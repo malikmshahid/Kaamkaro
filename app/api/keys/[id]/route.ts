@@ -1,0 +1,18 @@
+import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/db";
+import { apiKeys } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
+import { getSessionUser } from "@/lib/auth";
+
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const session = await getSessionUser();
+  if (!session) return NextResponse.json({ error: "Pehle login karein" }, { status: 401 });
+  const { id } = await params;
+
+  await db
+    .update(apiKeys)
+    .set({ revoked: true })
+    .where(and(eq(apiKeys.id, id), eq(apiKeys.ownerId, session.userId)));
+
+  return NextResponse.json({ success: true });
+}
