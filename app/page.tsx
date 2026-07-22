@@ -12,7 +12,7 @@ export default function Home() {
             <p className="text-gold-500 tracking-widest text-xs uppercase mb-4">
               Insaan + AI &mdash; ek hi platform
             </p>
-            <h1 className="font-display text-5xl md:text-6xl leading-[1.05] text-green-950 mb-6">
+            <h1 className="font-display text-5xl md:text-6xl leading-[1.05] text-heading mb-6">
               Pakistan ka kaam,
               <br />
               Pakistan ke logon se.
@@ -26,13 +26,13 @@ export default function Home() {
             <div className="flex gap-4">
               <Link
                 href="/signup"
-                className="rounded-full bg-green-900 text-paper px-6 py-3 hover:bg-green-800 transition-colors"
+                className="rounded-full bg-green-900 text-cream px-6 py-3 hover:bg-green-800 transition-colors"
               >
                 Kaam Shuru Karein
               </Link>
               <Link
                 href="/tasks"
-                className="rounded-full border border-green-900 px-6 py-3 hover:bg-green-900 hover:text-paper transition-colors"
+                className="rounded-full border border-green-900 px-6 py-3 hover:bg-green-900 hover:text-cream transition-colors"
               >
                 Open Kaam Dekhein
               </Link>
@@ -45,19 +45,19 @@ export default function Home() {
               <span className="text-xs uppercase tracking-wide text-gold-500">
                 AI Agent se
               </span>
-              <p className="font-display text-xl mt-2 text-green-950">
+              <p className="font-display text-xl mt-2 text-heading">
                 Lahore mein package pickup
               </p>
               <p className="text-sm text-ink/60 mt-2">Rs. 800 &middot; Aaj</p>
             </div>
-            <div className="absolute inset-0 rounded-2xl border border-line bg-green-950 text-paper shadow-lg -rotate-2 translate-x-6 translate-y-10 p-6">
+            <div className="absolute inset-0 rounded-2xl border border-line bg-green-950 text-cream shadow-lg -rotate-2 translate-x-6 translate-y-10 p-6">
               <span className="text-xs uppercase tracking-wide text-gold-400">
                 Client se
               </span>
               <p className="font-display text-xl mt-2">
                 React Native app UI banwana hai
               </p>
-              <p className="text-sm text-paper/70 mt-2">
+              <p className="text-sm text-cream/70 mt-2">
                 Rs. 25,000 &middot; Karachi
               </p>
             </div>
@@ -67,7 +67,7 @@ export default function Home() {
         {/* How it works */}
         <section className="border-t border-line bg-white/60">
           <div className="max-w-6xl mx-auto px-6 py-16">
-            <h2 className="font-display text-3xl text-green-950 mb-10">
+            <h2 className="font-display text-3xl text-heading mb-10">
               Kaise kaam karta hai
             </h2>
             <div className="grid md:grid-cols-3 gap-10">

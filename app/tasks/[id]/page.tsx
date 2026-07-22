@@ -282,7 +282,7 @@ export default function TaskDetailPage({
           <span className="text-xs text-ink/50">{STAGE_LABELS[task.status]}</span>
         </div>
 
-        <h1 className="font-display text-4xl text-green-950 mb-4">{task.title}</h1>
+        <h1 className="font-display text-4xl text-heading mb-4">{task.title}</h1>
         <p className="text-ink/70 leading-relaxed mb-6 whitespace-pre-wrap">
           {task.description}
         </p>
@@ -324,7 +324,7 @@ export default function TaskDetailPage({
             />
             <button
               type="submit"
-              className="rounded-full bg-green-900 text-paper px-6 py-2.5 hover:bg-green-800 transition-colors"
+              className="rounded-full bg-green-900 text-cream px-6 py-2.5 hover:bg-green-800 transition-colors"
             >
               Apply Karein
             </button>
@@ -344,7 +344,7 @@ export default function TaskDetailPage({
         {/* --- Applications list (owner, open task) --- */}
         {isOwner && task.status === "open" && (
           <div className="mb-10">
-            <h2 className="font-display text-2xl text-green-950 mb-4">
+            <h2 className="font-display text-2xl text-heading mb-4">
               Applications ({applications.length})
             </h2>
             {applications.length === 0 && (
@@ -366,7 +366,7 @@ export default function TaskDetailPage({
                   {app.status === "pending" && (
                     <button
                       onClick={() => handleAccept(app.id)}
-                      className="rounded-full bg-green-900 text-paper px-4 py-2 text-sm hover:bg-green-800 transition-colors whitespace-nowrap"
+                      className="rounded-full bg-green-900 text-cream px-4 py-2 text-sm hover:bg-green-800 transition-colors whitespace-nowrap"
                     >
                       Accept Karein
                     </button>
@@ -380,7 +380,7 @@ export default function TaskDetailPage({
         {/* --- Escrow payment step (owner, assigned, no payment yet) --- */}
         {isOwner && task.status === "assigned" && !payment && (
           <div className="mb-10 border border-gold-400 bg-gold-100/40 rounded-xl p-6">
-            <p className="font-semibold text-green-950 mb-1">Escrow Payment</p>
+            <p className="font-semibold text-heading mb-1">Escrow Payment</p>
             <p className="text-sm text-ink/60 mb-4">
               Provider ko confirm karne ke liye Rs. {task.budget.toLocaleString()} escrow mein
               hold karein. Kaam mukammal hone tak paisa aapke pass mahfooz rahega.
@@ -393,7 +393,7 @@ export default function TaskDetailPage({
             <button
               onClick={handlePay}
               disabled={busy}
-              className="rounded-full bg-green-900 text-paper px-6 py-2.5 hover:bg-green-800 transition-colors disabled:opacity-50"
+              className="rounded-full bg-green-900 text-cream px-6 py-2.5 hover:bg-green-800 transition-colors disabled:opacity-50"
             >
               {busy ? "..." : `Rs. ${task.budget.toLocaleString()} Escrow Mein Dalein`}
             </button>
@@ -403,7 +403,7 @@ export default function TaskDetailPage({
         {/* --- Provider submits proof (assigned provider, payment held) --- */}
         {isAssignedProvider && task.status === "assigned" && payment?.status === "held_in_escrow" && (
           <form onSubmit={handleSubmitProof} className="mb-10 border border-line rounded-xl p-6 bg-white space-y-3">
-            <p className="font-semibold text-green-950">Kaam Submit Karein</p>
+            <p className="font-semibold text-heading">Kaam Submit Karein</p>
             <textarea
               className="w-full border border-line rounded-lg px-4 py-2.5 bg-paper focus:outline-none focus:ring-2 focus:ring-green-700 min-h-20"
               placeholder="Proof ka link ya note (photo URL, description)..."
@@ -414,7 +414,7 @@ export default function TaskDetailPage({
             <button
               type="submit"
               disabled={busy}
-              className="rounded-full bg-green-900 text-paper px-6 py-2.5 hover:bg-green-800 transition-colors disabled:opacity-50"
+              className="rounded-full bg-green-900 text-cream px-6 py-2.5 hover:bg-green-800 transition-colors disabled:opacity-50"
             >
               {busy ? "..." : "Kaam Submit Karein"}
             </button>
@@ -430,7 +430,7 @@ export default function TaskDetailPage({
         {/* --- Owner confirms completion (submitted) --- */}
         {isOwner && task.status === "submitted" && (
           <div className="mb-10 border border-line rounded-xl p-6 bg-white">
-            <p className="font-semibold text-green-950 mb-1">Provider ne kaam submit kar diya</p>
+            <p className="font-semibold text-heading mb-1">Provider ne kaam submit kar diya</p>
             {task.proofUrl && (
               <p className="text-sm text-ink/60 mb-4 break-words">Proof: {task.proofUrl}</p>
             )}
@@ -483,7 +483,7 @@ export default function TaskDetailPage({
             <button
               onClick={handleComplete}
               disabled={busy}
-              className="rounded-full bg-green-900 text-paper px-6 py-2.5 hover:bg-green-800 transition-colors disabled:opacity-50"
+              className="rounded-full bg-green-900 text-cream px-6 py-2.5 hover:bg-green-800 transition-colors disabled:opacity-50"
             >
               {busy ? "..." : "Confirm Karein aur Payment Release Karein"}
             </button>
@@ -496,7 +496,7 @@ export default function TaskDetailPage({
         {/* --- Chat (participants, once assigned) --- */}
         {isParticipant && task.status !== "open" && (
           <div className="mb-10 border border-line rounded-xl bg-white overflow-hidden">
-            <p className="font-semibold text-green-950 px-6 pt-5 pb-3 border-b border-line">
+            <p className="font-semibold text-heading px-6 pt-5 pb-3 border-b border-line">
               Chat
             </p>
             <div className="max-h-72 overflow-y-auto px-6 py-4 space-y-3">
@@ -508,7 +508,7 @@ export default function TaskDetailPage({
                   <span
                     className={`inline-block rounded-xl px-3 py-2 text-sm max-w-[75%] ${
                       m.senderId === user?.id
-                        ? "bg-green-900 text-paper"
+                        ? "bg-green-900 text-cream"
                         : "bg-paper border border-line"
                     }`}
                   >
@@ -539,7 +539,7 @@ export default function TaskDetailPage({
         {/* --- Reviews (completed) --- */}
         {task.status === "completed" && (
           <div className="mb-10">
-            <h2 className="font-display text-2xl text-green-950 mb-4">Reviews</h2>
+            <h2 className="font-display text-2xl text-heading mb-4">Reviews</h2>
             {reviews.length > 0 && (
               <div className="space-y-3 mb-6">
                 {reviews.map((r) => (
@@ -552,7 +552,7 @@ export default function TaskDetailPage({
             )}
             {isParticipant && !myReview && (
               <form onSubmit={handleReview} className="border border-line rounded-xl p-6 bg-white space-y-3">
-                <p className="font-semibold text-green-950">Apni Review Dein</p>
+                <p className="font-semibold text-heading">Apni Review Dein</p>
                 <select
                   className="border border-line rounded-lg px-4 py-2 bg-paper"
                   value={reviewRating}
@@ -573,7 +573,7 @@ export default function TaskDetailPage({
                 <button
                   type="submit"
                   disabled={busy}
-                  className="rounded-full bg-green-900 text-paper px-6 py-2.5 hover:bg-green-800 transition-colors disabled:opacity-50"
+                  className="rounded-full bg-green-900 text-cream px-6 py-2.5 hover:bg-green-800 transition-colors disabled:opacity-50"
                 >
                   {busy ? "..." : "Review Submit Karein"}
                 </button>

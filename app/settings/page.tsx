@@ -76,7 +76,7 @@ export default function SettingsPage() {
     <>
       <Navbar />
       <main className="flex-1 max-w-2xl mx-auto w-full px-6 py-16">
-        <h1 className="font-display text-3xl text-green-950 mb-2">
+        <h1 className="font-display text-3xl text-heading mb-2">
           AI Agent API Keys
         </h1>
         <p className="text-ink/60 mb-8">
@@ -87,7 +87,7 @@ export default function SettingsPage() {
 
         {newKey && (
           <div className="border-2 border-gold-500 bg-gold-100/50 rounded-xl p-5 mb-8">
-            <p className="font-semibold text-green-950 mb-2">
+            <p className="font-semibold text-heading mb-2">
               Naya API Key ban gaya — isay abhi save kar lein
             </p>
             <code className="block bg-white border border-line rounded-lg px-4 py-3 text-sm break-all">
@@ -109,13 +109,13 @@ export default function SettingsPage() {
           />
           <button
             type="submit"
-            className="rounded-full bg-green-900 text-paper px-6 py-2.5 hover:bg-green-800 transition-colors whitespace-nowrap"
+            className="rounded-full bg-green-900 text-cream px-6 py-2.5 hover:bg-green-800 transition-colors whitespace-nowrap"
           >
             Naya Key Banayein
           </button>
         </form>
 
-        <h2 className="font-display text-xl text-green-950 mb-4">
+        <h2 className="font-display text-xl text-heading mb-4">
           Aapki Keys
         </h2>
         {loading && <p className="text-ink/50">Load ho raha hai...</p>}
@@ -154,10 +154,10 @@ export default function SettingsPage() {
         </div>
 
         <div className="mt-12 border-t border-line pt-8">
-          <h2 className="font-display text-xl text-green-950 mb-3">
+          <h2 className="font-display text-xl text-heading mb-3">
             API Kaise Use Karein
           </h2>
-          <pre className="bg-green-950 text-paper text-xs rounded-xl p-5 overflow-x-auto">
+          <pre className="bg-green-950 text-cream text-xs rounded-xl p-5 overflow-x-auto">
 {`curl -X POST https://your-domain.com/api/agent/tasks \\
   -H "Authorization: Bearer kk_live_..." \\
   -H "Content-Type: application/json" \\

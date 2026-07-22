@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/lib/useUser";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function Navbar() {
   const { user, loading, setUser } = useUser();
@@ -28,6 +29,7 @@ export default function Navbar() {
         </Link>
 
         <div className="flex items-center gap-6 text-sm">
+          <ThemeToggle />
           <Link href="/tasks" className="hover:text-green-700">
             Kaam Dhoondein
           </Link>
@@ -54,7 +56,7 @@ export default function Navbar() {
               </Link>
               <Link
                 href="/signup"
-                className="rounded-full bg-green-900 text-paper px-4 py-2 hover:bg-green-800 transition-colors"
+                className="rounded-full bg-green-900 text-cream px-4 py-2 hover:bg-green-800 transition-colors"
               >
                 Shuru Karein
               </Link>
@@ -64,7 +66,7 @@ export default function Navbar() {
           {!loading && user && (
             <button
               onClick={handleLogout}
-              className="rounded-full border border-green-900 px-4 py-2 hover:bg-green-900 hover:text-paper transition-colors"
+              className="rounded-full border border-green-900 px-4 py-2 hover:bg-green-900 hover:text-cream transition-colors"
             >
               Logout
             </button>

@@ -63,7 +63,7 @@ export default function DashboardPage() {
     <>
       <Navbar />
       <main className="flex-1 max-w-4xl mx-auto w-full px-6 py-16">
-        <h1 className="font-display text-3xl text-green-950 mb-2">
+        <h1 className="font-display text-3xl text-heading mb-2">
           Assalam-o-Alaikum, {user?.name?.split(" ")[0]}
         </h1>
         <p className="text-ink/60 mb-10">
@@ -77,7 +77,7 @@ export default function DashboardPage() {
           <div className="grid md:grid-cols-2 gap-10">
             <section>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-display text-xl text-green-950">
+                <h2 className="font-display text-xl text-heading">
                   Aapke Posted Kaam
                 </h2>
                 <Link
@@ -107,7 +107,7 @@ export default function DashboardPage() {
             </section>
 
             <section>
-              <h2 className="font-display text-xl text-green-950 mb-4">
+              <h2 className="font-display text-xl text-heading mb-4">
                 Aapki Applications
               </h2>
               {myApplications.length === 0 && (

@@ -44,7 +44,7 @@ export default function SignupPage() {
     <>
       <Navbar />
       <main className="flex-1 max-w-md mx-auto w-full px-6 py-16">
-        <h1 className="font-display text-3xl text-green-950 mb-2">
+        <h1 className="font-display text-3xl text-heading mb-2">
           Account Banayein
         </h1>
         <p className="text-ink/60 mb-8">
@@ -115,7 +115,7 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-full bg-green-900 text-paper px-6 py-3 hover:bg-green-800 transition-colors disabled:opacity-50"
+            className="w-full rounded-full bg-green-900 text-cream px-6 py-3 hover:bg-green-800 transition-colors disabled:opacity-50"
           >
             {loading ? "Ban raha hai..." : "Account Banayein"}
           </button>

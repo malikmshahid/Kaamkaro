@@ -37,7 +37,7 @@ export default function TasksPage() {
       <Navbar />
       <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-12">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="font-display text-3xl text-green-950">
+          <h1 className="font-display text-3xl text-heading">
             Open Kaam
           </h1>
           <select
@@ -83,7 +83,7 @@ export default function TasksPage() {
                 </span>
                 <span className="text-xs text-ink/50">{task.category}</span>
               </div>
-              <h3 className="font-display text-xl text-green-950 mb-2">
+              <h3 className="font-display text-xl text-heading mb-2">
                 {task.title}
               </h3>
               <p className="text-sm text-ink/60 line-clamp-2 mb-4">
