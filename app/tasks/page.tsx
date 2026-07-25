@@ -38,29 +38,29 @@ export default function TasksPage() {
       <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-12">
         <div className="flex items-center justify-between mb-8">
           <h1 className="font-display text-3xl text-heading">
-            Open Kaam
+            Open Tasks
           </h1>
           <select
             className="border border-line rounded-lg px-3 py-2 bg-white text-sm"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
           >
-            <option value="">Sab Categories</option>
+            <option value="">All Categories</option>
             <option value="delivery">Delivery</option>
             <option value="design">Design</option>
             <option value="coding">Coding / IT</option>
             <option value="writing">Writing</option>
-            <option value="home">Ghar ka Kaam</option>
+            <option value="home">Home Services</option>
             <option value="verification">Verification / Photo</option>
-            <option value="other">Doosra</option>
+            <option value="other">Other</option>
           </select>
         </div>
 
-        {loading && <p className="text-ink/50">Load ho raha hai...</p>}
+        {loading && <p className="text-ink/50">Loading...</p>}
 
         {!loading && tasks.length === 0 && (
           <div className="border border-dashed border-line rounded-xl p-12 text-center text-ink/50">
-            Abhi koi open kaam nahi hai. Pehla kaam post karke shuruat karein.
+            No open tasks right now. Be the first to post one! 🚀
           </div>
         )}
 
@@ -93,7 +93,7 @@ export default function TasksPage() {
                 <span className="font-semibold text-green-800">
                   Rs. {task.budget.toLocaleString()}
                 </span>
-                <span className="text-ink/50">{task.city || "Online"}</span>
+                <span className="text-ink/50">{task.city || "Remote"}</span>
               </div>
             </Link>
           ))}

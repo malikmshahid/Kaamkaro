@@ -3,14 +3,14 @@ import Anthropic from "@anthropic-ai/sdk";
 /**
  * AI Proof-of-Completion Verification
  * -------------------------------------
- * Jab provider kaam submit karta hai, ye module submitted proof (photo URL)
- * ko task ki description ke sath compare karta hai — Claude Vision se —
- * aur ek advisory verdict deta hai. Ye FINAL decision nahi hai: client hi
- * hamesha "complete confirm karein" button dabata hai. Ye sirf client ko
- * ek extra signal deta hai taake fraud/mismatch pehchanna aasan ho.
+ * When a provider submits a task, this module compares the submitted proof
+ * (a photo URL) against the task description using Claude Vision, and
+ * returns an advisory verdict. This is NOT the final decision — the client
+ * always presses the "confirm complete" button themselves. It's just an
+ * extra signal to help spot fraud or mismatches quickly.
  *
- * Env var zaroori hai: ANTHROPIC_API_KEY
- * Agar key set nahi hai to verification skip ho jati hai (client sirf manually check karega).
+ * Requires the ANTHROPIC_API_KEY env var. If it's not set, verification is
+ * skipped gracefully (the client is told to check manually).
  */
 
 export type VerificationResult = {
@@ -43,8 +43,7 @@ export async function verifyTaskProof(
     return {
       status: "review_needed",
       confidence: 0,
-      notes:
-        "AI verification configure nahi hui (ANTHROPIC_API_KEY set nahi hai). Client manually check karein.",
+      notes: "AI verification is not configured (ANTHROPIC_API_KEY not set). Please review manually.",
     };
   }
 
@@ -52,7 +51,7 @@ export async function verifyTaskProof(
     return {
       status: "review_needed",
       confidence: 0,
-      notes: "Koi proof URL submit nahi hui — manual review zaroori hai.",
+      notes: "No proof URL was submitted — manual review required.",
     };
   }
 
@@ -62,7 +61,7 @@ export async function verifyTaskProof(
       status: "review_needed",
       confidence: 0,
       notes:
-        "Proof URL se image load nahi ho saki (link kaam nahi kar raha ya ye image nahi hai). Manual review zaroori hai.",
+        "Could not load the image from the proof URL (broken link or not an image). Manual review required.",
     };
   }
 
@@ -85,15 +84,15 @@ export async function verifyTaskProof(
             },
             {
               type: "text",
-              text: `Ye task tha: "${taskTitle}" — ${taskDescription}
+              text: `The task was: "${taskTitle}" — ${taskDescription}
 
-Is submitted photo ko dekh kar batayein ke ye task genuinely complete hua lagta hai ya nahi.
-SIRF is JSON format mein respond karein, kuch aur nahi:
-{"status": "pass" | "review_needed" | "fail", "confidence": 0.0-1.0, "notes": "1-2 sentence explanation in Roman Urdu"}
+Look at this submitted photo and judge whether the task genuinely appears complete.
+Respond ONLY in this JSON format, nothing else:
+{"status": "pass" | "review_needed" | "fail", "confidence": 0.0-1.0, "notes": "1-2 sentence explanation"}
 
-- "pass": photo clearly task ke completion ko match karti hai
-- "review_needed": ambiguous hai, insaan ko check karna chahiye
-- "fail": photo task se clearly mismatch hai ya fraud lagta hai`,
+- "pass": the photo clearly matches the completed task
+- "review_needed": ambiguous, a human should check
+- "fail": the photo clearly mismatches the task or looks fraudulent`,
             },
           ],
         },
@@ -102,7 +101,7 @@ SIRF is JSON format mein respond karein, kuch aur nahi:
 
     const textBlock = message.content.find((b) => b.type === "text");
     if (!textBlock || textBlock.type !== "text") {
-      return { status: "review_needed", confidence: 0, notes: "AI se response parse nahi hui." };
+      return { status: "review_needed", confidence: 0, notes: "Could not parse the AI's response." };
     }
 
     const cleaned = textBlock.text.replace(/```json|```/g, "").trim();
@@ -123,7 +122,7 @@ SIRF is JSON format mein respond karein, kuch aur nahi:
     return {
       status: "error",
       confidence: 0,
-      notes: `AI verification fail ho gayi: ${(err as Error).message}`,
+      notes: `AI verification failed: ${(err as Error).message}`,
     };
   }
 }

@@ -40,7 +40,7 @@ const API_KEY = process.env.KAAMKARO_API_KEY;
 
 if (!API_KEY) {
   console.error(
-    "KAAMKARO_API_KEY env var zaroori hai. /settings page se ek key generate karein."
+    "KAAMKARO_API_KEY env var is required. Generate one from the /settings page."
   );
   process.exit(1);
 }
@@ -71,30 +71,30 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
     {
       name: "post_task",
       description:
-        "Pakistan mein kisi real-world kaam ko post karein taake koi verified human provider use complete kare. Delivery, verification, on-site checks, ya koi bhi physical task ke liye.",
+        "Post a real-world task in Pakistan for a verified human provider to complete. Great for delivery, verification, on-site checks, or any physical task.",
       inputSchema: {
         type: "object",
         properties: {
-          title: { type: "string", description: "Kaam ka chota title" },
-          description: { type: "string", description: "Kaam ki poori tafseel" },
+          title: { type: "string", description: "A short title for the task" },
+          description: { type: "string", description: "Full details of the task" },
           category: {
             type: "string",
             enum: ["delivery", "design", "coding", "writing", "home", "verification", "other"],
           },
           budget: { type: "number", description: "Budget in PKR" },
-          city: { type: "string", description: "Shehar (optional)" },
+          city: { type: "string", description: "City (optional)" },
         },
         required: ["title", "description", "category", "budget"],
       },
     },
     {
       name: "list_my_tasks",
-      description: "Is agent ke posted kiye hue sab tasks list karein.",
+      description: "List all tasks this agent has posted.",
       inputSchema: { type: "object", properties: {} },
     },
     {
       name: "get_task_status",
-      description: "Ek specific task ki current status aur applications dekhein.",
+      description: "Check the current status and applications of a specific task.",
       inputSchema: {
         type: "object",
         properties: { taskId: { type: "string" } },
@@ -103,7 +103,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
     },
     {
       name: "accept_provider",
-      description: "Kisi provider ki application accept karein taake wo kaam shuru kar sake.",
+      description: "Accept a provider's application so they can start work.",
       inputSchema: {
         type: "object",
         properties: {
@@ -115,7 +115,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
     },
     {
       name: "fund_escrow",
-      description: "Accepted provider ke liye budget escrow mein hold karein.",
+      description: "Hold the budget in escrow for the accepted provider.",
       inputSchema: {
         type: "object",
         properties: { taskId: { type: "string" } },
@@ -125,11 +125,27 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
     {
       name: "confirm_completion",
       description:
-        "Provider ke submit kiye hue proof ko confirm karein aur escrow payment release karein.",
+        "Confirm the provider's submitted proof and release the escrowed payment.",
       inputSchema: {
         type: "object",
         properties: { taskId: { type: "string" } },
         required: ["taskId"],
+      },
+    },
+    {
+      name: "browse_tools",
+      description:
+        "Browse ready-to-order services (\"Toolbox\" listings) from providers. Faster than posting an open task — order instantly instead of waiting for applicants.",
+      inputSchema: { type: "object", properties: {} },
+    },
+    {
+      name: "order_tool",
+      description:
+        "Instantly order a provider's Toolbox listing. This creates a task that's already assigned — follow up with fund_escrow to pay.",
+      inputSchema: {
+        type: "object",
+        properties: { toolId: { type: "string" } },
+        required: ["toolId"],
       },
     },
   ],
@@ -147,7 +163,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         });
         return {
           content: [
-            { type: "text", text: `Task post ho gaya. Task ID: ${data.taskId}` },
+            { type: "text", text: `Task posted. Task ID: ${data.taskId}` },
           ],
         };
       }
@@ -166,7 +182,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           method: "POST",
           body: JSON.stringify({ action: "accept", applicationId }),
         });
-        return { content: [{ type: "text", text: "Provider accept ho gaya." }] };
+        return { content: [{ type: "text", text: "Provider accepted." }] };
       }
       case "fund_escrow": {
         const { taskId } = args as { taskId: string };
@@ -174,7 +190,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           method: "POST",
           body: JSON.stringify({ action: "pay" }),
         });
-        return { content: [{ type: "text", text: "Escrow payment hold ho gayi." }] };
+        return { content: [{ type: "text", text: "Escrow payment held." }] };
       }
       case "confirm_completion": {
         const { taskId } = args as { taskId: string };
@@ -182,7 +198,20 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           method: "POST",
           body: JSON.stringify({ action: "complete" }),
         });
-        return { content: [{ type: "text", text: "Kaam confirm ho gaya, payment release ho gayi." }] };
+        return { content: [{ type: "text", text: "Task confirmed, payment released." }] };
+      }
+      case "browse_tools": {
+        const data = await apiCall("/api/agent/tools");
+        return { content: [{ type: "text", text: JSON.stringify(data.tools, null, 2) }] };
+      }
+      case "order_tool": {
+        const { toolId } = args as { toolId: string };
+        const data = await apiCall(`/api/agent/tools/${toolId}/order`, { method: "POST" });
+        return {
+          content: [
+            { type: "text", text: `Tool ordered. Task ID: ${data.taskId} — now assigned, ready to fund.` },
+          ],
+        };
       }
       default:
         throw new Error(`Unknown tool: ${name}`);

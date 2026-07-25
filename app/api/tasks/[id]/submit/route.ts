@@ -9,23 +9,23 @@ import { verifyTaskProof } from "@/lib/aiVerification";
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSessionUser();
   if (!session) {
-    return NextResponse.json({ error: "Pehle login karein" }, { status: 401 });
+    return NextResponse.json({ error: "Please log in first" }, { status: 401 });
   }
   const { id: taskId } = await params;
   const { proofUrl } = await req.json().catch(() => ({ proofUrl: "" }));
 
   const found = await db.select().from(tasks).where(eq(tasks.id, taskId)).limit(1);
   const task = found[0];
-  if (!task) return NextResponse.json({ error: "Task nahi mila" }, { status: 404 });
+  if (!task) return NextResponse.json({ error: "Task not found" }, { status: 404 });
   if (task.assignedProviderId !== session.userId) {
     return NextResponse.json(
-      { error: "Sirf assigned provider proof submit kar sakta hai" },
+      { error: "Only the assigned provider can submit proof" },
       { status: 403 }
     );
   }
   if (task.status !== "assigned") {
     return NextResponse.json(
-      { error: "Task abhi submit karne ke stage mein nahi hai" },
+      { error: "This task is not ready for submission yet" },
       { status: 400 }
     );
   }
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const paymentRows = await db.select().from(payments).where(eq(payments.taskId, taskId)).limit(1);
   if (paymentRows.length === 0 || paymentRows[0].status !== "held_in_escrow") {
     return NextResponse.json(
-      { error: "Client ne abhi tak payment escrow mein nahi dali" },
+      { error: "The client has not funded escrow yet" },
       { status: 400 }
     );
   }

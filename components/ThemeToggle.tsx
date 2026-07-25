@@ -6,7 +6,6 @@ export default function ThemeToggle() {
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
-    // Reflect whatever the pre-paint script already applied to <html>.
     setIsDark(document.documentElement.classList.contains("dark"));
   }, []);
 
@@ -20,7 +19,7 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggle}
-      aria-label="Theme badlein"
+      aria-label="Toggle theme"
       title="Light/Dark mode"
       className="w-9 h-9 rounded-full border border-line flex items-center justify-center hover:border-green-700 transition-colors text-lg leading-none"
     >

@@ -10,19 +10,19 @@ import { randomUUID } from "crypto";
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSessionUser();
   if (!session) {
-    return NextResponse.json({ error: "Pehle login karein" }, { status: 401 });
+    return NextResponse.json({ error: "Please log in first" }, { status: 401 });
   }
   const { id: taskId } = await params;
 
   const found = await db.select().from(tasks).where(eq(tasks.id, taskId)).limit(1);
   const task = found[0];
-  if (!task) return NextResponse.json({ error: "Task nahi mila" }, { status: 404 });
+  if (!task) return NextResponse.json({ error: "Task not found" }, { status: 404 });
   if (task.postedById !== session.userId) {
-    return NextResponse.json({ error: "Sirf client payment kar sakta hai" }, { status: 403 });
+    return NextResponse.json({ error: "Only the client can make the payment" }, { status: 403 });
   }
   if (task.status !== "assigned" || !task.assignedProviderId) {
     return NextResponse.json(
-      { error: "Payment se pehle kisi provider ko accept karein" },
+      { error: "Accept a provider before paying" },
       { status: 400 }
     );
   }
@@ -33,13 +33,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     .where(eq(payments.taskId, taskId))
     .limit(1);
   if (existingPayment.length > 0) {
-    return NextResponse.json({ error: "Payment pehle hi ho chuki hai" }, { status: 409 });
+    return NextResponse.json({ error: "Payment has already been made" }, { status: 409 });
   }
 
   const provider = getPaymentProvider();
   const result = await provider.charge(task.budget, session.userId);
   if (!result.success) {
-    return NextResponse.json({ error: result.error || "Payment fail ho gayi" }, { status: 500 });
+    return NextResponse.json({ error: result.error || "Payment failed" }, { status: 500 });
   }
 
   const id = randomUUID();

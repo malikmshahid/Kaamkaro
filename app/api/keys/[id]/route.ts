@@ -6,7 +6,7 @@ import { getSessionUser } from "@/lib/auth";
 
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSessionUser();
-  if (!session) return NextResponse.json({ error: "Pehle login karein" }, { status: 401 });
+  if (!session) return NextResponse.json({ error: "Please log in first" }, { status: 401 });
   const { id } = await params;
 
   await db

@@ -1,12 +1,12 @@
 /**
  * Payment Gateway Abstraction
  * ---------------------------
- * Abhi "mock" provider use ho raha hai kyunke JazzCash/EasyPaisa merchant
- * account approval mein waqt lagta hai (3-7 din) aur real credentials chahiye.
+ * Currently using the "mock" provider since JazzCash/EasyPaisa merchant
+ * account approval takes time (3-7 days) and needs real credentials.
  *
- * Jab merchant account mil jaye, bas `chargeMock` aur `releaseMock` ki jagah
- * `chargeJazzCash` / `chargeEasyPaisa` likh kar isi interface ko implement
- * karna hai — baaki app (API routes, UI) mein koi change nahi karna paray ga.
+ * Once a merchant account is approved, implement `chargeJazzCash` /
+ * `chargeEasyPaisa` against this same interface — the rest of the app
+ * (API routes, UI) won't need to change at all.
  */
 
 export type ChargeResult = {
@@ -16,11 +16,11 @@ export type ChargeResult = {
 };
 
 export interface PaymentProvider {
-  /** Client se paisa le kar escrow mein hold karta hai */
+  /** Takes payment from the client and holds it in escrow */
   charge(amount: number, payerId: string): Promise<ChargeResult>;
-  /** Escrow se provider ko paisa release karta hai */
+  /** Releases escrowed funds to the provider */
   release(providerRef: string, payeeId: string): Promise<ChargeResult>;
-  /** Client ko refund karta hai (dispute/cancel case) */
+  /** Refunds the client (dispute/cancel case) */
   refund(providerRef: string): Promise<ChargeResult>;
 }
 
@@ -41,7 +41,7 @@ class MockPaymentProvider implements PaymentProvider {
 }
 
 /**
- * TODO (Phase 2 continuation, jab merchant account mil jaye):
+ * TODO (once a merchant account is approved):
  *
  * class JazzCashProvider implements PaymentProvider {
  *   async charge(amount, payerId) {

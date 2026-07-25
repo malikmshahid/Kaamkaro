@@ -1,6 +1,24 @@
 import { pgTable, text, integer, real, boolean, timestamp } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
+// Tools: provider-listed services ("gigs") — a provider proactively lists a
+// fixed-price offering instead of waiting for a client to post a task.
+// Ordering a tool creates a `tasks` row (linked via sourceToolId) so it reuses
+// the exact same escrow/chat/verification/dispute/review pipeline as tasks.
+export const tools = pgTable("tools", {
+  id: text("id").primaryKey(),
+  providerId: text("provider_id").notNull(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  category: text("category").notNull(),
+  price: real("price").notNull(),
+  deliveryDays: integer("delivery_days").notNull().default(1),
+  city: text("city"),
+  status: text("status", { enum: ["active", "paused"] }).notNull().default("active"),
+  orderCount: integer("order_count").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+});
+
 // Users: providers, clients, or both. AI agents also live here with a role flag.
 export const users = pgTable("users", {
   id: text("id").primaryKey(),
@@ -39,6 +57,7 @@ export const tasks = pgTable("tasks", {
     .default("open"),
   assignedProviderId: text("assigned_provider_id"),
   proofUrl: text("proof_url"),
+  sourceToolId: text("source_tool_id"), // set when this task originated from an ordered tool/gig
   verificationStatus: text("verification_status", {
     enum: ["not_run", "pass", "review_needed", "fail", "error"],
   })

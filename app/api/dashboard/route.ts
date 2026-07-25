@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { tasks, applications } from "@/db/schema";
+import { tasks, applications, tools } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
 
 export async function GET() {
   const session = await getSessionUser();
   if (!session) {
-    return NextResponse.json({ error: "Pehle login karein" }, { status: 401 });
+    return NextResponse.json({ error: "Please log in first" }, { status: 401 });
   }
 
   const postedTasks = await db
@@ -30,5 +30,11 @@ export async function GET() {
     .where(eq(applications.providerId, session.userId))
     .orderBy(desc(applications.createdAt));
 
-  return NextResponse.json({ postedTasks, myApplications });
+  const myTools = await db
+    .select()
+    .from(tools)
+    .where(eq(tools.providerId, session.userId))
+    .orderBy(desc(tools.createdAt));
+
+  return NextResponse.json({ postedTasks, myApplications, myTools });
 }

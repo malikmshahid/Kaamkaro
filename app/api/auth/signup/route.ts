@@ -7,9 +7,9 @@ import { z } from "zod";
 import { randomUUID } from "crypto";
 
 const signupSchema = z.object({
-  name: z.string().min(2, "Naam kam se kam 2 haroof ka ho"),
-  phone: z.string().min(10, "Phone number sahi nahi hai"),
-  password: z.string().min(6, "Password kam se kam 6 haroof ka ho"),
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  phone: z.string().min(10, "Please enter a valid phone number"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
   role: z.enum(["client", "provider", "both"]).default("both"),
   city: z.string().optional(),
 });
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     const existing = await db.select().from(users).where(eq(users.phone, phone)).limit(1);
     if (existing.length > 0) {
       return NextResponse.json(
-        { error: "Ye phone number pehle se registered hai" },
+        { error: "This phone number is already registered" },
         { status: 409 }
       );
     }
@@ -52,6 +52,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, userId: id });
   } catch (err) {
     console.error(err);
-    return NextResponse.json({ error: "Server error, dobara koshish karein" }, { status: 500 });
+    return NextResponse.json({ error: "Server error, please try again" }, { status: 500 });
   }
 }

@@ -9,7 +9,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   const found = await db.select().from(tasks).where(eq(tasks.id, id)).limit(1);
   const task = found[0];
   if (!task) {
-    return NextResponse.json({ error: "Task nahi mila" }, { status: 404 });
+    return NextResponse.json({ error: "Task not found" }, { status: 404 });
   }
 
   const apps = await db

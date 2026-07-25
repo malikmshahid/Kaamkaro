@@ -1,6 +1,20 @@
 -- KaamKaro.ai — Initial database setup
 -- Neon SQL Editor mein isay paste karke "Run" dabayein
 
+CREATE TABLE IF NOT EXISTS tools (
+  id TEXT PRIMARY KEY,
+  provider_id TEXT NOT NULL,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  category TEXT NOT NULL,
+  price REAL NOT NULL,
+  delivery_days INTEGER NOT NULL DEFAULT 1,
+  city TEXT,
+  status TEXT NOT NULL DEFAULT 'active',
+  order_count INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMP NOT NULL DEFAULT now()
+);
+
 CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
@@ -29,6 +43,7 @@ CREATE TABLE IF NOT EXISTS tasks (
   status TEXT NOT NULL DEFAULT 'open',
   assigned_provider_id TEXT,
   proof_url TEXT,
+  source_tool_id TEXT,
   verification_status TEXT NOT NULL DEFAULT 'not_run',
   verification_notes TEXT,
   verification_confidence REAL,

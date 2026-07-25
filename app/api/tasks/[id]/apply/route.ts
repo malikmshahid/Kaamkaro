@@ -8,19 +8,19 @@ import { randomUUID } from "crypto";
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSessionUser();
   if (!session) {
-    return NextResponse.json({ error: "Pehle login karein" }, { status: 401 });
+    return NextResponse.json({ error: "Please log in first" }, { status: 401 });
   }
   const { id: taskId } = await params;
   const body = await req.json().catch(() => ({}));
 
   const found = await db.select().from(tasks).where(eq(tasks.id, taskId)).limit(1);
   const task = found[0];
-  if (!task) return NextResponse.json({ error: "Task nahi mila" }, { status: 404 });
+  if (!task) return NextResponse.json({ error: "Task not found" }, { status: 404 });
   if (task.status !== "open") {
-    return NextResponse.json({ error: "Ye task ab open nahi hai" }, { status: 400 });
+    return NextResponse.json({ error: "This task is no longer open" }, { status: 400 });
   }
   if (task.postedById === session.userId) {
-    return NextResponse.json({ error: "Aap apne hi task pe apply nahi kar sakte" }, { status: 400 });
+    return NextResponse.json({ error: "You cannot apply to your own task" }, { status: 400 });
   }
 
   const existing = await db
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     .where(and(eq(applications.taskId, taskId), eq(applications.providerId, session.userId)))
     .limit(1);
   if (existing.length > 0) {
-    return NextResponse.json({ error: "Aap pehle hi apply kar chuke hain" }, { status: 409 });
+    return NextResponse.json({ error: "You have already applied" }, { status: 409 });
   }
 
   const id = randomUUID();

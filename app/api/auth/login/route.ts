@@ -15,19 +15,19 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const parsed = loginSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: "Phone aur password required hain" }, { status: 400 });
+      return NextResponse.json({ error: "Phone and password are required" }, { status: 400 });
     }
     const { phone, password } = parsed.data;
 
     const found = await db.select().from(users).where(eq(users.phone, phone)).limit(1);
     const user = found[0];
     if (!user) {
-      return NextResponse.json({ error: "Account nahi mila, phone check karein" }, { status: 401 });
+      return NextResponse.json({ error: "No account found, please check your phone number" }, { status: 401 });
     }
 
     const valid = await verifyPassword(password, user.passwordHash);
     if (!valid) {
-      return NextResponse.json({ error: "Password ghalat hai" }, { status: 401 });
+      return NextResponse.json({ error: "Incorrect password" }, { status: 401 });
     }
 
     const token = signToken({ userId: user.id, role: user.role });
@@ -39,6 +39,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (err) {
     console.error(err);
-    return NextResponse.json({ error: "Server error, dobara koshish karein" }, { status: 500 });
+    return NextResponse.json({ error: "Server error, please try again" }, { status: 500 });
   }
 }

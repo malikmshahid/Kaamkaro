@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, use, useRef } from "react";
+import { useEffect, useState, use } from "react";
 import Navbar from "@/components/Navbar";
 import { useUser } from "@/lib/useUser";
 
@@ -68,12 +68,9 @@ export default function TaskDetailPage({
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
 
-  // chat state
   const [chat, setChat] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
-  const chatEndRef = useRef<HTMLDivElement>(null);
 
-  // review state
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState("");
   const [proofNote, setProofNote] = useState("");
@@ -114,10 +111,6 @@ export default function TaskDetailPage({
   }, [isParticipant, task?.status]);
 
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [chat]);
-
-  useEffect(() => {
     if (task?.status === "submitted" && task.verificationStatus === "not_run") {
       const interval = setInterval(load, 3000);
       return () => clearInterval(interval);
@@ -139,7 +132,7 @@ export default function TaskDetailPage({
       return;
     }
     setMessage("");
-    setNotice("Apply ho gaya! Client ko intezar karein.");
+    setNotice("You're in! Waiting on the client now.");
     load();
   }
 
@@ -161,7 +154,7 @@ export default function TaskDetailPage({
     const data = await res.json();
     setBusy(false);
     if (!res.ok) return setNotice(data.error);
-    setNotice("Payment escrow mein hold ho gayi. Provider ab kaam shuru kar sakta hai.");
+    setNotice("Escrow funded — the provider can get to work now.");
     load();
   }
 
@@ -177,7 +170,7 @@ export default function TaskDetailPage({
     const data = await res.json();
     setBusy(false);
     if (!res.ok) return setNotice(data.error);
-    setNotice("Kaam submit ho gaya. Client ke confirm karne ka intezar karein.");
+    setNotice("Submitted! Waiting on the client to confirm.");
     load();
   }
 
@@ -188,7 +181,7 @@ export default function TaskDetailPage({
     const data = await res.json();
     setBusy(false);
     if (!res.ok) return setNotice(data.error);
-    setNotice("Kaam complete! Payment provider ko release ho gayi.");
+    setNotice("Task complete! Payment has been released. 🎉");
     load();
   }
 
@@ -203,7 +196,7 @@ export default function TaskDetailPage({
   }
 
   async function handleDispute() {
-    const reason = window.prompt("Dispute ki wajah likhein (client ko dikhegi):");
+    const reason = window.prompt("What's the issue? (visible to the client)");
     if (reason === null) return;
     setBusy(true);
     setNotice("");
@@ -215,7 +208,7 @@ export default function TaskDetailPage({
     const data = await res.json();
     setBusy(false);
     if (!res.ok) return setNotice(data.error);
-    setNotice("Dispute utha diya gaya — admin review karega.");
+    setNotice("Dispute raised — an admin will review this shortly.");
     load();
   }
 
@@ -253,7 +246,7 @@ export default function TaskDetailPage({
       <>
         <Navbar />
         <main className="flex-1 max-w-3xl mx-auto w-full px-6 py-16">
-          <p className="text-ink/50">Load ho raha hai...</p>
+          <p className="text-ink/50">Loading...</p>
         </main>
       </>
     );
@@ -264,7 +257,7 @@ export default function TaskDetailPage({
       <>
         <Navbar />
         <main className="flex-1 max-w-3xl mx-auto w-full px-6 py-16">
-          <p className="text-ink/50">Ye kaam nahi mila.</p>
+          <p className="text-ink/50">This task couldn&apos;t be found.</p>
         </main>
       </>
     );
@@ -274,12 +267,12 @@ export default function TaskDetailPage({
   const myReview = user && reviews.find((r) => r.reviewerId === user.id);
 
   const STAGE_LABELS: Record<string, string> = {
-    open: "Open — applications ka intezar",
-    assigned: "Assigned — payment/kaam ka intezar",
-    submitted: "Submit ho gaya — client confirm karega",
-    completed: "Mukammal ✓",
-    disputed: "Dispute mein",
-    cancelled: "Cancel ho gaya",
+    open: "Open — waiting for applicants",
+    assigned: "Assigned — awaiting payment/work",
+    submitted: "Submitted — awaiting client confirmation",
+    completed: "Completed ✓",
+    disputed: "In dispute",
+    cancelled: "Cancelled",
   };
 
   return (
@@ -312,8 +305,8 @@ export default function TaskDetailPage({
             </p>
           </div>
           <div>
-            <p className="text-ink/50">Shehar</p>
-            <p className="font-semibold text-lg">{task.city || "Online"}</p>
+            <p className="text-ink/50">City</p>
+            <p className="font-semibold text-lg">{task.city || "Remote"}</p>
           </div>
           <div>
             <p className="text-ink/50">Category</p>
@@ -331,11 +324,11 @@ export default function TaskDetailPage({
         {user && !isOwner && task.status === "open" && !alreadyApplied && (
           <form onSubmit={handleApply} className="mb-10 space-y-3">
             <label className="block text-sm mb-1">
-              Apply karne ke liye message likhein
+              Write a quick message to apply
             </label>
             <textarea
               className="w-full border border-line rounded-lg px-4 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-green-700 min-h-24"
-              placeholder="Main ye kaam kyun kar sakta hoon..."
+              placeholder="Why you're a good fit for this..."
               value={message}
               onChange={(e) => setMessage(e.target.value)}
             />
@@ -343,18 +336,17 @@ export default function TaskDetailPage({
               type="submit"
               className="rounded-full bg-green-900 text-cream px-6 py-2.5 hover:bg-green-800 transition-colors"
             >
-              Apply Karein
+              Apply
             </button>
           </form>
         )}
 
         {!user && task.status === "open" && (
           <p className="text-ink/60 mb-10">
-            Apply karne ke liye{" "}
             <a href="/login" className="text-green-700 underline">
-              login karein
-            </a>
-            .
+              Log in
+            </a>{" "}
+            to apply.
           </p>
         )}
 
@@ -365,7 +357,7 @@ export default function TaskDetailPage({
               Applications ({applications.length})
             </h2>
             {applications.length === 0 && (
-              <p className="text-ink/50">Abhi koi apply nahi hua.</p>
+              <p className="text-ink/50">No applicants yet.</p>
             )}
             <div className="space-y-3">
               {applications.map((app) => (
@@ -385,7 +377,7 @@ export default function TaskDetailPage({
                       onClick={() => handleAccept(app.id)}
                       className="rounded-full bg-green-900 text-cream px-4 py-2 text-sm hover:bg-green-800 transition-colors whitespace-nowrap"
                     >
-                      Accept Karein
+                      Accept
                     </button>
                   )}
                 </div>
@@ -397,14 +389,14 @@ export default function TaskDetailPage({
         {/* --- Escrow payment step (owner, assigned, no payment yet) --- */}
         {isOwner && task.status === "assigned" && !payment && (
           <div className="mb-10 border border-gold-400 bg-gold-100/40 rounded-xl p-6">
-            <p className="font-semibold text-heading mb-1">Escrow Payment</p>
+            <p className="font-semibold text-heading mb-1">Fund Escrow</p>
             <p className="text-sm text-ink/60 mb-4">
-              Provider ko confirm karne ke liye Rs. {task.budget.toLocaleString()} escrow mein
-              hold karein. Kaam mukammal hone tak paisa aapke pass mahfooz rahega.
+              Hold Rs. {task.budget.toLocaleString()} in escrow to confirm the
+              provider. The funds stay safely with us until the work is done.
               <br />
               <span className="text-xs italic">
-                (Abhi mock/sandbox mode hai — real JazzCash/EasyPaisa merchant account milne ke
-                baad ye asal payment lega.)
+                (Sandbox/mock mode for now — this will process real payments
+                once JazzCash/EasyPaisa is integrated.)
               </span>
             </p>
             <button
@@ -412,7 +404,7 @@ export default function TaskDetailPage({
               disabled={busy}
               className="rounded-full bg-green-900 text-cream px-6 py-2.5 hover:bg-green-800 transition-colors disabled:opacity-50"
             >
-              {busy ? "..." : `Rs. ${task.budget.toLocaleString()} Escrow Mein Dalein`}
+              {busy ? "..." : `Fund Escrow — Rs. ${task.budget.toLocaleString()}`}
             </button>
           </div>
         )}
@@ -420,10 +412,10 @@ export default function TaskDetailPage({
         {/* --- Provider submits proof (assigned provider, payment held) --- */}
         {isAssignedProvider && task.status === "assigned" && payment?.status === "held_in_escrow" && (
           <form onSubmit={handleSubmitProof} className="mb-10 border border-line rounded-xl p-6 bg-white space-y-3">
-            <p className="font-semibold text-heading">Kaam Submit Karein</p>
+            <p className="font-semibold text-heading">Submit Your Work</p>
             <textarea
               className="w-full border border-line rounded-lg px-4 py-2.5 bg-paper focus:outline-none focus:ring-2 focus:ring-green-700 min-h-20"
-              placeholder="Proof ka link ya note (photo URL, description)..."
+              placeholder="Link to proof (photo URL, description)..."
               value={proofNote}
               onChange={(e) => setProofNote(e.target.value)}
               required
@@ -433,21 +425,21 @@ export default function TaskDetailPage({
               disabled={busy}
               className="rounded-full bg-green-900 text-cream px-6 py-2.5 hover:bg-green-800 transition-colors disabled:opacity-50"
             >
-              {busy ? "..." : "Kaam Submit Karein"}
+              {busy ? "..." : "Submit Work"}
             </button>
           </form>
         )}
 
         {isAssignedProvider && task.status === "assigned" && payment?.status !== "held_in_escrow" && (
           <p className="mb-10 text-sm text-ink/50 italic">
-            Client ke escrow payment ka intezar karein, uske baad aap kaam submit kar sakte hain.
+            Waiting on the client to fund escrow before you can submit.
           </p>
         )}
 
         {/* --- Owner confirms completion (submitted) --- */}
         {isOwner && task.status === "submitted" && (
           <div className="mb-10 border border-line rounded-xl p-6 bg-white">
-            <p className="font-semibold text-heading mb-1">Provider ne kaam submit kar diya</p>
+            <p className="font-semibold text-heading mb-1">The provider submitted their work</p>
             {task.proofUrl && (
               <p className="text-sm text-ink/60 mb-4 break-words">Proof: {task.proofUrl}</p>
             )}
@@ -457,7 +449,7 @@ export default function TaskDetailPage({
               {task.verificationStatus === "not_run" && (
                 <p className="text-sm text-ink/50 italic flex items-center gap-2">
                   <span className="inline-block w-2 h-2 rounded-full bg-gold-500 animate-pulse" />
-                  AI proof check chal raha hai...
+                  Running AI proof check...
                 </p>
               )}
               {task.verificationStatus !== "not_run" && (
@@ -478,7 +470,7 @@ export default function TaskDetailPage({
                       ? "✗ Fail"
                       : task.verificationStatus === "error"
                       ? "Error"
-                      : "Manual Review Chahiye"}
+                      : "Needs Manual Review"}
                     {task.verificationConfidence !== null &&
                       task.verificationConfidence > 0 &&
                       ` (${Math.round(task.verificationConfidence * 100)}% confidence)`}
@@ -492,7 +484,7 @@ export default function TaskDetailPage({
                   disabled={busy}
                   className="text-xs text-green-700 underline mt-2"
                 >
-                  Dobara AI Check Karein
+                  Re-run AI Check
                 </button>
               )}
             </div>
@@ -502,10 +494,10 @@ export default function TaskDetailPage({
               disabled={busy}
               className="rounded-full bg-green-900 text-cream px-6 py-2.5 hover:bg-green-800 transition-colors disabled:opacity-50"
             >
-              {busy ? "..." : "Confirm Karein aur Payment Release Karein"}
+              {busy ? "..." : "Confirm & Release Payment"}
             </button>
             <p className="text-xs text-ink/40 mt-2">
-              AI verification sirf ek signal hai — final faisla hamesha aapka hai.
+              AI verification is just a signal — the final call is always yours.
             </p>
           </div>
         )}
@@ -514,10 +506,10 @@ export default function TaskDetailPage({
         {task.status === "disputed" && (
           <div className="mb-6 border border-red-200 bg-red-50 rounded-xl p-5">
             <p className="font-semibold text-red-700 mb-1">
-              Ye task dispute mein hai
+              This task is in dispute
             </p>
             <p className="text-sm text-red-600">
-              Admin is ko review kar raha hai. Escrow payment tab tak hold rahegi jab tak faisla nahi hota.
+              An admin is reviewing it. Escrow stays held until a decision is made.
             </p>
           </div>
         )}
@@ -530,7 +522,7 @@ export default function TaskDetailPage({
               disabled={busy}
               className="text-sm text-red-500 underline"
             >
-              Koi masla hai? Dispute utha kar admin ko bulayein
+              Something wrong? Raise a dispute
             </button>
           </div>
         )}
@@ -543,7 +535,7 @@ export default function TaskDetailPage({
             </p>
             <div className="max-h-72 overflow-y-auto px-6 py-4 space-y-3">
               {chat.length === 0 && (
-                <p className="text-sm text-ink/40">Abhi koi message nahi.</p>
+                <p className="text-sm text-ink/40">No messages yet.</p>
               )}
               {chat.map((m) => (
                 <div key={m.id} className={m.senderId === user?.id ? "text-right" : ""}>
@@ -559,12 +551,11 @@ export default function TaskDetailPage({
                   <p className="text-[10px] text-ink/30 mt-0.5">{m.senderName}</p>
                 </div>
               ))}
-              <div ref={chatEndRef} />
             </div>
             <form onSubmit={handleSendChat} className="flex border-t border-line">
               <input
                 className="flex-1 px-4 py-3 text-sm focus:outline-none"
-                placeholder="Message likhein..."
+                placeholder="Type a message..."
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
               />
@@ -572,7 +563,7 @@ export default function TaskDetailPage({
                 type="submit"
                 className="px-5 text-sm font-semibold text-green-800 hover:bg-paper"
               >
-                Bhejein
+                Send
               </button>
             </form>
           </div>
@@ -594,7 +585,7 @@ export default function TaskDetailPage({
             )}
             {isParticipant && !myReview && (
               <form onSubmit={handleReview} className="border border-line rounded-xl p-6 bg-white space-y-3">
-                <p className="font-semibold text-heading">Apni Review Dein</p>
+                <p className="font-semibold text-heading">Leave a Review</p>
                 <select
                   className="border border-line rounded-lg px-4 py-2 bg-paper"
                   value={reviewRating}
@@ -617,7 +608,7 @@ export default function TaskDetailPage({
                   disabled={busy}
                   className="rounded-full bg-green-900 text-cream px-6 py-2.5 hover:bg-green-800 transition-colors disabled:opacity-50"
                 >
-                  {busy ? "..." : "Review Submit Karein"}
+                  {busy ? "..." : "Submit Review"}
                 </button>
               </form>
             )}

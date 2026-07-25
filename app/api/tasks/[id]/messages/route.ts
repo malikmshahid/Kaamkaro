@@ -21,11 +21,11 @@ async function assertParticipant(taskId: string, userId: string) {
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSessionUser();
-  if (!session) return NextResponse.json({ error: "Pehle login karein" }, { status: 401 });
+  if (!session) return NextResponse.json({ error: "Please log in first" }, { status: 401 });
   const { id: taskId } = await params;
 
   const task = await assertParticipant(taskId, session.userId);
-  if (!task) return NextResponse.json({ error: "Access nahi hai" }, { status: 403 });
+  if (!task) return NextResponse.json({ error: "Access denied" }, { status: 403 });
 
   const rows = await db
     .select({
@@ -45,15 +45,15 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSessionUser();
-  if (!session) return NextResponse.json({ error: "Pehle login karein" }, { status: 401 });
+  if (!session) return NextResponse.json({ error: "Please log in first" }, { status: 401 });
   const { id: taskId } = await params;
 
   const task = await assertParticipant(taskId, session.userId);
-  if (!task) return NextResponse.json({ error: "Access nahi hai" }, { status: 403 });
+  if (!task) return NextResponse.json({ error: "Access denied" }, { status: 403 });
 
   const { body } = await req.json();
   if (!body || typeof body !== "string" || body.trim().length === 0) {
-    return NextResponse.json({ error: "Message khali nahi ho sakta" }, { status: 400 });
+    return NextResponse.json({ error: "Message cannot be empty" }, { status: 400 });
   }
 
   const id = randomUUID();

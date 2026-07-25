@@ -8,17 +8,17 @@ import { verifyTaskProof } from "@/lib/aiVerification";
 // POST /api/tasks/[id]/verify — client (or the owner) re-runs AI verification manually
 export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSessionUser();
-  if (!session) return NextResponse.json({ error: "Pehle login karein" }, { status: 401 });
+  if (!session) return NextResponse.json({ error: "Please log in first" }, { status: 401 });
   const { id: taskId } = await params;
 
   const found = await db.select().from(tasks).where(eq(tasks.id, taskId)).limit(1);
   const task = found[0];
-  if (!task) return NextResponse.json({ error: "Task nahi mila" }, { status: 404 });
+  if (!task) return NextResponse.json({ error: "Task not found" }, { status: 404 });
   if (task.postedById !== session.userId) {
-    return NextResponse.json({ error: "Sirf task owner verify kar sakta hai" }, { status: 403 });
+    return NextResponse.json({ error: "Only the task owner can trigger verification" }, { status: 403 });
   }
   if (!["submitted", "completed"].includes(task.status)) {
-    return NextResponse.json({ error: "Verify karne ke liye pehle kaam submit hona chahiye" }, { status: 400 });
+    return NextResponse.json({ error: "The task must be submitted before it can be verified" }, { status: 400 });
   }
 
   const result = await verifyTaskProof(task.title, task.description, task.proofUrl);

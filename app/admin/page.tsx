@@ -88,7 +88,7 @@ export default function AdminPage() {
   }, [tab]);
 
   async function handleResolve(taskId: string, decision: "release_provider" | "refund_client") {
-    const notes = window.prompt("Faisle ki wajah (optional, dono taraf ko dikhegi):") || "";
+    const notes = window.prompt("Reason for this decision (optional, visible to both sides):") || "";
     const res = await fetch(`/api/admin/tasks/${taskId}/resolve`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -103,11 +103,10 @@ export default function AdminPage() {
         <Navbar />
         <main className="flex-1 max-w-3xl mx-auto w-full px-6 py-16">
           <p className="text-ink/60">
-            Admin panel dekhne ke liye{" "}
             <a href="/login" className="text-green-700 underline">
-              login karein
-            </a>
-            .
+              Log in
+            </a>{" "}
+            to view the admin panel.
           </p>
         </main>
       </>
@@ -120,8 +119,8 @@ export default function AdminPage() {
         <Navbar />
         <main className="flex-1 max-w-3xl mx-auto w-full px-6 py-16">
           <p className="text-ink/60">
-            Ye page sirf admin ke liye hai. Agar aapko admin access chahiye,
-            database mein apna role update karwayein.
+            This page is admin-only. If you need admin access, your role has to
+            be updated directly in the database.
           </p>
         </main>
       </>
@@ -133,7 +132,7 @@ export default function AdminPage() {
       <Navbar />
       <main className="flex-1 max-w-5xl mx-auto w-full px-6 py-12">
         <h1 className="font-display text-3xl text-heading mb-2">Admin Panel</h1>
-        <p className="text-ink/60 mb-8">Platform overview aur dispute resolution.</p>
+        <p className="text-ink/60 mb-8">Platform overview and dispute resolution.</p>
 
         <div className="flex gap-2 mb-8 border-b border-line">
           {(["overview", "disputes", "users", "tasks"] as const).map((t) => (
@@ -146,12 +145,12 @@ export default function AdminPage() {
                   : "border-transparent text-ink/50 hover:text-ink"
               }`}
             >
-              {t === "overview" ? "Overview" : t === "disputes" ? `Disputes${stats && stats.disputedCount > 0 ? ` (${stats.disputedCount})` : ""}` : t === "users" ? "Users" : "Sab Tasks"}
+              {t === "overview" ? "Overview" : t === "disputes" ? `Disputes${stats && stats.disputedCount > 0 ? ` (${stats.disputedCount})` : ""}` : t === "users" ? "Users" : "All Tasks"}
             </button>
           ))}
         </div>
 
-        {loading && <p className="text-ink/50">Load ho raha hai...</p>}
+        {loading && <p className="text-ink/50">Loading...</p>}
 
         {!loading && tab === "overview" && stats && (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -167,7 +166,7 @@ export default function AdminPage() {
         {!loading && tab === "disputes" && (
           <div className="space-y-4">
             {disputes.length === 0 && (
-              <p className="text-sm text-ink/50">Koi active dispute nahi hai. 🎉</p>
+              <p className="text-sm text-ink/50">No active disputes. 🎉</p>
             )}
             {disputes.map((t) => (
               <div key={t.id} className="border border-red-200 bg-red-50/50 rounded-xl p-5">
@@ -177,7 +176,7 @@ export default function AdminPage() {
                       {t.title}
                     </Link>
                     <p className="text-sm text-ink/50">
-                      Rs. {t.budget.toLocaleString()} · {t.city || "Online"} · {t.postedByType}
+                      Rs. {t.budget.toLocaleString()} · {t.city || "Remote"} · {t.postedByType}
                     </p>
                   </div>
                 </div>
@@ -186,19 +185,19 @@ export default function AdminPage() {
                     onClick={() => handleResolve(t.id, "release_provider")}
                     className="rounded-full bg-green-900 text-cream px-4 py-2 text-sm hover:bg-green-800"
                   >
-                    Provider Ko Release Karein
+                    Release to Provider
                   </button>
                   <button
                     onClick={() => handleResolve(t.id, "refund_client")}
                     className="rounded-full border border-red-400 text-red-600 px-4 py-2 text-sm hover:bg-red-100"
                   >
-                    Client Ko Refund Karein
+                    Refund Client
                   </button>
                   <Link
                     href={`/tasks/${t.id}`}
                     className="rounded-full border border-line px-4 py-2 text-sm hover:border-green-700"
                   >
-                    Poori Detail Dekhein
+                    View Full Details
                   </Link>
                 </div>
               </div>
@@ -211,10 +210,10 @@ export default function AdminPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left text-ink/50 border-b border-line">
-                  <th className="py-2 pr-4">Naam</th>
+                  <th className="py-2 pr-4">Name</th>
                   <th className="py-2 pr-4">Phone</th>
                   <th className="py-2 pr-4">Role</th>
-                  <th className="py-2 pr-4">Shehar</th>
+                  <th className="py-2 pr-4">City</th>
                   <th className="py-2 pr-4">Rating</th>
                 </tr>
               </thead>

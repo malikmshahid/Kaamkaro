@@ -61,11 +61,10 @@ export default function SettingsPage() {
         <Navbar />
         <main className="flex-1 max-w-2xl mx-auto w-full px-6 py-16">
           <p className="text-ink/60">
-            Settings dekhne ke liye{" "}
             <a href="/login" className="text-green-700 underline">
-              login karein
-            </a>
-            .
+              Log in
+            </a>{" "}
+            to view settings.
           </p>
         </main>
       </>
@@ -80,22 +79,22 @@ export default function SettingsPage() {
           AI Agent API Keys
         </h1>
         <p className="text-ink/60 mb-8">
-          Ye key apne AI agent (Claude, GPT, custom script) ko dein taake wo
-          aapki taraf se KaamKaro par tasks post kar sake — bilkul us tarah
-          jesa RentAHuman.ai mein AI agents kaam post karte hain.
+          Give this key to your AI agent (Claude, GPT, a custom script) so it can
+          post tasks and order tools on KaamKaro on your behalf — the same way
+          AI agents work on RentAHuman.ai.
         </p>
 
         {newKey && (
           <div className="border-2 border-gold-500 bg-gold-100/50 rounded-xl p-5 mb-8">
             <p className="font-semibold text-heading mb-2">
-              Naya API Key ban gaya — isay abhi save kar lein
+              New API key created — save it now
             </p>
             <code className="block bg-white border border-line rounded-lg px-4 py-3 text-sm break-all">
               {newKey}
             </code>
             <p className="text-xs text-ink/50 mt-2">
-              Ye key dobara dikhai nahi degi. Isay kisi secure jagah save
-              karein (e.g. .env file).
+              This key won&apos;t be shown again. Store it somewhere safe (e.g. an
+              .env file).
             </p>
           </div>
         )}
@@ -103,7 +102,7 @@ export default function SettingsPage() {
         <form onSubmit={handleCreate} className="flex gap-3 mb-10">
           <input
             className="flex-1 border border-line rounded-lg px-4 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
-            placeholder="Agent ka naam (e.g. 'Delivery Bot')"
+            placeholder="Agent name (e.g. 'Delivery Bot')"
             value={agentName}
             onChange={(e) => setAgentName(e.target.value)}
           />
@@ -111,16 +110,16 @@ export default function SettingsPage() {
             type="submit"
             className="rounded-full bg-green-900 text-cream px-6 py-2.5 hover:bg-green-800 transition-colors whitespace-nowrap"
           >
-            Naya Key Banayein
+            Generate New Key
           </button>
         </form>
 
         <h2 className="font-display text-xl text-heading mb-4">
-          Aapki Keys
+          Your Keys
         </h2>
-        {loading && <p className="text-ink/50">Load ho raha hai...</p>}
+        {loading && <p className="text-ink/50">Loading...</p>}
         {!loading && keys.length === 0 && (
-          <p className="text-sm text-ink/50">Abhi koi key nahi bani.</p>
+          <p className="text-sm text-ink/50">No keys yet.</p>
         )}
         <div className="space-y-3">
           {keys.map((k) => (
@@ -138,7 +137,7 @@ export default function SettingsPage() {
                 <p className="text-xs text-ink/50 font-mono">{k.keyPrefix}</p>
                 <p className="text-xs text-ink/40 mt-1">
                   {k.requestCount} requests
-                  {k.lastUsedAt ? ` · Last: ${k.lastUsedAt}` : ""}
+                  {k.lastUsedAt ? ` · Last used: ${k.lastUsedAt}` : ""}
                 </p>
               </div>
               {!k.revoked && (
@@ -155,15 +154,15 @@ export default function SettingsPage() {
 
         <div className="mt-12 border-t border-line pt-8">
           <h2 className="font-display text-xl text-heading mb-3">
-            API Kaise Use Karein
+            Using the API
           </h2>
           <pre className="bg-green-950 text-cream text-xs rounded-xl p-5 overflow-x-auto">
 {`curl -X POST https://your-domain.com/api/agent/tasks \\
   -H "Authorization: Bearer kk_live_..." \\
   -H "Content-Type: application/json" \\
   -d '{
-    "title": "Lahore mein document scan karwana",
-    "description": "5 pages scan karke PDF banana hai",
+    "title": "Scan a document in Lahore",
+    "description": "Scan 5 pages and turn them into a PDF",
     "category": "verification",
     "budget": 500,
     "city": "Lahore"

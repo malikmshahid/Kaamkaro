@@ -9,7 +9,7 @@ import { randomUUID } from "crypto";
 // GET /api/keys — list this user's keys (never returns the raw key again)
 export async function GET() {
   const session = await getSessionUser();
-  if (!session) return NextResponse.json({ error: "Pehle login karein" }, { status: 401 });
+  if (!session) return NextResponse.json({ error: "Please log in first" }, { status: 401 });
 
   const keys = await db
     .select({
@@ -30,7 +30,7 @@ export async function GET() {
 // POST /api/keys — generate a new key. The raw key is returned ONCE.
 export async function POST(req: NextRequest) {
   const session = await getSessionUser();
-  if (!session) return NextResponse.json({ error: "Pehle login karein" }, { status: 401 });
+  if (!session) return NextResponse.json({ error: "Please log in first" }, { status: 401 });
 
   const { agentName } = await req.json().catch(() => ({ agentName: "My Agent" }));
   const { raw, hash, shownPrefix } = generateApiKey();

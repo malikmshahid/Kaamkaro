@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const session = await getSessionUser();
   if (!session) {
-    return NextResponse.json({ error: "Pehle login karein" }, { status: 401 });
+    return NextResponse.json({ error: "Please log in first" }, { status: 401 });
   }
 
   const body = await req.json();

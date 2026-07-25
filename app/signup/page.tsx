@@ -28,13 +28,13 @@ export default function SignupPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "Kuch ghalat ho gaya");
+        setError(data.error || "Something went wrong");
         return;
       }
       router.push("/dashboard");
       router.refresh();
     } catch {
-      setError("Server se connect nahi ho saka");
+      setError("Could not connect to the server");
     } finally {
       setLoading(false);
     }
@@ -45,15 +45,15 @@ export default function SignupPage() {
       <Navbar />
       <main className="flex-1 max-w-md mx-auto w-full px-6 py-16">
         <h1 className="font-display text-3xl text-heading mb-2">
-          Account Banayein
+          Create Your Account
         </h1>
         <p className="text-ink/60 mb-8">
-          Kaam dene ya lene ke liye, dono ke liye ek hi account.
+          One account, whether you&apos;re here to give work or get it done.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm mb-1">Poora Naam</label>
+            <label className="block text-sm mb-1">Full Name</label>
             <input
               className="w-full border border-line rounded-lg px-4 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
               value={form.name}
@@ -72,7 +72,7 @@ export default function SignupPage() {
             />
           </div>
           <div>
-            <label className="block text-sm mb-1">Shehar</label>
+            <label className="block text-sm mb-1">City</label>
             <input
               className="w-full border border-line rounded-lg px-4 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
               placeholder="Lodhran, Lahore, Karachi..."
@@ -81,7 +81,7 @@ export default function SignupPage() {
             />
           </div>
           <div>
-            <label className="block text-sm mb-1">Aap kya karna chahte hain?</label>
+            <label className="block text-sm mb-1">What brings you here?</label>
             <select
               className="w-full border border-line rounded-lg px-4 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
               value={form.role}
@@ -89,9 +89,9 @@ export default function SignupPage() {
                 setForm({ ...form, role: e.target.value as typeof form.role })
               }
             >
-              <option value="both">Dono &mdash; kaam dena aur lena</option>
-              <option value="client">Sirf kaam post karna</option>
-              <option value="provider">Sirf kaam karna (earn)</option>
+              <option value="both">Both &mdash; give work and get it done</option>
+              <option value="client">Just posting work</option>
+              <option value="provider">Just here to earn</option>
             </select>
           </div>
           <div>
@@ -117,26 +117,26 @@ export default function SignupPage() {
             disabled={loading}
             className="w-full rounded-full bg-green-900 text-cream px-6 py-3 hover:bg-green-800 transition-colors disabled:opacity-50"
           >
-            {loading ? "Ban raha hai..." : "Account Banayein"}
+            {loading ? "Creating your account..." : "Create Account"}
           </button>
 
           <p className="text-xs text-ink/50 text-center">
-            Account banane se aap hamari{" "}
+            By signing up, you agree to our{" "}
             <a href="/terms" className="underline">
               Terms of Service
             </a>{" "}
-            aur{" "}
+            and{" "}
             <a href="/privacy" className="underline">
               Privacy Policy
-            </a>{" "}
-            se agree karte hain.
+            </a>
+            .
           </p>
         </form>
 
         <p className="text-sm text-ink/60 mt-6">
-          Pehle se account hai?{" "}
+          Already have an account?{" "}
           <a href="/login" className="text-green-700 underline">
-            Login karein
+            Log in
           </a>
         </p>
       </main>

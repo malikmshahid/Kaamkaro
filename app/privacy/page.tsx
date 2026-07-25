@@ -15,49 +15,50 @@ export default function PrivacyPage() {
         <div className="prose-like space-y-8 text-ink/80 leading-relaxed">
           <section>
             <p>
-              Ye Privacy Policy batati hai ke KaamKaro.ai ("hum") aapki information
-              kaise collect, use, aur protect karta hai jab aap platform use karte hain.
+              This Privacy Policy explains how KaamKaro.ai (&quot;we&quot;) collects,
+              uses, and protects your information when you use the platform.
             </p>
           </section>
 
           <section>
-            <h2 className="font-display text-xl text-heading mb-2">1. Kya Information Collect Hoti Hai</h2>
+            <h2 className="font-display text-xl text-heading mb-2">1. What Information We Collect</h2>
             <ul className="list-disc pl-5 space-y-1">
-              <li>Account information: naam, phone number, shehar, password (hashed — hum aapka asal password kabhi nahi dekhte)</li>
-              <li>Task data: aap ne jo kaam post kiye ya apply kiye, unki tafseel</li>
-              <li>Chat messages: task ke andar bheje gaye messages</li>
-              <li>Payment records: kitni escrow payment hui, kab release/refund hui (asal card/bank details hum store nahi karte)</li>
-              <li>Proof photos: jo aap task completion ke liye submit karte hain</li>
-              <li>API usage: agar aap AI agent key banate hain, us key ki request count aur last-used time</li>
+              <li>Account information: name, phone number, city, password (hashed — we never see your actual password)</li>
+              <li>Task and Toolbox data: details of what you post, apply to, or list</li>
+              <li>Chat messages: messages sent within a task</li>
+              <li>Payment records: how much escrow was funded, when it was released/refunded (we don&apos;t store actual card/bank details)</li>
+              <li>Proof photos: what you submit as proof of task completion</li>
+              <li>API usage: if you create an AI agent key, its request count and last-used time</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="font-display text-xl text-heading mb-2">2. Information Kis Liye Use Hoti Hai</h2>
+            <h2 className="font-display text-xl text-heading mb-2">2. How We Use It</h2>
             <ul className="list-disc pl-5 space-y-1">
-              <li>Account banane aur login karwane ke liye</li>
-              <li>Clients aur providers ko match karne ke liye</li>
-              <li>Escrow payment aur dispute resolution process chalane ke liye</li>
-              <li>Submit ki gayi proof photos ko AI se verify karne ke liye (advisory signal)</li>
-              <li>Platform ki security aur fraud rokne ke liye</li>
+              <li>To create your account and let you log in</li>
+              <li>To match clients and providers</li>
+              <li>To run the escrow payment and dispute resolution process</li>
+              <li>To AI-verify submitted proof photos (advisory signal)</li>
+              <li>To keep the platform secure and prevent fraud</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="font-display text-xl text-heading mb-2">3. Information Kis Ke Sath Share Hoti Hai</h2>
-            <p>Hum aapki information kisi ko becha nahi. Ye sirf in cases mein share hoti hai:</p>
+            <h2 className="font-display text-xl text-heading mb-2">3. Who We Share It With</h2>
+            <p>We never sell your information. It&apos;s only shared in these cases:</p>
             <ul className="list-disc pl-5 space-y-1 mt-2">
               <li>
-                <strong>Doosre users:</strong> jab aap task apply/accept karte hain, doosri
-                party aapka naam, rating, aur message dekh sakti hai
+                <strong>Other users:</strong> when you apply to or accept a task, the
+                other party can see your name, rating, and message
               </li>
               <li>
-                <strong>Service providers:</strong> hamari database Neon (Postgres hosting)
-                par hai, app Vercel par hosted hai, aur proof photo verification Anthropic
-                (Claude AI) API se hoti hai — ye sab sirf platform chalane ke liye zaroori hain
+                <strong>Service providers:</strong> our database runs on Neon (Postgres
+                hosting), the app is hosted on Vercel, and proof photo verification
+                uses the Anthropic (Claude) API — these are all necessary to run the
+                platform
               </li>
               <li>
-                <strong>Qanooni zaroorat:</strong> agar qanoon ki taraf se majboor kiya jaye
+                <strong>Legal requirements:</strong> if compelled by law
               </li>
             </ul>
           </section>
@@ -65,51 +66,50 @@ export default function PrivacyPage() {
           <section>
             <h2 className="font-display text-xl text-heading mb-2">4. Data Security</h2>
             <p>
-              Passwords hamesha hash (bcrypt) format mein store hote hain, kabhi plain text
-              mein nahi. API keys bhi sirf hashed form mein save hoti hain. Login sessions
-              secure, httpOnly cookies se manage hote hain.
+              Passwords are always stored hashed (bcrypt), never in plain text. API
+              keys are also stored only in hashed form. Login sessions are managed
+              through secure, httpOnly cookies.
             </p>
           </section>
 
           <section>
-            <h2 className="font-display text-xl text-heading mb-2">5. Aapke Rights</h2>
+            <h2 className="font-display text-xl text-heading mb-2">5. Your Rights</h2>
             <p>
-              Aap kabhi bhi apni account information dekh sakte hain, update kar sakte hain,
-              ya account delete karne ki request kar sakte hain. Delete request par hum
-              aapka personal data mita dete hain, sivaye us data ke jo qanooni ya financial
-              record ke liye rakhna zaroori ho (jese completed payment records).
+              You can view or update your account information anytime, or request
+              account deletion. On deletion, we remove your personal data except
+              where we&apos;re required to keep it for legal or financial record-keeping
+              (e.g. completed payment records).
             </p>
           </section>
 
           <section>
             <h2 className="font-display text-xl text-heading mb-2">6. Cookies</h2>
             <p>
-              Hum sirf ek zaroori session cookie use karte hain jo aapko logged-in rakhta
-              hai. Koi tracking ya advertising cookies nahi hain.
+              We use exactly one essential session cookie to keep you logged in. No
+              tracking or advertising cookies.
             </p>
           </section>
 
           <section>
-            <h2 className="font-display text-xl text-heading mb-2">7. Bachon Ki Privacy</h2>
+            <h2 className="font-display text-xl text-heading mb-2">7. Children&apos;s Privacy</h2>
             <p>
-              Ye platform 18 saal se kam umar ke logon ke liye nahi hai. Hum jaan boojh
-              kar minors ka data collect nahi karte.
+              This platform is not intended for anyone under 18. We do not knowingly
+              collect data from minors.
             </p>
           </section>
 
           <section>
-            <h2 className="font-display text-xl text-heading mb-2">8. Policy Mein Tabdeeli</h2>
+            <h2 className="font-display text-xl text-heading mb-2">8. Changes to This Policy</h2>
             <p>
-              Ye Privacy Policy waqtan faoqtan update ho sakti hai. Bara tabdeeliyon ki
-              soorat mein platform par notice diya jayega.
+              This Privacy Policy may be updated from time to time. Significant
+              changes will be announced on the platform.
             </p>
           </section>
 
           <section>
-            <h2 className="font-display text-xl text-heading mb-2">9. Rabta (Contact)</h2>
+            <h2 className="font-display text-xl text-heading mb-2">9. Contact</h2>
             <p>
-              Apni privacy se mutaliq kisi bhi sawal ke liye, platform ke zariye hum se
-              rabta karein.
+              For any privacy-related questions, reach out to us through the platform.
             </p>
           </section>
         </div>

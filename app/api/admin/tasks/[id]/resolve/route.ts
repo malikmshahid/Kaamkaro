@@ -23,15 +23,15 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const found = await db.select().from(tasks).where(eq(tasks.id, taskId)).limit(1);
   const task = found[0];
-  if (!task) return NextResponse.json({ error: "Task nahi mila" }, { status: 404 });
+  if (!task) return NextResponse.json({ error: "Task not found" }, { status: 404 });
   if (task.status !== "disputed") {
-    return NextResponse.json({ error: "Sirf disputed tasks resolve ho sakte hain" }, { status: 400 });
+    return NextResponse.json({ error: "Only disputed tasks can be resolved" }, { status: 400 });
   }
 
   const payRows = await db.select().from(payments).where(eq(payments.taskId, taskId)).limit(1);
   const payment = payRows[0];
   if (!payment || payment.status !== "held_in_escrow") {
-    return NextResponse.json({ error: "Escrow payment nahi mili" }, { status: 400 });
+    return NextResponse.json({ error: "Escrow payment not found" }, { status: 400 });
   }
 
   const provider = getPaymentProvider();

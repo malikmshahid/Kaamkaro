@@ -8,21 +8,21 @@ import { getSessionUser } from "@/lib/auth";
 // can flag a problem while the task is in progress. An admin then reviews it.
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSessionUser();
-  if (!session) return NextResponse.json({ error: "Pehle login karein" }, { status: 401 });
+  if (!session) return NextResponse.json({ error: "Please log in first" }, { status: 401 });
   const { id: taskId } = await params;
   const { reason } = await req.json().catch(() => ({ reason: "" }));
 
   const found = await db.select().from(tasks).where(eq(tasks.id, taskId)).limit(1);
   const task = found[0];
-  if (!task) return NextResponse.json({ error: "Task nahi mila" }, { status: 404 });
+  if (!task) return NextResponse.json({ error: "Task not found" }, { status: 404 });
 
   const isParticipant = task.postedById === session.userId || task.assignedProviderId === session.userId;
   if (!isParticipant) {
-    return NextResponse.json({ error: "Access nahi hai" }, { status: 403 });
+    return NextResponse.json({ error: "Access denied" }, { status: 403 });
   }
   if (!["assigned", "submitted"].includes(task.status)) {
     return NextResponse.json(
-      { error: "Sirf assigned ya submitted task pe dispute utha sakte hain" },
+      { error: "Disputes can only be raised on assigned or submitted tasks" },
       { status: 400 }
     );
   }

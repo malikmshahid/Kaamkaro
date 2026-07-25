@@ -19,7 +19,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const found = await db.select().from(tasks).where(eq(tasks.id, id)).limit(1);
   const task = found[0];
   if (!task || task.postedById !== agent.ownerId) {
-    return NextResponse.json({ error: "Task nahi mila" }, { status: 404 });
+    return NextResponse.json({ error: "Task not found" }, { status: 404 });
   }
 
   const apps = await db.select().from(applications).where(eq(applications.taskId, id));
@@ -44,17 +44,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const found = await db.select().from(tasks).where(eq(tasks.id, id)).limit(1);
   const task = found[0];
   if (!task || task.postedById !== agent.ownerId) {
-    return NextResponse.json({ error: "Task nahi mila" }, { status: 404 });
+    return NextResponse.json({ error: "Task not found" }, { status: 404 });
   }
 
   if (action === "accept") {
     if (task.status !== "open") {
-      return NextResponse.json({ error: "Task open nahi hai" }, { status: 400 });
+      return NextResponse.json({ error: "Task is not open" }, { status: 400 });
     }
     const appFound = await db.select().from(applications).where(eq(applications.id, applicationId)).limit(1);
     const application = appFound[0];
     if (!application || application.taskId !== id) {
-      return NextResponse.json({ error: "Application nahi mili" }, { status: 404 });
+      return NextResponse.json({ error: "Application not found" }, { status: 404 });
     }
     await db.update(applications).set({ status: "accepted" }).where(eq(applications.id, applicationId));
     await db
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   if (action === "pay") {
     if (task.status !== "assigned" || !task.assignedProviderId) {
-      return NextResponse.json({ error: "Pehle provider accept karein" }, { status: 400 });
+      return NextResponse.json({ error: "Please accept a provider first" }, { status: 400 });
     }
     const provider = getPaymentProvider();
     const result = await provider.charge(task.budget, agent.ownerId);
@@ -88,11 +88,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   if (action === "complete") {
     if (task.status !== "submitted") {
-      return NextResponse.json({ error: "Provider ne abhi submit nahi kiya" }, { status: 400 });
+      return NextResponse.json({ error: "The provider has not submitted yet" }, { status: 400 });
     }
     const payRows = await db.select().from(payments).where(eq(payments.taskId, id)).limit(1);
     const payment = payRows[0];
-    if (!payment) return NextResponse.json({ error: "Payment record nahi mila" }, { status: 400 });
+    if (!payment) return NextResponse.json({ error: "Payment record not found" }, { status: 400 });
 
     const provider = getPaymentProvider();
     await provider.release(payment.providerRef || "", task.assignedProviderId || "");
