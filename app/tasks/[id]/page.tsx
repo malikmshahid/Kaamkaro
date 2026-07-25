@@ -202,6 +202,23 @@ export default function TaskDetailPage({
     load();
   }
 
+  async function handleDispute() {
+    const reason = window.prompt("Dispute ki wajah likhein (client ko dikhegi):");
+    if (reason === null) return;
+    setBusy(true);
+    setNotice("");
+    const res = await fetch(`/api/tasks/${id}/dispute`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reason }),
+    });
+    const data = await res.json();
+    setBusy(false);
+    if (!res.ok) return setNotice(data.error);
+    setNotice("Dispute utha diya gaya — admin review karega.");
+    load();
+  }
+
   async function handleReview(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
@@ -490,6 +507,31 @@ export default function TaskDetailPage({
             <p className="text-xs text-ink/40 mt-2">
               AI verification sirf ek signal hai — final faisla hamesha aapka hai.
             </p>
+          </div>
+        )}
+
+        {/* --- Dispute banner --- */}
+        {task.status === "disputed" && (
+          <div className="mb-6 border border-red-200 bg-red-50 rounded-xl p-5">
+            <p className="font-semibold text-red-700 mb-1">
+              Ye task dispute mein hai
+            </p>
+            <p className="text-sm text-red-600">
+              Admin is ko review kar raha hai. Escrow payment tab tak hold rahegi jab tak faisla nahi hota.
+            </p>
+          </div>
+        )}
+
+        {/* --- Raise dispute (participants, work in progress) --- */}
+        {isParticipant && ["assigned", "submitted"].includes(task.status) && (
+          <div className="mb-6">
+            <button
+              onClick={handleDispute}
+              disabled={busy}
+              className="text-sm text-red-500 underline"
+            >
+              Koi masla hai? Dispute utha kar admin ko bulayein
+            </button>
           </div>
         )}
 

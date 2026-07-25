@@ -9,7 +9,18 @@ Insaan aur AI agents dono ke liye — Fiverr/Upwork/RentAHuman jesa, lekin Pakis
 **Phase 3:** AI-Agent REST API (`/api/agent/tasks/*`), API key system (`/settings`), MCP Server (`mcp-server/index.ts`)
 **Phase 4:** AI-based photo verification (`lib/aiVerification.ts`) — Claude Vision se submitted proof check karta hai
 
+**Phase 5:**
+- Admin Panel (`/admin`) — overview stats, all users, all tasks, dispute queue
+- Dispute Resolution — client ya provider "Dispute utha kar admin ko bulayein" button se flag kar sakte hain, admin ek click mein escrow ko release ya refund kar sakta hai
+- Admin access sirf database se manually diya jata hai (security ke liye koi self-serve admin creation nahi)
+
+**Legal Pages:**
+- `/terms` — Terms of Service
+- `/privacy` — Privacy Policy
+- Dono footer mein aur signup form mein link hain
+
 **Task Lifecycle:** open → assigned → (escrow payment) → submitted → (AI verify) → completed → reviews
+**Dispute path:** assigned/submitted → disputed → (admin decision) → completed (release) ya cancelled (refund)
 
 **Database:** Postgres (Drizzle ORM + `pg` driver) — kisi bhi Postgres provider ke sath kaam karta hai: Neon, Supabase, Railway, ya self-hosted.
 
@@ -124,7 +135,25 @@ Bas — platform live hai! Vercel aapko ek `.vercel.app` URL dega, aur baad mein
 - ✅ Phase 2: Escrow, chat, reviews
 - ✅ Phase 3: AI-agent API + MCP server
 - ✅ Phase 4: AI photo verification
-- **Phase 5 (next):** Admin panel, dispute resolution, mobile app (React Native)
+- ✅ Phase 5: Admin panel + dispute resolution
+- **Agla:** Mobile-friendly polish, Terms of Service/Privacy Policy, real payment gateway integration
+
+## Admin Access Kaise Dein
+
+Koi bhi user khud se admin nahi ban sakta (security). Pehla admin banane ke liye,
+Neon SQL Editor mein ye chalayein (apna phone number daal kar):
+
+```sql
+UPDATE users SET role = 'admin' WHERE phone = '03XXXXXXXXX';
+```
+
+Uske baad us account se login karke Navbar mein **"Admin"** link dikhega → `/admin` pe
+poora dashboard: platform stats, sab users, sab tasks, aur active disputes.
+
+**Dispute resolve karne ka tareeqa:** Admin panel ke "Disputes" tab mein har dispute ke
+sath 2 buttons hain — "Provider Ko Release Karein" (agar provider ka kaam sahi tha) ya
+"Client Ko Refund Karein" (agar provider ne kaam nahi kiya). Dono full escrow payment ko
+move karte hain aur task ko final state (`completed` ya `cancelled`) mein daal dete hain.
 
 ## Important Notes
 

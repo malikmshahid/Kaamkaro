@@ -99,7 +99,16 @@ export default function Home() {
         </section>
       </main>
       <footer className="border-t border-line py-8 text-center text-sm text-ink/50">
-        KaamKaro.ai &mdash; Made in Pakistan, duniya ke liye.
+        <p className="mb-2">KaamKaro.ai &mdash; Made in Pakistan, duniya ke liye.</p>
+        <div className="flex items-center justify-center gap-4">
+          <Link href="/terms" className="hover:text-green-700 underline">
+            Terms of Service
+          </Link>
+          <span>&middot;</span>
+          <Link href="/privacy" className="hover:text-green-700 underline">
+            Privacy Policy
+          </Link>
+        </div>
       </footer>
     </>
   );

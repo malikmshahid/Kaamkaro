@@ -119,6 +119,18 @@ export default function SignupPage() {
           >
             {loading ? "Ban raha hai..." : "Account Banayein"}
           </button>
+
+          <p className="text-xs text-ink/50 text-center">
+            Account banane se aap hamari{" "}
+            <a href="/terms" className="underline">
+              Terms of Service
+            </a>{" "}
+            aur{" "}
+            <a href="/privacy" className="underline">
+              Privacy Policy
+            </a>{" "}
+            se agree karte hain.
+          </p>
         </form>
 
         <p className="text-sm text-ink/60 mt-6">

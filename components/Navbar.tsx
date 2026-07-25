@@ -48,6 +48,11 @@ export default function Navbar() {
               API Keys
             </Link>
           )}
+          {!loading && user && user.role === "admin" && (
+            <Link href="/admin" className="hover:text-gold-500 font-semibold">
+              Admin
+            </Link>
+          )}
 
           {!loading && !user && (
             <>

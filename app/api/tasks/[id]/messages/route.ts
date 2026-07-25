@@ -9,8 +9,14 @@ async function assertParticipant(taskId: string, userId: string) {
   const found = await db.select().from(tasks).where(eq(tasks.id, taskId)).limit(1);
   const task = found[0];
   if (!task) return null;
-  const allowed = task.postedById === userId || task.assignedProviderId === userId;
-  return allowed ? task : null;
+  const isParticipant = task.postedById === userId || task.assignedProviderId === userId;
+  if (isParticipant) return task;
+
+  // Admins can read chat history for disputed tasks under review.
+  const userRow = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+  if (userRow[0]?.role === "admin" && task.status === "disputed") return task;
+
+  return null;
 }
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
