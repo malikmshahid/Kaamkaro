@@ -94,6 +94,16 @@ export const apiKeys = pgTable("api_keys", {
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
 });
 
+// Password Resets: short-lived tokens for the forgot-password flow.
+export const passwordResets = pgTable("password_resets", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  tokenHash: text("token_hash").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  used: boolean("used").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+});
+
 // Messages: simple per-task chat between client and assigned provider.
 export const messages = pgTable("messages", {
   id: text("id").primaryKey(),

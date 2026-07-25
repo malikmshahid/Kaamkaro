@@ -54,7 +54,7 @@ export default function NewTaskPage() {
           <div>
             <label className="block text-sm mb-1">Task Title</label>
             <input
-              className="w-full border border-line rounded-lg px-4 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
+              className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
               placeholder="e.g. Package pickup in Lahore"
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
@@ -64,7 +64,7 @@ export default function NewTaskPage() {
           <div>
             <label className="block text-sm mb-1">Description</label>
             <textarea
-              className="w-full border border-line rounded-lg px-4 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-green-700 min-h-32"
+              className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700 min-h-32"
               placeholder="Give the full details of what you need..."
               value={form.description}
               onChange={(e) =>
@@ -77,7 +77,7 @@ export default function NewTaskPage() {
             <div>
               <label className="block text-sm mb-1">Category</label>
               <select
-                className="w-full border border-line rounded-lg px-4 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
+                className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
                 value={form.category}
                 onChange={(e) =>
                   setForm({ ...form, category: e.target.value })
@@ -97,7 +97,7 @@ export default function NewTaskPage() {
               <input
                 type="number"
                 min="1"
-                className="w-full border border-line rounded-lg px-4 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
+                className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
                 value={form.budget}
                 onChange={(e) => setForm({ ...form, budget: e.target.value })}
                 required
@@ -107,7 +107,7 @@ export default function NewTaskPage() {
           <div>
             <label className="block text-sm mb-1">City</label>
             <input
-              className="w-full border border-line rounded-lg px-4 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
+              className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
               placeholder="Lahore, Karachi, Remote..."
               value={form.city}
               onChange={(e) => setForm({ ...form, city: e.target.value })}

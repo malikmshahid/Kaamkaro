@@ -327,7 +327,7 @@ export default function TaskDetailPage({
               Write a quick message to apply
             </label>
             <textarea
-              className="w-full border border-line rounded-lg px-4 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-green-700 min-h-24"
+              className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700 min-h-24"
               placeholder="Why you're a good fit for this..."
               value={message}
               onChange={(e) => setMessage(e.target.value)}
@@ -363,7 +363,7 @@ export default function TaskDetailPage({
               {applications.map((app) => (
                 <div
                   key={app.id}
-                  className="border border-line rounded-xl p-5 bg-white flex items-start justify-between gap-4"
+                  className="border border-line rounded-xl p-5 bg-card flex items-start justify-between gap-4"
                 >
                   <div>
                     <p className="font-semibold">{app.providerName}</p>
@@ -411,7 +411,7 @@ export default function TaskDetailPage({
 
         {/* --- Provider submits proof (assigned provider, payment held) --- */}
         {isAssignedProvider && task.status === "assigned" && payment?.status === "held_in_escrow" && (
-          <form onSubmit={handleSubmitProof} className="mb-10 border border-line rounded-xl p-6 bg-white space-y-3">
+          <form onSubmit={handleSubmitProof} className="mb-10 border border-line rounded-xl p-6 bg-card space-y-3">
             <p className="font-semibold text-heading">Submit Your Work</p>
             <textarea
               className="w-full border border-line rounded-lg px-4 py-2.5 bg-paper focus:outline-none focus:ring-2 focus:ring-green-700 min-h-20"
@@ -438,7 +438,7 @@ export default function TaskDetailPage({
 
         {/* --- Owner confirms completion (submitted) --- */}
         {isOwner && task.status === "submitted" && (
-          <div className="mb-10 border border-line rounded-xl p-6 bg-white">
+          <div className="mb-10 border border-line rounded-xl p-6 bg-card">
             <p className="font-semibold text-heading mb-1">The provider submitted their work</p>
             {task.proofUrl && (
               <p className="text-sm text-ink/60 mb-4 break-words">Proof: {task.proofUrl}</p>
@@ -529,7 +529,7 @@ export default function TaskDetailPage({
 
         {/* --- Chat (participants, once assigned) --- */}
         {isParticipant && task.status !== "open" && (
-          <div className="mb-10 border border-line rounded-xl bg-white overflow-hidden">
+          <div className="mb-10 border border-line rounded-xl bg-card overflow-hidden">
             <p className="font-semibold text-heading px-6 pt-5 pb-3 border-b border-line">
               Chat
             </p>
@@ -576,7 +576,7 @@ export default function TaskDetailPage({
             {reviews.length > 0 && (
               <div className="space-y-3 mb-6">
                 {reviews.map((r) => (
-                  <div key={r.id} className="border border-line rounded-xl p-4 bg-white">
+                  <div key={r.id} className="border border-line rounded-xl p-4 bg-card">
                     <p className="text-gold-500">{"⭐".repeat(r.rating)}</p>
                     {r.comment && <p className="text-sm text-ink/60 mt-1">{r.comment}</p>}
                   </div>
@@ -584,7 +584,7 @@ export default function TaskDetailPage({
               </div>
             )}
             {isParticipant && !myReview && (
-              <form onSubmit={handleReview} className="border border-line rounded-xl p-6 bg-white space-y-3">
+              <form onSubmit={handleReview} className="border border-line rounded-xl p-6 bg-card space-y-3">
                 <p className="font-semibold text-heading">Leave a Review</p>
                 <select
                   className="border border-line rounded-lg px-4 py-2 bg-paper"

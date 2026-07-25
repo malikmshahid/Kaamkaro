@@ -120,7 +120,7 @@ export default function DashboardPage() {
                   <Link
                     key={t.id}
                     href={`/tasks/${t.id}`}
-                    className="block border border-line rounded-xl p-4 bg-white hover:border-green-700"
+                    className="block border border-line rounded-xl p-4 bg-card hover:border-green-700"
                   >
                     <p className="font-semibold">{t.title}</p>
                     <p className="text-sm text-ink/50">
@@ -145,7 +145,7 @@ export default function DashboardPage() {
                   <Link
                     key={a.applicationId}
                     href={`/tasks/${a.taskId}`}
-                    className="block border border-line rounded-xl p-4 bg-white hover:border-green-700"
+                    className="block border border-line rounded-xl p-4 bg-card hover:border-green-700"
                   >
                     <p className="font-semibold">{a.taskTitle}</p>
                     <p className="text-sm text-ink/50">
@@ -179,7 +179,7 @@ export default function DashboardPage() {
                 <Link
                   key={t.id}
                   href={`/tools/${t.id}`}
-                  className="block border border-line rounded-xl p-4 bg-white hover:border-green-700"
+                  className="block border border-line rounded-xl p-4 bg-card hover:border-green-700"
                 >
                   <p className="font-semibold">{t.title}</p>
                   <p className="text-sm text-ink/50">

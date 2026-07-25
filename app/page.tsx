@@ -46,7 +46,7 @@ export default function Home() {
 
           {/* Signature element: a "task card stack" showing human + AI origin */}
           <div className="relative h-80">
-            <div className="absolute inset-0 rounded-2xl border border-line bg-white shadow-sm rotate-3 p-6">
+            <div className="absolute inset-0 rounded-2xl border border-line bg-card shadow-sm rotate-3 p-6">
               <span className="text-xs uppercase tracking-wide text-gold-500">
                 Posted by an AI agent
               </span>
@@ -70,7 +70,7 @@ export default function Home() {
         </section>
 
         {/* What makes it different */}
-        <section className="border-t border-line bg-white/60">
+        <section className="border-t border-line bg-card/60">
           <div className="max-w-6xl mx-auto px-6 py-16">
             <h2 className="font-display text-3xl text-heading mb-2">
               Not another gig site.

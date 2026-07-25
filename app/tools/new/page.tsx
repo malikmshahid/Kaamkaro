@@ -60,7 +60,7 @@ export default function NewToolPage() {
           <div>
             <label className="block text-sm mb-1">Tool Title</label>
             <input
-              className="w-full border border-line rounded-lg px-4 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
+              className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
               placeholder="e.g. I'll design a logo for your business"
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
@@ -70,7 +70,7 @@ export default function NewToolPage() {
           <div>
             <label className="block text-sm mb-1">Description</label>
             <textarea
-              className="w-full border border-line rounded-lg px-4 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-green-700 min-h-32"
+              className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700 min-h-32"
               placeholder="Describe exactly what a buyer gets when they order this..."
               value={form.description}
               onChange={(e) =>
@@ -83,7 +83,7 @@ export default function NewToolPage() {
             <div>
               <label className="block text-sm mb-1">Category</label>
               <select
-                className="w-full border border-line rounded-lg px-4 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
+                className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
                 value={form.category}
                 onChange={(e) =>
                   setForm({ ...form, category: e.target.value })
@@ -103,7 +103,7 @@ export default function NewToolPage() {
               <input
                 type="number"
                 min="1"
-                className="w-full border border-line rounded-lg px-4 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
+                className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
                 value={form.price}
                 onChange={(e) => setForm({ ...form, price: e.target.value })}
                 required
@@ -116,7 +116,7 @@ export default function NewToolPage() {
               <input
                 type="number"
                 min="1"
-                className="w-full border border-line rounded-lg px-4 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
+                className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
                 value={form.deliveryDays}
                 onChange={(e) => setForm({ ...form, deliveryDays: e.target.value })}
                 required
@@ -125,7 +125,7 @@ export default function NewToolPage() {
             <div>
               <label className="block text-sm mb-1">City (optional)</label>
               <input
-                className="w-full border border-line rounded-lg px-4 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
+                className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
                 placeholder="Leave blank if fully remote"
                 value={form.city}
                 onChange={(e) => setForm({ ...form, city: e.target.value })}

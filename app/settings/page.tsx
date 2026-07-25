@@ -89,7 +89,7 @@ export default function SettingsPage() {
             <p className="font-semibold text-heading mb-2">
               New API key created — save it now
             </p>
-            <code className="block bg-white border border-line rounded-lg px-4 py-3 text-sm break-all">
+            <code className="block bg-card border border-line rounded-lg px-4 py-3 text-sm break-all">
               {newKey}
             </code>
             <p className="text-xs text-ink/50 mt-2">
@@ -101,7 +101,7 @@ export default function SettingsPage() {
 
         <form onSubmit={handleCreate} className="flex gap-3 mb-10">
           <input
-            className="flex-1 border border-line rounded-lg px-4 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
+            className="flex-1 border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
             placeholder="Agent name (e.g. 'Delivery Bot')"
             value={agentName}
             onChange={(e) => setAgentName(e.target.value)}
@@ -125,7 +125,7 @@ export default function SettingsPage() {
           {keys.map((k) => (
             <div
               key={k.id}
-              className="border border-line rounded-xl p-4 bg-white flex items-center justify-between"
+              className="border border-line rounded-xl p-4 bg-card flex items-center justify-between"
             >
               <div>
                 <p className="font-semibold">

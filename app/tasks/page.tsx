@@ -41,7 +41,7 @@ export default function TasksPage() {
             Open Tasks
           </h1>
           <select
-            className="border border-line rounded-lg px-3 py-2 bg-white text-sm"
+            className="border border-line rounded-lg px-3 py-2 bg-card text-sm"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
           >
@@ -69,7 +69,7 @@ export default function TasksPage() {
             <Link
               key={task.id}
               href={`/tasks/${task.id}`}
-              className="border border-line rounded-xl p-6 bg-white hover:border-green-700 transition-colors"
+              className="border border-line rounded-xl p-6 bg-card hover:border-green-700 transition-colors"
             >
               <div className="flex items-center justify-between mb-3">
                 <span

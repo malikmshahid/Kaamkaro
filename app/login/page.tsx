@@ -45,17 +45,22 @@ export default function LoginPage() {
           <div>
             <label className="block text-sm mb-1">Phone Number</label>
             <input
-              className="w-full border border-line rounded-lg px-4 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
+              className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
               value={form.phone}
               onChange={(e) => setForm({ ...form, phone: e.target.value })}
               required
             />
           </div>
           <div>
-            <label className="block text-sm mb-1">Password</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-sm">Password</label>
+              <a href="/forgot-password" className="text-xs text-green-700 underline">
+                Forgot password?
+              </a>
+            </div>
             <input
               type="password"
-              className="w-full border border-line rounded-lg px-4 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
+              className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               required

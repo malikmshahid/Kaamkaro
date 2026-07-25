@@ -21,6 +21,7 @@
   --color-paper: #f7f4ec;
   --color-heading: #0d2318;
   --color-line: #dcd4bf;
+  --color-card: #ffffff;
 
   --font-display: "Fraunces", "Georgia", serif;
   --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
@@ -36,6 +37,7 @@
   --color-paper: #12140f;
   --color-heading: #eef3ea;
   --color-line: #33362c;
+  --color-card: #1b1e17;
 }
 
 body {

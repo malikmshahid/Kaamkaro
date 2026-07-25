@@ -240,7 +240,7 @@ export default function AdminPage() {
               <Link
                 key={t.id}
                 href={`/tasks/${t.id}`}
-                className="flex items-center justify-between border border-line rounded-lg p-3 bg-white hover:border-green-700 text-sm"
+                className="flex items-center justify-between border border-line rounded-lg p-3 bg-card hover:border-green-700 text-sm"
               >
                 <span className="font-medium">{t.title}</span>
                 <span className="text-ink/50">
@@ -265,7 +265,7 @@ function StatCard({
   accent?: boolean;
 }) {
   return (
-    <div className={`border rounded-xl p-5 bg-white ${accent ? "border-red-300" : "border-line"}`}>
+    <div className={`border rounded-xl p-5 bg-card ${accent ? "border-red-300" : "border-line"}`}>
       <p className="text-xs text-ink/50 uppercase tracking-wide mb-1">{label}</p>
       <p className={`font-display text-2xl ${accent ? "text-red-600" : "text-heading"}`}>{value}</p>
     </div>

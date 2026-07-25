@@ -50,7 +50,7 @@ export default function ToolsPage() {
           </div>
           <div className="flex items-center gap-3">
             <select
-              className="border border-line rounded-lg px-3 py-2 bg-white text-sm"
+              className="border border-line rounded-lg px-3 py-2 bg-card text-sm"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
             >
@@ -87,7 +87,7 @@ export default function ToolsPage() {
               <Link
                 key={tool.id}
                 href={`/tools/${tool.id}`}
-                className="border border-line rounded-xl p-6 bg-white hover:border-gold-500 transition-colors flex flex-col"
+                className="border border-line rounded-xl p-6 bg-card hover:border-gold-500 transition-colors flex flex-col"
               >
                 <span className="text-xs text-ink/50 mb-2">{tool.category}</span>
                 <h3 className="font-display text-lg text-heading mb-2">
