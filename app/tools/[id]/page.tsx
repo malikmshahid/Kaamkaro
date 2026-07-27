@@ -2,6 +2,7 @@
 
 import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { useUser } from "@/lib/useUser";
 
@@ -116,7 +117,12 @@ export default function ToolDetailPage({
 
         <div className="border border-line rounded-xl p-6 bg-card mb-8">
           <p className="text-xs text-ink/50 uppercase tracking-wide mb-1">Provider</p>
-          <p className="font-semibold text-heading text-lg">{tool.providerName}</p>
+          <Link
+            href={`/providers/${tool.providerId}`}
+            className="font-semibold text-heading text-lg hover:underline"
+          >
+            {tool.providerName}
+          </Link>
           <p className="text-sm text-ink/50">
             {tool.providerCity || "Location not set"} &middot;{" "}
             {tool.providerRatingCount > 0

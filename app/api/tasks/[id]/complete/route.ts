@@ -4,6 +4,7 @@ import { tasks, payments } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
 import { getPaymentProvider } from "@/lib/payments";
+import { notify } from "@/lib/notify";
 
 // POST /api/tasks/[id]/complete — client confirms work, escrow releases to provider
 export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -41,6 +42,15 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
     .where(eq(payments.taskId, taskId));
 
   await db.update(tasks).set({ status: "completed" }).where(eq(tasks.id, taskId));
+
+  if (task.assignedProviderId) {
+    await notify(
+      task.assignedProviderId,
+      "payment_released",
+      `Payment for "${task.title}" was released to you 🎉`,
+      taskId
+    );
+  }
 
   return NextResponse.json({ success: true });
 }

@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { tools, tasks } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { authenticateAgent } from "@/lib/agentAuth";
+import { notify } from "@/lib/notify";
 import { randomUUID } from "crypto";
 
 // POST /api/agent/tools/[id]/order — an AI agent instantly orders a provider's
@@ -36,6 +37,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   });
 
   await db.update(tools).set({ orderCount: tool.orderCount + 1 }).where(eq(tools.id, toolId));
+
+  await notify(
+    tool.providerId,
+    "tool_ordered",
+    `Your Toolbox listing "${tool.title}" got a new order from an AI agent 🤖`,
+    taskId
+  );
 
   return NextResponse.json({ success: true, taskId });
 }

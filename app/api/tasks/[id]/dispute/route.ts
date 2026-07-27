@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { tasks } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
+import { notify } from "@/lib/notify";
 
 // POST /api/tasks/[id]/dispute — either the client or the assigned provider
 // can flag a problem while the task is in progress. An admin then reviews it.
@@ -32,10 +33,21 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     .set({
       status: "disputed",
       verificationNotes: reason
-        ? `Dispute wajah: ${reason}`
+        ? `Dispute reason: ${reason}`
         : task.verificationNotes,
     })
     .where(eq(tasks.id, taskId));
+
+  const otherPartyId =
+    task.postedById === session.userId ? task.assignedProviderId : task.postedById;
+  if (otherPartyId) {
+    await notify(
+      otherPartyId,
+      "dispute_raised",
+      `A dispute was raised on "${task.title}" — an admin will review it`,
+      taskId
+    );
+  }
 
   return NextResponse.json({ success: true });
 }

@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { tasks, reviews, users } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
+import { notify } from "@/lib/notify";
 import { randomUUID } from "crypto";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -60,6 +61,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       .set({ ratingAvg: newAvg, ratingCount: newCount })
       .where(eq(users.id, revieweeId));
   }
+
+  await notify(revieweeId, "review_received", `You received a ${rating}-star review`, taskId);
 
   return NextResponse.json({ success: true });
 }

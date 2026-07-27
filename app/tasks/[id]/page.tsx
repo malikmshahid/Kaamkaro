@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, use } from "react";
+import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { useUser } from "@/lib/useUser";
 
@@ -366,7 +367,12 @@ export default function TaskDetailPage({
                   className="border border-line rounded-xl p-5 bg-card flex items-start justify-between gap-4"
                 >
                   <div>
-                    <p className="font-semibold">{app.providerName}</p>
+                    <Link
+                      href={`/providers/${app.providerId}`}
+                      className="font-semibold hover:underline hover:text-green-700"
+                    >
+                      {app.providerName}
+                    </Link>
                     {app.message && (
                       <p className="text-sm text-ink/60 mt-1">{app.message}</p>
                     )}

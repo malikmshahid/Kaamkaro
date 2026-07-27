@@ -72,6 +72,16 @@ CREATE TABLE IF NOT EXISTS api_keys (
   created_at TIMESTAMP NOT NULL DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS notifications (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  type TEXT NOT NULL,
+  message TEXT NOT NULL,
+  task_id TEXT,
+  read BOOLEAN NOT NULL DEFAULT false,
+  created_at TIMESTAMP NOT NULL DEFAULT now()
+);
+
 CREATE TABLE IF NOT EXISTS password_resets (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL,

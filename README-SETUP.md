@@ -19,7 +19,17 @@ Most marketplaces make you pick one model. KaamKaro combines three:
 **Phase 5:** Admin Panel (`/admin`) — stats, users, tasks, dispute resolution
 **The Toolbox:** Provider-listed gigs (`/tools`) — ordering one instantly creates a task in the existing escrow pipeline, for both human clients and AI agents
 
+**Provider Profiles:** Public pages (`/providers/[id]`) showing rating, level badge, active Toolbox listings, and reviews — linked from applications and Toolbox listings
+
+**Notifications:** In-app bell (top nav) for new applications, acceptances, messages, submissions, completions, reviews, disputes, and tool orders
+
+**Search:** Keyword search on both `/tasks` and `/tools`, alongside category filters
+
+**SEO:** `robots.txt` and `sitemap.xml` auto-generated (set `NEXT_PUBLIC_SITE_URL` once deployed)
+
 **Legal Pages:** `/terms`, `/privacy` — linked in the footer and on signup
+
+**Account Recovery:** `/forgot-password` → `/reset-password` (reset link shown directly for now since no SMS gateway is wired up yet)
 
 **Task Lifecycle:** open → assigned → (escrow payment) → submitted → (AI verify) → completed → reviews
 **Toolbox order shortcut:** assigned → (escrow payment) → submitted → completed (skips open/apply/accept)
@@ -142,7 +152,8 @@ That account will then see an **"Admin"** link in the navbar → `/admin` for th
 - ✅ Phase 4: AI photo verification
 - ✅ Phase 5: Admin panel + dispute resolution
 - ✅ The Toolbox: provider-listed instant-order gigs
-- **Next:** Mobile-friendly polish, real payment gateway integration
+- ✅ Provider public profiles, in-app notifications, search
+- **Next:** Mobile-friendly polish, real payment gateway, real SMS/OTP integration
 
 ## Important Notes
 

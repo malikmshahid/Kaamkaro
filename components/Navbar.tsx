@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/lib/useUser";
 import ThemeToggle from "@/components/ThemeToggle";
+import NotificationBell from "@/components/NotificationBell";
 
 export default function Navbar() {
   const { user, loading, setUser } = useUser();
@@ -30,6 +31,7 @@ export default function Navbar() {
 
         <div className="flex items-center gap-6 text-sm">
           <ThemeToggle />
+          {!loading && user && <NotificationBell />}
           <Link href="/tasks" className="hover:text-green-700">
             Find Work
           </Link>

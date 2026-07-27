@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { tools, users } from "@/db/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, or, ilike } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
 import { z } from "zod";
 import { randomUUID } from "crypto";
@@ -19,9 +19,15 @@ const createToolSchema = z.object({
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const category = searchParams.get("category");
+  const q = searchParams.get("q");
 
   const conditions = [eq(tools.status, "active")];
   if (category) conditions.push(eq(tools.category, category));
+  if (q) {
+    conditions.push(
+      or(ilike(tools.title, `%${q}%`), ilike(tools.description, `%${q}%`))!
+    );
+  }
 
   const rows = await db
     .select({

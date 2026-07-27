@@ -94,6 +94,18 @@ export const apiKeys = pgTable("api_keys", {
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
 });
 
+// Notifications: lightweight in-app alerts for key events (new application,
+// accepted, new message, submitted, completed, review received, dispute).
+export const notifications = pgTable("notifications", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  type: text("type").notNull(), // e.g. "application_received", "task_accepted", "new_message"
+  message: text("message").notNull(),
+  taskId: text("task_id"),
+  read: boolean("read").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+});
+
 // Password Resets: short-lived tokens for the forgot-password flow.
 export const passwordResets = pgTable("password_resets", {
   id: text("id").primaryKey(),

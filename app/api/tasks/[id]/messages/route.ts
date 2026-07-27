@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { tasks, messages, users } from "@/db/schema";
 import { eq, asc } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
+import { notify } from "@/lib/notify";
 import { randomUUID } from "crypto";
 
 async function assertParticipant(taskId: string, userId: string) {
@@ -58,6 +59,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const id = randomUUID();
   await db.insert(messages).values({ id, taskId, senderId: session.userId, body: body.trim() });
+
+  const otherPartyId =
+    task.postedById === session.userId ? task.assignedProviderId : task.postedById;
+  if (otherPartyId) {
+    await notify(otherPartyId, "new_message", `New message on "${task.title}"`, taskId);
+  }
 
   return NextResponse.json({ success: true, id });
 }

@@ -4,6 +4,7 @@ import { tasks, payments } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
 import { verifyTaskProof } from "@/lib/aiVerification";
+import { notify } from "@/lib/notify";
 
 // POST /api/tasks/[id]/submit — provider marks work as done with a proof note/url
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -42,6 +43,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     .update(tasks)
     .set({ status: "submitted", proofUrl: proofUrl || null, verificationStatus: "not_run" })
     .where(eq(tasks.id, taskId));
+
+  await notify(
+    task.postedById,
+    "task_submitted",
+    `Work was submitted for "${task.title}" — review it now`,
+    taskId
+  );
 
   // Run AI verification in the background — don't block the provider's response on it.
   // The client sees the result appear on the task page moments later.

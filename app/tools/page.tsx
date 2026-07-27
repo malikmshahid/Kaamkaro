@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 
@@ -13,26 +14,33 @@ type Tool = {
   deliveryDays: number;
   city: string | null;
   orderCount: number;
+  providerId: string;
   providerName: string | null;
   providerRating: number | null;
   providerRatingCount: number | null;
 };
 
 export default function ToolsPage() {
+  const router = useRouter();
   const [tools, setTools] = useState<Tool[]>([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState("");
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
-    const url = category
-      ? `/api/tools?category=${encodeURIComponent(category)}`
-      : "/api/tools";
+    const params = new URLSearchParams();
+    if (category) params.set("category", category);
+    if (search) params.set("q", search);
+    const url = params.toString() ? `/api/tools?${params}` : "/api/tools";
     setLoading(true);
-    fetch(url)
-      .then((r) => r.json())
-      .then((data) => setTools(data.tools || []))
-      .finally(() => setLoading(false));
-  }, [category]);
+    const timeout = setTimeout(() => {
+      fetch(url)
+        .then((r) => r.json())
+        .then((data) => setTools(data.tools || []))
+        .finally(() => setLoading(false));
+    }, 300);
+    return () => clearTimeout(timeout);
+  }, [category, search]);
 
   return (
     <>
@@ -73,6 +81,13 @@ export default function ToolsPage() {
         </div>
 
         <div className="mt-8">
+          <input
+            className="w-full border border-line rounded-lg px-4 py-2.5 bg-card mb-6 focus:outline-none focus:ring-2 focus:ring-green-700"
+            placeholder="🔍 Search the Toolbox by keyword..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+
           {loading && <p className="text-ink/50">Loading...</p>}
 
           {!loading && tools.length === 0 && (
@@ -97,7 +112,16 @@ export default function ToolsPage() {
                   {tool.description}
                 </p>
                 <div className="flex items-center justify-between text-xs text-ink/50 mb-3">
-                  <span>{tool.providerName}</span>
+                  <span
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      router.push(`/providers/${tool.providerId}`);
+                    }}
+                    className="hover:underline hover:text-green-700 cursor-pointer"
+                  >
+                    {tool.providerName}
+                  </span>
                   {tool.providerRatingCount ? (
                     <span>{tool.providerRating?.toFixed(1)} ⭐ ({tool.providerRatingCount})</span>
                   ) : (

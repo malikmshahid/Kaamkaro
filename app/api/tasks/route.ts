@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { tasks } from "@/db/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, or, ilike } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
 import { z } from "zod";
 import { randomUUID } from "crypto";
@@ -20,10 +20,16 @@ export async function GET(req: NextRequest) {
   const category = searchParams.get("category");
   const city = searchParams.get("city");
   const status = searchParams.get("status") || "open";
+  const q = searchParams.get("q");
 
   const conditions = [eq(tasks.status, status as "open")];
   if (category) conditions.push(eq(tasks.category, category));
   if (city) conditions.push(eq(tasks.city, city));
+  if (q) {
+    conditions.push(
+      or(ilike(tasks.title, `%${q}%`), ilike(tasks.description, `%${q}%`))!
+    );
+  }
 
   const results = await db
     .select()

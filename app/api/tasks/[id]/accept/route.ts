@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { tasks, applications } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
+import { notify } from "@/lib/notify";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSessionUser();
@@ -43,6 +44,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     .update(tasks)
     .set({ status: "assigned", assignedProviderId: application.providerId })
     .where(eq(tasks.id, taskId));
+
+  await notify(
+    application.providerId,
+    "task_accepted",
+    `You were accepted for "${task.title}" — waiting on escrow funding`,
+    taskId
+  );
 
   return NextResponse.json({ success: true });
 }

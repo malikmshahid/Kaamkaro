@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { tasks, applications } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
+import { notify } from "@/lib/notify";
 import { randomUUID } from "crypto";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -40,6 +41,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     message: body.message || null,
     status: "pending",
   });
+
+  await notify(
+    task.postedById,
+    "application_received",
+    `Someone applied to your task "${task.title}"`,
+    taskId
+  );
 
   return NextResponse.json({ success: true, applicationId: id });
 }
