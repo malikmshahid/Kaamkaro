@@ -5,23 +5,32 @@ import { desc } from "drizzle-orm";
 import { requireAdmin } from "@/lib/adminAuth";
 
 export async function GET() {
-  const admin = await requireAdmin();
-  if (!admin) return NextResponse.json({ error: "Admin access required" }, { status: 403 });
+  try {
+    const admin = await requireAdmin();
+    if (!admin) return NextResponse.json({ error: "Admin access required" }, { status: 403 });
 
-  const rows = await db
-    .select({
-      id: users.id,
-      name: users.name,
-      phone: users.phone,
-      role: users.role,
-      city: users.city,
-      ratingAvg: users.ratingAvg,
-      ratingCount: users.ratingCount,
-      cnicVerified: users.cnicVerified,
-      createdAt: users.createdAt,
-    })
-    .from(users)
-    .orderBy(desc(users.createdAt));
+    const rows = await db
+      .select({
+        id: users.id,
+        name: users.name,
+        phone: users.phone,
+        role: users.role,
+        city: users.city,
+        ratingAvg: users.ratingAvg,
+        ratingCount: users.ratingCount,
+        cnicVerified: users.cnicVerified,
+        createdAt: users.createdAt,
+      })
+      .from(users)
+      .orderBy(desc(users.createdAt));
 
-  return NextResponse.json({ users: rows });
+    return NextResponse.json({ users: rows });
+
+  } catch (err) {
+    console.error("GET  failed:", err);
+    return NextResponse.json(
+      { error: "Something went wrong on our end. Please try again." },
+      { status: 500 }
+    );
+  }
 }

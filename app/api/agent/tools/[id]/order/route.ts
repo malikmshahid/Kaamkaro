@@ -10,40 +10,49 @@ import { randomUUID } from "crypto";
 // gig on its owner's behalf. Task is created already "assigned" — the agent
 // can immediately call the existing /api/agent/tasks/[id] "pay" action.
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const agent = await authenticateAgent(req);
-  if (!agent) return NextResponse.json({ error: "Invalid or missing API key" }, { status: 401 });
-  const { id: toolId } = await params;
+  try {
+    const agent = await authenticateAgent(req);
+    if (!agent) return NextResponse.json({ error: "Invalid or missing API key" }, { status: 401 });
+    const { id: toolId } = await params;
 
-  const found = await db.select().from(tools).where(eq(tools.id, toolId)).limit(1);
-  const tool = found[0];
-  if (!tool) return NextResponse.json({ error: "Tool not found" }, { status: 404 });
-  if (tool.status !== "active") {
-    return NextResponse.json({ error: "This tool is currently paused" }, { status: 400 });
+    const found = await db.select().from(tools).where(eq(tools.id, toolId)).limit(1);
+    const tool = found[0];
+    if (!tool) return NextResponse.json({ error: "Tool not found" }, { status: 404 });
+    if (tool.status !== "active") {
+      return NextResponse.json({ error: "This tool is currently paused" }, { status: 400 });
+    }
+
+    const taskId = randomUUID();
+    await db.insert(tasks).values({
+      id: taskId,
+      postedById: agent.ownerId,
+      postedByType: "ai_agent",
+      title: tool.title,
+      description: tool.description,
+      category: tool.category,
+      budget: tool.price,
+      city: tool.city,
+      status: "assigned",
+      assignedProviderId: tool.providerId,
+      sourceToolId: tool.id,
+    });
+
+    await db.update(tools).set({ orderCount: tool.orderCount + 1 }).where(eq(tools.id, toolId));
+
+    await notify(
+      tool.providerId,
+      "tool_ordered",
+      `Your Toolbox listing "${tool.title}" got a new order from an AI agent 🤖`,
+      taskId
+    );
+
+    return NextResponse.json({ success: true, taskId });
+
+  } catch (err) {
+    console.error("POST failed:", err);
+    return NextResponse.json(
+      { error: "Something went wrong on our end. Please try again." },
+      { status: 500 }
+    );
   }
-
-  const taskId = randomUUID();
-  await db.insert(tasks).values({
-    id: taskId,
-    postedById: agent.ownerId,
-    postedByType: "ai_agent",
-    title: tool.title,
-    description: tool.description,
-    category: tool.category,
-    budget: tool.price,
-    city: tool.city,
-    status: "assigned",
-    assignedProviderId: tool.providerId,
-    sourceToolId: tool.id,
-  });
-
-  await db.update(tools).set({ orderCount: tool.orderCount + 1 }).where(eq(tools.id, toolId));
-
-  await notify(
-    tool.providerId,
-    "tool_ordered",
-    `Your Toolbox listing "${tool.title}" got a new order from an AI agent 🤖`,
-    taskId
-  );
-
-  return NextResponse.json({ success: true, taskId });
 }

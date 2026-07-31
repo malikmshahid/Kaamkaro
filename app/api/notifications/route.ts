@@ -5,20 +5,29 @@ import { eq, desc, and, sql } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
 
 export async function GET() {
-  const session = await getSessionUser();
-  if (!session) return NextResponse.json({ error: "Please log in first" }, { status: 401 });
+  try {
+    const session = await getSessionUser();
+    if (!session) return NextResponse.json({ error: "Please log in first" }, { status: 401 });
 
-  const rows = await db
-    .select()
-    .from(notifications)
-    .where(eq(notifications.userId, session.userId))
-    .orderBy(desc(notifications.createdAt))
-    .limit(30);
+    const rows = await db
+      .select()
+      .from(notifications)
+      .where(eq(notifications.userId, session.userId))
+      .orderBy(desc(notifications.createdAt))
+      .limit(30);
 
-  const [unread] = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(notifications)
-    .where(and(eq(notifications.userId, session.userId), eq(notifications.read, false)));
+    const [unread] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(notifications)
+      .where(and(eq(notifications.userId, session.userId), eq(notifications.read, false)));
 
-  return NextResponse.json({ notifications: rows, unreadCount: unread.count });
+    return NextResponse.json({ notifications: rows, unreadCount: unread.count });
+
+  } catch (err) {
+    console.error("GET  failed:", err);
+    return NextResponse.json(
+      { error: "Something went wrong on our end. Please try again." },
+      { status: 500 }
+    );
+  }
 }

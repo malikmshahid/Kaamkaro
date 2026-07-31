@@ -8,46 +8,55 @@ import { notify } from "@/lib/notify";
 // POST /api/tasks/[id]/dispute — either the client or the assigned provider
 // can flag a problem while the task is in progress. An admin then reviews it.
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const session = await getSessionUser();
-  if (!session) return NextResponse.json({ error: "Please log in first" }, { status: 401 });
-  const { id: taskId } = await params;
-  const { reason } = await req.json().catch(() => ({ reason: "" }));
+  try {
+    const session = await getSessionUser();
+    if (!session) return NextResponse.json({ error: "Please log in first" }, { status: 401 });
+    const { id: taskId } = await params;
+    const { reason } = await req.json().catch(() => ({ reason: "" }));
 
-  const found = await db.select().from(tasks).where(eq(tasks.id, taskId)).limit(1);
-  const task = found[0];
-  if (!task) return NextResponse.json({ error: "Task not found" }, { status: 404 });
+    const found = await db.select().from(tasks).where(eq(tasks.id, taskId)).limit(1);
+    const task = found[0];
+    if (!task) return NextResponse.json({ error: "Task not found" }, { status: 404 });
 
-  const isParticipant = task.postedById === session.userId || task.assignedProviderId === session.userId;
-  if (!isParticipant) {
-    return NextResponse.json({ error: "Access denied" }, { status: 403 });
-  }
-  if (!["assigned", "submitted"].includes(task.status)) {
+    const isParticipant = task.postedById === session.userId || task.assignedProviderId === session.userId;
+    if (!isParticipant) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
+    }
+    if (!["assigned", "submitted"].includes(task.status)) {
+      return NextResponse.json(
+        { error: "Disputes can only be raised on assigned or submitted tasks" },
+        { status: 400 }
+      );
+    }
+
+    await db
+      .update(tasks)
+      .set({
+        status: "disputed",
+        verificationNotes: reason
+          ? `Dispute reason: ${reason}`
+          : task.verificationNotes,
+      })
+      .where(eq(tasks.id, taskId));
+
+    const otherPartyId =
+      task.postedById === session.userId ? task.assignedProviderId : task.postedById;
+    if (otherPartyId) {
+      await notify(
+        otherPartyId,
+        "dispute_raised",
+        `A dispute was raised on "${task.title}" — an admin will review it`,
+        taskId
+      );
+    }
+
+    return NextResponse.json({ success: true });
+
+  } catch (err) {
+    console.error("POST failed:", err);
     return NextResponse.json(
-      { error: "Disputes can only be raised on assigned or submitted tasks" },
-      { status: 400 }
+      { error: "Something went wrong on our end. Please try again." },
+      { status: 500 }
     );
   }
-
-  await db
-    .update(tasks)
-    .set({
-      status: "disputed",
-      verificationNotes: reason
-        ? `Dispute reason: ${reason}`
-        : task.verificationNotes,
-    })
-    .where(eq(tasks.id, taskId));
-
-  const otherPartyId =
-    task.postedById === session.userId ? task.assignedProviderId : task.postedById;
-  if (otherPartyId) {
-    await notify(
-      otherPartyId,
-      "dispute_raised",
-      `A dispute was raised on "${task.title}" — an admin will review it`,
-      taskId
-    );
-  }
-
-  return NextResponse.json({ success: true });
 }

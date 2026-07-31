@@ -8,49 +8,58 @@ import { notify } from "@/lib/notify";
 
 // POST /api/tasks/[id]/complete — client confirms work, escrow releases to provider
 export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const session = await getSessionUser();
-  if (!session) {
-    return NextResponse.json({ error: "Please log in first" }, { status: 401 });
-  }
-  const { id: taskId } = await params;
+  try {
+    const session = await getSessionUser();
+    if (!session) {
+      return NextResponse.json({ error: "Please log in first" }, { status: 401 });
+    }
+    const { id: taskId } = await params;
 
-  const found = await db.select().from(tasks).where(eq(tasks.id, taskId)).limit(1);
-  const task = found[0];
-  if (!task) return NextResponse.json({ error: "Task not found" }, { status: 404 });
-  if (task.postedById !== session.userId) {
-    return NextResponse.json({ error: "Only the client can confirm completion" }, { status: 403 });
-  }
-  if (task.status !== "submitted") {
-    return NextResponse.json({ error: "The provider has not submitted yet" }, { status: 400 });
-  }
+    const found = await db.select().from(tasks).where(eq(tasks.id, taskId)).limit(1);
+    const task = found[0];
+    if (!task) return NextResponse.json({ error: "Task not found" }, { status: 404 });
+    if (task.postedById !== session.userId) {
+      return NextResponse.json({ error: "Only the client can confirm completion" }, { status: 403 });
+    }
+    if (task.status !== "submitted") {
+      return NextResponse.json({ error: "The provider has not submitted yet" }, { status: 400 });
+    }
 
-  const paymentRows = await db.select().from(payments).where(eq(payments.taskId, taskId)).limit(1);
-  const payment = paymentRows[0];
-  if (!payment || payment.status !== "held_in_escrow") {
-    return NextResponse.json({ error: "Escrow payment not found" }, { status: 400 });
-  }
+    const paymentRows = await db.select().from(payments).where(eq(payments.taskId, taskId)).limit(1);
+    const payment = paymentRows[0];
+    if (!payment || payment.status !== "held_in_escrow") {
+      return NextResponse.json({ error: "Escrow payment not found" }, { status: 400 });
+    }
 
-  const provider = getPaymentProvider();
-  const result = await provider.release(payment.providerRef || "", task.assignedProviderId || "");
-  if (!result.success) {
-    return NextResponse.json({ error: "Payment release failed" }, { status: 500 });
-  }
+    const provider = getPaymentProvider();
+    const result = await provider.release(payment.providerRef || "", task.assignedProviderId || "");
+    if (!result.success) {
+      return NextResponse.json({ error: "Payment release failed" }, { status: 500 });
+    }
 
-  await db
-    .update(payments)
-    .set({ status: "released", releasedAt: new Date() })
-    .where(eq(payments.taskId, taskId));
+    await db
+      .update(payments)
+      .set({ status: "released", releasedAt: new Date() })
+      .where(eq(payments.taskId, taskId));
 
-  await db.update(tasks).set({ status: "completed" }).where(eq(tasks.id, taskId));
+    await db.update(tasks).set({ status: "completed" }).where(eq(tasks.id, taskId));
 
-  if (task.assignedProviderId) {
-    await notify(
-      task.assignedProviderId,
-      "payment_released",
-      `Payment for "${task.title}" was released to you 🎉`,
-      taskId
+    if (task.assignedProviderId) {
+      await notify(
+        task.assignedProviderId,
+        "payment_released",
+        `Payment for "${task.title}" was released to you 🎉`,
+        taskId
+      );
+    }
+
+    return NextResponse.json({ success: true });
+
+  } catch (err) {
+    console.error("POST failed:", err);
+    return NextResponse.json(
+      { error: "Something went wrong on our end. Please try again." },
+      { status: 500 }
     );
   }
-
-  return NextResponse.json({ success: true });
 }

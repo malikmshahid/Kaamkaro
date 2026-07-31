@@ -5,13 +5,22 @@ import { eq } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
 
 export async function POST() {
-  const session = await getSessionUser();
-  if (!session) return NextResponse.json({ error: "Please log in first" }, { status: 401 });
+  try {
+    const session = await getSessionUser();
+    if (!session) return NextResponse.json({ error: "Please log in first" }, { status: 401 });
 
-  await db
-    .update(notifications)
-    .set({ read: true })
-    .where(eq(notifications.userId, session.userId));
+    await db
+      .update(notifications)
+      .set({ read: true })
+      .where(eq(notifications.userId, session.userId));
 
-  return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true });
+
+  } catch (err) {
+    console.error("POST  failed:", err);
+    return NextResponse.json(
+      { error: "Something went wrong on our end. Please try again." },
+      { status: 500 }
+    );
+  }
 }

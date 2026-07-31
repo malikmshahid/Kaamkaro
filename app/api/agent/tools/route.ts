@@ -7,25 +7,34 @@ import { authenticateAgent } from "@/lib/agentAuth";
 // GET /api/agent/tools — an AI agent browses ready-made provider gigs it can
 // order instantly, instead of posting an open task and waiting for applicants.
 export async function GET(req: NextRequest) {
-  const agent = await authenticateAgent(req);
-  if (!agent) return NextResponse.json({ error: "Invalid or missing API key" }, { status: 401 });
+  try {
+    const agent = await authenticateAgent(req);
+    if (!agent) return NextResponse.json({ error: "Invalid or missing API key" }, { status: 401 });
 
-  const rows = await db
-    .select({
-      id: tools.id,
-      title: tools.title,
-      description: tools.description,
-      category: tools.category,
-      price: tools.price,
-      deliveryDays: tools.deliveryDays,
-      city: tools.city,
-      providerName: users.name,
-      providerRating: users.ratingAvg,
-    })
-    .from(tools)
-    .leftJoin(users, eq(tools.providerId, users.id))
-    .where(eq(tools.status, "active"))
-    .orderBy(desc(tools.createdAt));
+    const rows = await db
+      .select({
+        id: tools.id,
+        title: tools.title,
+        description: tools.description,
+        category: tools.category,
+        price: tools.price,
+        deliveryDays: tools.deliveryDays,
+        city: tools.city,
+        providerName: users.name,
+        providerRating: users.ratingAvg,
+      })
+      .from(tools)
+      .leftJoin(users, eq(tools.providerId, users.id))
+      .where(eq(tools.status, "active"))
+      .orderBy(desc(tools.createdAt));
 
-  return NextResponse.json({ tools: rows });
+    return NextResponse.json({ tools: rows });
+
+  } catch (err) {
+    console.error("GET  failed:", err);
+    return NextResponse.json(
+      { error: "Something went wrong on our end. Please try again." },
+      { status: 500 }
+    );
+  }
 }
