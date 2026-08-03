@@ -3,14 +3,19 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
+import { COUNTRIES, getIdFormatHint } from "@/lib/idValidation";
 
 export default function SignupPage() {
   const router = useRouter();
   const [form, setForm] = useState({
     name: "",
     phone: "",
+    email: "",
     password: "",
     city: "",
+    country: "",
+    idType: "national_id" as "national_id" | "passport" | "driver_license" | "other",
+    idNumber: "",
     role: "both" as "client" | "provider" | "both",
   });
   const [error, setError] = useState("");
@@ -19,6 +24,10 @@ export default function SignupPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    if (!form.phone && !form.email) {
+      setError("Please provide a phone number or an email address");
+      return;
+    }
     setLoading(true);
     try {
       const res = await fetch("/api/auth/signup", {
@@ -61,16 +70,32 @@ export default function SignupPage() {
               required
             />
           </div>
-          <div>
-            <label className="block text-sm mb-1">Phone Number</label>
-            <input
-              className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
-              placeholder="03XXXXXXXXX"
-              value={form.phone}
-              onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              required
-            />
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm mb-1">Phone Number</label>
+              <input
+                className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
+                placeholder="03XXXXXXXXX"
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="block text-sm mb-1">Email</label>
+              <input
+                type="email"
+                className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
+                placeholder="you@example.com"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+              />
+            </div>
           </div>
+          <p className="text-xs text-ink/50 -mt-2">
+            At least one of phone or email is required — either works for logging in later.
+          </p>
+
           <div>
             <label className="block text-sm mb-1">City</label>
             <input
@@ -80,6 +105,56 @@ export default function SignupPage() {
               onChange={(e) => setForm({ ...form, city: e.target.value })}
             />
           </div>
+
+          <div>
+            <label className="block text-sm mb-1">Country</label>
+            <select
+              className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
+              value={form.country}
+              onChange={(e) => setForm({ ...form, country: e.target.value })}
+            >
+              <option value="">Select your country (optional)</option>
+              {COUNTRIES.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {form.country && (
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm mb-1">ID Type</label>
+                <select
+                  className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
+                  value={form.idType}
+                  onChange={(e) =>
+                    setForm({ ...form, idType: e.target.value as typeof form.idType })
+                  }
+                >
+                  <option value="national_id">National ID</option>
+                  <option value="passport">Passport</option>
+                  <option value="driver_license">Driver&apos;s License</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm mb-1">ID Number</label>
+                <input
+                  className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
+                  value={form.idNumber}
+                  onChange={(e) => setForm({ ...form, idNumber: e.target.value })}
+                />
+              </div>
+            </div>
+          )}
+          {form.country && (
+            <p className="text-xs text-ink/50 -mt-2">
+              Format: {getIdFormatHint(form.country)} — used for identity verification only, never for logging in.
+            </p>
+          )}
+
           <div>
             <label className="block text-sm mb-1">What brings you here?</label>
             <select

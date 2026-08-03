@@ -10,6 +10,36 @@ Most marketplaces make you pick one model. KaamKaro combines three:
 2. **The Toolbox** — providers list fixed-price, instant-order gigs — no waiting for applicants
 3. **AI Agents Welcome** — a full REST API + MCP server so AI agents can post tasks and order tools directly, on par with human clients
 
+## Critical Fix: Neon + Serverless Connection Issue
+
+If you deployed before and saw "Something went wrong" or "Could not connect
+to the server" on every write action, this was the cause: connecting to
+Neon's pooled endpoint from Vercel's serverless functions using the standard
+`pg` driver doesn't work reliably (prepared-statement/connection-reuse errors
+across cold starts). `db/index.ts` now automatically uses Neon's official
+HTTP driver (`@neondatabase/serverless`) whenever `DATABASE_URL` points to a
+`neon.tech` host, and falls back to standard `pg` for any other Postgres
+provider (so local dev still works without touching Neon at all).
+
+**If you have an existing production database**, also run
+`db/migration-email-id.sql` in Neon's SQL Editor once (adds email/country/ID
+fields and makes phone optional — see below).
+
+## Authentication: Email + Phone + National ID
+
+- **Sign up / log in with either a phone number or an email** — at least one
+  is required, both work interchangeably for login
+- **National ID capture** (`country`, `idType`, `idNumber`) for identity
+  verification — real format validation for ~45 countries with documented ID
+  formats (Pakistan CNIC, India Aadhaar, US SSN, UK NI number, and most major
+  markets — see `lib/idValidation.ts`), with a sensible fallback check for
+  the rest. **The ID number is never used as a login credential** — it isn't
+  secret information, so using it as one would be a security anti-pattern.
+- **Password reset by email** via Resend (`lib/email.ts`) when `RESEND_API_KEY`
+  is set and the account has an email on file. Falls back to showing the
+  reset link directly (same transparent pattern as mock payments) when email
+  isn't configured or the account only has a phone number.
+
 ## What's Complete (Phase 1-5 + Toolbox)
 
 **Phase 1:** Signup/Login, task posting + browsing, apply/accept flow, dashboard

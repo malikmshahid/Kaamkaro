@@ -6,7 +6,7 @@ import Navbar from "@/components/Navbar";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [form, setForm] = useState({ phone: "", password: "" });
+  const [form, setForm] = useState({ identifier: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -43,11 +43,11 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm mb-1">Phone Number</label>
+            <label className="block text-sm mb-1">Phone Number or Email</label>
             <input
               className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
-              value={form.phone}
-              onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              value={form.identifier}
+              onChange={(e) => setForm({ ...form, identifier: e.target.value })}
               required
             />
           </div>

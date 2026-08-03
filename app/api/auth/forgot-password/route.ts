@@ -1,21 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { users, passwordResets } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 import { randomBytes, createHash, randomUUID } from "crypto";
+import { sendEmail, passwordResetEmailHtml } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   try {
-    const { phone } = await req.json().catch(() => ({ phone: "" }));
-    if (!phone) {
-      return NextResponse.json({ error: "Please enter your phone number" }, { status: 400 });
+    const { identifier } = await req.json().catch(() => ({ identifier: "" }));
+    if (!identifier) {
+      return NextResponse.json(
+        { error: "Please enter your phone number or email" },
+        { status: 400 }
+      );
     }
 
-    const found = await db.select().from(users).where(eq(users.phone, phone)).limit(1);
+    const found = await db
+      .select()
+      .from(users)
+      .where(or(eq(users.phone, identifier), eq(users.email, identifier)))
+      .limit(1);
     const user = found[0];
     if (!user) {
       return NextResponse.json(
-        { error: "No account found with that phone number" },
+        { error: "No account found with that phone number or email" },
         { status: 404 }
       );
     }
@@ -31,19 +39,40 @@ export async function POST(req: NextRequest) {
       expiresAt,
     });
 
-    // NOTE: There's no SMS gateway wired up yet (see README), so instead of
-    // silently failing to deliver a reset code, we hand the token straight
-    // back — same transparent "mock, will be real later" pattern used for
-    // payments. Once an SMS provider is integrated, stop returning `resetToken`
-    // here and text the link to the user's phone instead.
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(req.url).origin;
+    const resetLink = `${siteUrl}/reset-password?token=${rawToken}`;
+
+    // If this account has an email on file and Resend is configured, actually
+    // deliver the reset link by email instead of exposing the raw token in
+    // the API response.
+    if (user.email) {
+      const result = await sendEmail(
+        user.email,
+        "Reset your KaamKaro password",
+        passwordResetEmailHtml(resetLink)
+      );
+      if (result.sent) {
+        return NextResponse.json({
+          success: true,
+          delivered: "email",
+          note: `A reset link was sent to ${user.email}.`,
+        });
+      }
+    }
+
+    // Fallback: no email on file, or email delivery isn't configured yet
+    // (no RESEND_API_KEY) — hand back the token/link directly, same
+    // transparent "mock, will be real later" pattern used elsewhere.
     return NextResponse.json({
       success: true,
+      delivered: "shown",
       resetToken: rawToken,
-      note: "SMS delivery isn't wired up yet — here's your reset link directly. Once an SMS gateway is added, this will be texted to your phone instead.",
+      note: user.email
+        ? "Email delivery isn't configured yet (RESEND_API_KEY missing) — here's your reset link directly."
+        : "No email on file and SMS delivery isn't wired up yet — here's your reset link directly.",
     });
-
   } catch (err) {
-    console.error("POST  failed:", err);
+    console.error("POST /api/auth/forgot-password failed:", err);
     return NextResponse.json(
       { error: "Something went wrong on our end. Please try again." },
       { status: 500 }

@@ -6,10 +6,11 @@ import Navbar from "@/components/Navbar";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
-  const [phone, setPhone] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [resetLink, setResetLink] = useState<string | null>(null);
+  const [emailSentTo, setEmailSentTo] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -19,14 +20,18 @@ export default function ForgotPasswordPage() {
       const res = await fetch("/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone }),
+        body: JSON.stringify({ identifier }),
       });
       const data = await res.json();
       if (!res.ok) {
         setError(data.error || "Something went wrong");
         return;
       }
-      setResetLink(`${window.location.origin}/reset-password?token=${data.resetToken}`);
+      if (data.delivered === "email") {
+        setEmailSentTo(data.note);
+      } else {
+        setResetLink(`${window.location.origin}/reset-password?token=${data.resetToken}`);
+      }
     } catch {
       setError("Could not connect to the server");
     } finally {
@@ -42,18 +47,25 @@ export default function ForgotPasswordPage() {
           Forgot Your Password?
         </h1>
         <p className="text-ink/60 mb-8">
-          Enter the phone number on your account and we&apos;ll get you a reset link.
+          Enter the phone number or email on your account and we&apos;ll get you a reset link.
         </p>
 
-        {!resetLink ? (
+        {emailSentTo && (
+          <div className="border-2 border-green-700 bg-green-950/5 rounded-xl p-5">
+            <p className="font-semibold text-heading mb-1">Check your inbox 📬</p>
+            <p className="text-sm text-ink/60">{emailSentTo}</p>
+          </div>
+        )}
+
+        {!resetLink && !emailSentTo && (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm mb-1">Phone Number</label>
+              <label className="block text-sm mb-1">Phone Number or Email</label>
               <input
                 className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
-                placeholder="03XXXXXXXXX"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                placeholder="03XXXXXXXXX or you@example.com"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
                 required
               />
             </div>
@@ -72,15 +84,17 @@ export default function ForgotPasswordPage() {
               {loading ? "..." : "Send Reset Link"}
             </button>
           </form>
-        ) : (
+        )}
+
+        {resetLink && (
           <div className="space-y-4">
             <div className="border-2 border-gold-500 bg-gold-100/50 rounded-xl p-5">
               <p className="font-semibold text-heading mb-2">
                 Here&apos;s your reset link
               </p>
               <p className="text-xs text-ink/60 mb-3">
-                SMS delivery isn&apos;t set up yet, so for now the link is shown
-                directly here instead of being texted to you.
+                Email/SMS delivery isn&apos;t fully set up yet, so for now the
+                link is shown directly here instead of being sent to you.
               </p>
               <a
                 href={resetLink}

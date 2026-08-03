@@ -23,13 +23,17 @@ export const tools = pgTable("tools", {
 export const users = pgTable("users", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
-  phone: text("phone").notNull().unique(),
+  phone: text("phone").unique(),
+  email: text("email").unique(),
   passwordHash: text("password_hash").notNull(),
   role: text("role", { enum: ["client", "provider", "both", "admin"] })
     .notNull()
     .default("both"),
   city: text("city"),
-  cnicVerified: boolean("cnic_verified").notNull().default(false),
+  country: text("country"), // ISO country name, e.g. "Pakistan"
+  idType: text("id_type", { enum: ["national_id", "passport", "driver_license", "other"] }),
+  idNumber: text("id_number"), // for identity verification only — never used as a login credential
+  cnicVerified: boolean("cnic_verified").notNull().default(false), // repurposed as general "ID verified" flag
   bio: text("bio"),
   skills: text("skills"), // comma-separated for MVP; move to a join table later
   hourlyRate: real("hourly_rate"),
