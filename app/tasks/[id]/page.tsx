@@ -298,7 +298,7 @@ export default function TaskDetailPage({
           {task.description}
         </p>
 
-        <div className="flex gap-8 text-sm mb-10 border-y border-line py-4">
+        <div className="grid grid-cols-3 gap-4 sm:flex sm:gap-8 text-sm mb-10 border-y border-line py-4">
           <div>
             <p className="text-ink/50">Budget</p>
             <p className="font-semibold text-green-800 text-lg">

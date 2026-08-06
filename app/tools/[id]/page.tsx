@@ -94,7 +94,7 @@ export default function ToolDetailPage({
           {tool.description}
         </p>
 
-        <div className="flex gap-8 text-sm mb-8 border-y border-line py-4">
+        <div className="grid grid-cols-2 gap-4 sm:flex sm:gap-8 text-sm mb-8 border-y border-line py-4">
           <div>
             <p className="text-ink/50">Price</p>
             <p className="font-semibold text-green-800 text-lg">
