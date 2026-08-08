@@ -17,9 +17,13 @@ type Stats = {
 type AdminUser = {
   id: string;
   name: string;
-  phone: string;
+  phone: string | null;
+  email: string | null;
   role: string;
   city: string | null;
+  country: string | null;
+  idType: string | null;
+  idNumber: string | null;
   ratingAvg: number;
   ratingCount: number;
   cnicVerified: boolean;
@@ -95,6 +99,15 @@ export default function AdminPage() {
       body: JSON.stringify({ decision, notes }),
     });
     if (res.ok) loadAll();
+  }
+
+  async function handleVerify(userId: string, verified: boolean) {
+    const res = await fetch(`/api/admin/users/${userId}/verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ verified }),
+    });
+    if (res.ok) loadUsers();
   }
 
   if (!userLoading && !user) {
@@ -211,21 +224,51 @@ export default function AdminPage() {
               <thead>
                 <tr className="text-left text-ink/50 border-b border-line">
                   <th className="py-2 pr-4">Name</th>
-                  <th className="py-2 pr-4">Phone</th>
+                  <th className="py-2 pr-4">Contact</th>
                   <th className="py-2 pr-4">Role</th>
                   <th className="py-2 pr-4">City</th>
+                  <th className="py-2 pr-4">ID Submitted</th>
                   <th className="py-2 pr-4">Rating</th>
+                  <th className="py-2 pr-4">Verification</th>
                 </tr>
               </thead>
               <tbody>
                 {users.map((u) => (
                   <tr key={u.id} className="border-b border-line/50">
                     <td className="py-2 pr-4">{u.name}</td>
-                    <td className="py-2 pr-4">{u.phone}</td>
+                    <td className="py-2 pr-4">{u.phone || u.email || "—"}</td>
                     <td className="py-2 pr-4 capitalize">{u.role}</td>
                     <td className="py-2 pr-4">{u.city || "—"}</td>
                     <td className="py-2 pr-4">
+                      {u.idNumber ? (
+                        <span title={u.idNumber}>
+                          {u.country} · {u.idType?.replace("_", " ")}
+                        </span>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
+                    <td className="py-2 pr-4">
                       {u.ratingCount > 0 ? `${u.ratingAvg.toFixed(1)} ⭐ (${u.ratingCount})` : "—"}
+                    </td>
+                    <td className="py-2 pr-4">
+                      {!u.idNumber ? (
+                        <span className="text-ink/30">No ID</span>
+                      ) : u.cnicVerified ? (
+                        <button
+                          onClick={() => handleVerify(u.id, false)}
+                          className="text-xs px-2 py-1 rounded-full bg-green-950/5 text-green-800 hover:bg-red-50 hover:text-red-600"
+                        >
+                          ✓ Verified (undo)
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleVerify(u.id, true)}
+                          className="text-xs px-2 py-1 rounded-full bg-gold-100 text-gold-500 hover:opacity-80"
+                        >
+                          Verify ID
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}

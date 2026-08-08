@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
+import PasswordInput from "@/components/PasswordInput";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -58,12 +59,11 @@ export default function LoginPage() {
                 Forgot password?
               </a>
             </div>
-            <input
-              type="password"
-              className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
+            <PasswordInput
               value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              onChange={(v) => setForm({ ...form, password: v })}
               required
+              autoComplete="current-password"
             />
           </div>
 

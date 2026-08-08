@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
+import PasswordInput from "@/components/PasswordInput";
 import { COUNTRIES, getIdFormatHint } from "@/lib/idValidation";
 
 export default function SignupPage() {
@@ -171,13 +172,12 @@ export default function SignupPage() {
           </div>
           <div>
             <label className="block text-sm mb-1">Password</label>
-            <input
-              type="password"
-              className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
+            <PasswordInput
               value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              onChange={(v) => setForm({ ...form, password: v })}
               required
               minLength={6}
+              autoComplete="new-password"
             />
           </div>
 

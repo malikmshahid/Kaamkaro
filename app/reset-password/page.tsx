@@ -3,6 +3,7 @@
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
+import PasswordInput from "@/components/PasswordInput";
 
 function ResetPasswordForm() {
   const router = useRouter();
@@ -67,24 +68,22 @@ function ResetPasswordForm() {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label className="block text-sm mb-1">New Password</label>
-        <input
-          type="password"
-          className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
+        <PasswordInput
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={setPassword}
           minLength={6}
           required
+          autoComplete="new-password"
         />
       </div>
       <div>
         <label className="block text-sm mb-1">Confirm New Password</label>
-        <input
-          type="password"
-          className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
+        <PasswordInput
           value={confirm}
-          onChange={(e) => setConfirm(e.target.value)}
+          onChange={setConfirm}
           minLength={6}
           required
+          autoComplete="new-password"
         />
       </div>
 
