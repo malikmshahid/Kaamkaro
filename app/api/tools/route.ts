@@ -11,6 +11,7 @@ const createToolSchema = z.object({
   description: z.string().min(10, "Please add a bit more detail"),
   category: z.string().min(2),
   price: z.number().positive("Price must be a positive number"),
+  currency: z.string().optional(),
   deliveryDays: z.number().int().positive().default(1),
   city: z.string().optional(),
 });
@@ -38,6 +39,7 @@ export async function GET(req: NextRequest) {
         description: tools.description,
         category: tools.category,
         price: tools.price,
+        currency: tools.currency,
         deliveryDays: tools.deliveryDays,
         city: tools.city,
         orderCount: tools.orderCount,
@@ -77,7 +79,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { title, description, category, price, deliveryDays, city } = parsed.data;
+    const { title, description, category, price, currency, deliveryDays, city } = parsed.data;
     const id = randomUUID();
 
     await db.insert(tools).values({
@@ -87,6 +89,7 @@ export async function POST(req: NextRequest) {
       description,
       category,
       price,
+      currency: currency || "PKR",
       deliveryDays,
       city: city || null,
       status: "active",

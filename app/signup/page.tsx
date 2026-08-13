@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import PasswordInput from "@/components/PasswordInput";
 import { COUNTRIES, getIdFormatHint } from "@/lib/idValidation";
 
-export default function SignupPage() {
+function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [form, setForm] = useState({
     name: "",
     phone: "",
@@ -18,7 +19,13 @@ export default function SignupPage() {
     idType: "national_id" as "national_id" | "passport" | "driver_license" | "other",
     idNumber: "",
     role: "both" as "client" | "provider" | "both",
+    referralCode: "",
   });
+
+  useEffect(() => {
+    const ref = searchParams.get("ref");
+    if (ref) setForm((f) => ({ ...f, referralCode: ref }));
+  }, [searchParams]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -60,6 +67,12 @@ export default function SignupPage() {
         <p className="text-ink/60 mb-8">
           One account, whether you&apos;re here to give work or get it done.
         </p>
+
+        {form.referralCode && (
+          <p className="text-sm bg-gold-100/60 text-gold-500 rounded-lg px-4 py-2 mb-6">
+            🎁 You were invited with code <strong>{form.referralCode}</strong>
+          </p>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -216,5 +229,13 @@ export default function SignupPage() {
         </p>
       </main>
     </>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignupForm />
+    </Suspense>
   );
 }

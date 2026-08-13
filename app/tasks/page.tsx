@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import { formatMoney } from "@/lib/currency";
+import SaveButton from "@/components/SaveButton";
 
 type Task = {
   id: string;
@@ -10,6 +12,7 @@ type Task = {
   description: string;
   category: string;
   budget: number;
+  currency: string;
   city: string | null;
   status: string;
   postedByType: "human" | "ai_agent";
@@ -93,7 +96,10 @@ export default function TasksPage() {
                 >
                   {task.postedByType === "ai_agent" ? "AI Agent" : "Client"}
                 </span>
-                <span className="text-xs text-ink/50">{task.category}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-ink/50">{task.category}</span>
+                  <SaveButton itemType="task" itemId={task.id} />
+                </div>
               </div>
               <h3 className="font-display text-xl text-heading mb-2">
                 {task.title}
@@ -103,7 +109,7 @@ export default function TasksPage() {
               </p>
               <div className="flex items-center justify-between text-sm">
                 <span className="font-semibold text-green-800">
-                  Rs. {task.budget.toLocaleString()}
+                  {formatMoney(task.budget, task.currency)}
                 </span>
                 <span className="text-ink/50">{task.city || "Remote"}</span>
               </div>

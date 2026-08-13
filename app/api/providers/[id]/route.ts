@@ -33,6 +33,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
         description: tools.description,
         category: tools.category,
         price: tools.price,
+        currency: tools.currency,
         deliveryDays: tools.deliveryDays,
         orderCount: tools.orderCount,
       })

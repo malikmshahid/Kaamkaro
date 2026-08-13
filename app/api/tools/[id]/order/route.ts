@@ -35,6 +35,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
       description: tool.description,
       category: tool.category,
       budget: tool.price,
+      currency: tool.currency,
       city: tool.city,
       status: "assigned",
       assignedProviderId: tool.providerId,

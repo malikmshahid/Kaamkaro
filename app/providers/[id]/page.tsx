@@ -3,6 +3,7 @@
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import { formatMoney } from "@/lib/currency";
 
 type Provider = {
   id: string;
@@ -22,6 +23,7 @@ type Tool = {
   description: string;
   category: string;
   price: number;
+  currency: string;
   deliveryDays: number;
   orderCount: number;
 };
@@ -136,7 +138,7 @@ export default function ProviderProfilePage({
                   <p className="text-sm text-ink/60 line-clamp-2 mb-3">{t.description}</p>
                   <div className="flex items-center justify-between text-sm">
                     <span className="font-semibold text-green-800">
-                      Rs. {t.price.toLocaleString()}
+                      {formatMoney(t.price, t.currency)}
                     </span>
                     <span className="text-ink/50">{t.orderCount} orders</span>
                   </div>

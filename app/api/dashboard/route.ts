@@ -24,6 +24,7 @@ export async function GET() {
         taskId: tasks.id,
         taskTitle: tasks.title,
         taskBudget: tasks.budget,
+        taskCurrency: tasks.currency,
         taskStatus: tasks.status,
       })
       .from(applications)

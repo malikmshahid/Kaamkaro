@@ -50,6 +50,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       payerId: session.userId,
       payeeId: task.assignedProviderId,
       amount: task.budget,
+      currency: task.currency,
       provider: "mock",
       status: "held_in_escrow",
       providerRef: result.providerRef,

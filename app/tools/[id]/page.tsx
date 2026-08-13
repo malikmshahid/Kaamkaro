@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { useUser } from "@/lib/useUser";
+import { formatMoney } from "@/lib/currency";
 
 type Tool = {
   id: string;
@@ -13,6 +14,7 @@ type Tool = {
   description: string;
   category: string;
   price: number;
+  currency: string;
   deliveryDays: number;
   city: string | null;
   status: string;
@@ -98,7 +100,7 @@ export default function ToolDetailPage({
           <div>
             <p className="text-ink/50">Price</p>
             <p className="font-semibold text-green-800 text-lg">
-              Rs. {tool.price.toLocaleString()}
+              {formatMoney(tool.price, tool.currency)}
             </p>
           </div>
           <div>
@@ -158,7 +160,7 @@ export default function ToolDetailPage({
             disabled={ordering}
             className="rounded-full bg-gold-500 text-cream px-8 py-3 hover:opacity-90 transition-opacity disabled:opacity-50"
           >
-            {ordering ? "Placing order..." : `Order Now — Rs. ${tool.price.toLocaleString()}`}
+            {ordering ? "Placing order..." : `Order Now — ${formatMoney(tool.price, tool.currency)}`}
           </button>
         )}
       </main>

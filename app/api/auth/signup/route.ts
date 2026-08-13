@@ -5,7 +5,7 @@ import { eq, or } from "drizzle-orm";
 import { hashPassword, signToken, setSessionCookie } from "@/lib/auth";
 import { validateIdNumber, COUNTRIES } from "@/lib/idValidation";
 import { z } from "zod";
-import { randomUUID } from "crypto";
+import { randomUUID, randomBytes } from "crypto";
 
 const signupSchema = z
   .object({
@@ -18,11 +18,19 @@ const signupSchema = z
     country: z.enum(COUNTRIES).optional(),
     idType: z.enum(["national_id", "passport", "driver_license", "other"]).optional(),
     idNumber: z.string().optional(),
+    preferredCurrency: z.string().optional(),
+    referralCode: z.string().optional(),
   })
   .refine((data) => (data.phone && data.phone.length > 0) || (data.email && data.email.length > 0), {
     message: "Please provide a phone number or an email address",
     path: ["phone"],
   });
+
+function generateReferralCode(name: string) {
+  const namePart = name.replace(/[^a-zA-Z]/g, "").slice(0, 4).toUpperCase() || "USER";
+  const randomPart = randomBytes(3).toString("hex").toUpperCase();
+  return `${namePart}${randomPart}`;
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -34,7 +42,19 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    const { name, phone, email, password, role, city, country, idType, idNumber } = parsed.data;
+    const {
+      name,
+      phone,
+      email,
+      password,
+      role,
+      city,
+      country,
+      idType,
+      idNumber,
+      preferredCurrency,
+      referralCode,
+    } = parsed.data;
 
     // Uniqueness checks — only for whichever identifiers were actually provided.
     const identifierConditions = [];
@@ -62,8 +82,31 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // If a referral code was provided, look up who it belongs to.
+    let referredBy: string | null = null;
+    if (referralCode) {
+      const referrer = await db
+        .select()
+        .from(users)
+        .where(eq(users.referralCode, referralCode.toUpperCase()))
+        .limit(1);
+      if (referrer[0]) referredBy = referrer[0].id;
+    }
+
     const passwordHash = await hashPassword(password);
     const id = randomUUID();
+
+    // Generate a unique referral code for this new user (retry on the rare collision).
+    let myReferralCode = generateReferralCode(name);
+    for (let i = 0; i < 5; i++) {
+      const clash = await db
+        .select()
+        .from(users)
+        .where(eq(users.referralCode, myReferralCode))
+        .limit(1);
+      if (clash.length === 0) break;
+      myReferralCode = generateReferralCode(name);
+    }
 
     await db.insert(users).values({
       id,
@@ -76,6 +119,9 @@ export async function POST(req: NextRequest) {
       country: country || null,
       idType: idType || null,
       idNumber: idNumber || null,
+      preferredCurrency: preferredCurrency || "PKR",
+      referralCode: myReferralCode,
+      referredBy,
     });
 
     const token = signToken({ userId: id, role });

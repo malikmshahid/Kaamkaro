@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
+import { CURRENCIES } from "@/lib/currency";
 
 export default function NewToolPage() {
   const router = useRouter();
@@ -11,6 +12,7 @@ export default function NewToolPage() {
     description: "",
     category: "design",
     price: "",
+    currency: "PKR",
     deliveryDays: "1",
     city: "",
   });
@@ -99,15 +101,28 @@ export default function NewToolPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm mb-1">Price (Rs.)</label>
-              <input
-                type="number"
-                min="1"
-                className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
-                value={form.price}
-                onChange={(e) => setForm({ ...form, price: e.target.value })}
-                required
-              />
+              <label className="block text-sm mb-1">Price</label>
+              <div className="flex gap-2">
+                <select
+                  className="border border-line rounded-lg px-2 py-2.5 bg-card text-sm focus:outline-none focus:ring-2 focus:ring-green-700"
+                  value={form.currency}
+                  onChange={(e) => setForm({ ...form, currency: e.target.value })}
+                >
+                  {CURRENCIES.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.code}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="number"
+                  min="1"
+                  className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
+                  value={form.price}
+                  onChange={(e) => setForm({ ...form, price: e.target.value })}
+                  required
+                />
+              </div>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">

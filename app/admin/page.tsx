@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { useUser } from "@/lib/useUser";
+import { formatMoney } from "@/lib/currency";
 
 type Stats = {
   userCount: number;
@@ -35,6 +36,7 @@ type AdminTask = {
   title: string;
   status: string;
   budget: number;
+  currency: string;
   postedByType: string;
   city: string | null;
   createdAt: string;
@@ -171,8 +173,8 @@ export default function AdminPage() {
             <StatCard label="Total Tasks" value={stats.taskCount} />
             <StatCard label="Completed" value={stats.completedCount} />
             <StatCard label="Active Disputes" value={stats.disputedCount} accent={stats.disputedCount > 0} />
-            <StatCard label="GMV (Released)" value={`Rs. ${stats.gmv.toLocaleString()}`} />
-            <StatCard label="Escrow Held" value={`Rs. ${stats.escrowHeld.toLocaleString()}`} />
+            <StatCard label="GMV (Released, mixed currencies)" value={`Rs. ${stats.gmv.toLocaleString()}`} />
+            <StatCard label="Escrow Held (mixed currencies)" value={`Rs. ${stats.escrowHeld.toLocaleString()}`} />
           </div>
         )}
 
@@ -189,7 +191,7 @@ export default function AdminPage() {
                       {t.title}
                     </Link>
                     <p className="text-sm text-ink/50">
-                      Rs. {t.budget.toLocaleString()} · {t.city || "Remote"} · {t.postedByType}
+                      {formatMoney(t.budget, t.currency)} · {t.city || "Remote"} · {t.postedByType}
                     </p>
                   </div>
                 </div>
@@ -287,7 +289,7 @@ export default function AdminPage() {
               >
                 <span className="font-medium">{t.title}</span>
                 <span className="text-ink/50">
-                  Rs. {t.budget.toLocaleString()} · {t.status}
+                  {formatMoney(t.budget, t.currency)} · {t.status}
                 </span>
               </Link>
             ))}

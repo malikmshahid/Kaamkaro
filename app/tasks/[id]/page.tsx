@@ -4,6 +4,7 @@ import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { useUser } from "@/lib/useUser";
+import { formatMoney } from "@/lib/currency";
 
 type Task = {
   id: string;
@@ -11,6 +12,7 @@ type Task = {
   description: string;
   category: string;
   budget: number;
+  currency: string;
   city: string | null;
   status: string;
   postedById: string;
@@ -302,7 +304,7 @@ export default function TaskDetailPage({
           <div>
             <p className="text-ink/50">Budget</p>
             <p className="font-semibold text-green-800 text-lg">
-              Rs. {task.budget.toLocaleString()}
+              {formatMoney(task.budget, task.currency)}
             </p>
           </div>
           <div>
@@ -397,7 +399,7 @@ export default function TaskDetailPage({
           <div className="mb-10 border border-gold-400 bg-gold-100/40 rounded-xl p-6">
             <p className="font-semibold text-heading mb-1">Fund Escrow</p>
             <p className="text-sm text-ink/60 mb-4">
-              Hold Rs. {task.budget.toLocaleString()} in escrow to confirm the
+              Hold {formatMoney(task.budget, task.currency)} in escrow to confirm the
               provider. The funds stay safely with us until the work is done.
               <br />
               <span className="text-xs italic">
@@ -410,7 +412,7 @@ export default function TaskDetailPage({
               disabled={busy}
               className="rounded-full bg-green-900 text-cream px-6 py-2.5 hover:bg-green-800 transition-colors disabled:opacity-50"
             >
-              {busy ? "..." : `Fund Escrow — Rs. ${task.budget.toLocaleString()}`}
+              {busy ? "..." : `Fund Escrow — ${formatMoney(task.budget, task.currency)}`}
             </button>
           </div>
         )}

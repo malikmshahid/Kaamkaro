@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { useUser } from "@/lib/useUser";
+import { formatMoney } from "@/lib/currency";
 
 type PostedTask = {
   id: string;
   title: string;
   budget: number;
+  currency: string;
   status: string;
 };
 
@@ -18,6 +20,7 @@ type MyApplication = {
   taskId: string;
   taskTitle: string;
   taskBudget: number;
+  taskCurrency: string;
   taskStatus: string;
 };
 
@@ -25,9 +28,13 @@ type MyTool = {
   id: string;
   title: string;
   price: number;
+  currency: string;
   status: string;
   orderCount: number;
 };
+
+type SavedTask = { id: string; title: string; budget: number; currency: string };
+type SavedTool = { id: string; title: string; price: number; currency: string };
 
 function levelBadge(completedCount: number) {
   if (completedCount >= 30) return { label: "Legend", emoji: "🏆" };
@@ -41,6 +48,10 @@ export default function DashboardPage() {
   const [postedTasks, setPostedTasks] = useState<PostedTask[]>([]);
   const [myApplications, setMyApplications] = useState<MyApplication[]>([]);
   const [myTools, setMyTools] = useState<MyTool[]>([]);
+  const [savedTasks, setSavedTasks] = useState<SavedTask[]>([]);
+  const [savedTools, setSavedTools] = useState<SavedTool[]>([]);
+  const [referralCode, setReferralCode] = useState("");
+  const [referredCount, setReferredCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -49,12 +60,19 @@ export default function DashboardPage() {
       setLoading(false);
       return;
     }
-    fetch("/api/dashboard")
-      .then((r) => r.json())
-      .then((data) => {
-        setPostedTasks(data.postedTasks || []);
-        setMyApplications(data.myApplications || []);
-        setMyTools(data.myTools || []);
+    Promise.all([
+      fetch("/api/dashboard").then((r) => r.json()),
+      fetch("/api/saved").then((r) => r.json()),
+      fetch("/api/referrals").then((r) => r.json()),
+    ])
+      .then(([dash, saved, ref]) => {
+        setPostedTasks(dash.postedTasks || []);
+        setMyApplications(dash.myApplications || []);
+        setMyTools(dash.myTools || []);
+        setSavedTasks(saved.tasks || []);
+        setSavedTools(saved.tools || []);
+        setReferralCode(ref.referralCode || "");
+        setReferredCount(ref.referredCount || 0);
       })
       .finally(() => setLoading(false));
   }, [user, userLoading]);
@@ -124,7 +142,7 @@ export default function DashboardPage() {
                   >
                     <p className="font-semibold">{t.title}</p>
                     <p className="text-sm text-ink/50">
-                      Rs. {t.budget.toLocaleString()} &middot; {t.status}
+                      {formatMoney(t.budget, t.currency)} &middot; {t.status}
                     </p>
                   </Link>
                 ))}
@@ -149,7 +167,7 @@ export default function DashboardPage() {
                   >
                     <p className="font-semibold">{a.taskTitle}</p>
                     <p className="text-sm text-ink/50">
-                      Rs. {a.taskBudget.toLocaleString()} &middot; Application:{" "}
+                      {formatMoney(a.taskBudget, a.taskCurrency)} &middot; Application:{" "}
                       {a.applicationStatus}
                     </p>
                   </Link>
@@ -183,10 +201,70 @@ export default function DashboardPage() {
                 >
                   <p className="font-semibold">{t.title}</p>
                   <p className="text-sm text-ink/50">
-                    Rs. {t.price.toLocaleString()} &middot; {t.orderCount} orders &middot; {t.status}
+                    {formatMoney(t.price, t.currency)} &middot; {t.orderCount} orders &middot; {t.status}
                   </p>
                 </Link>
               ))}
+            </div>
+          </section>
+        )}
+
+        {!loading && (savedTasks.length > 0 || savedTools.length > 0) && (
+          <section className="mt-10">
+            <h2 className="font-display text-xl text-heading mb-4">🔖 Saved</h2>
+            <div className="grid md:grid-cols-2 gap-3">
+              {savedTasks.map((t) => (
+                <Link
+                  key={t.id}
+                  href={`/tasks/${t.id}`}
+                  className="block border border-line rounded-xl p-4 bg-card hover:border-green-700"
+                >
+                  <p className="font-semibold">{t.title}</p>
+                  <p className="text-sm text-ink/50">
+                    {formatMoney(t.budget, t.currency)} &middot; Task
+                  </p>
+                </Link>
+              ))}
+              {savedTools.map((t) => (
+                <Link
+                  key={t.id}
+                  href={`/tools/${t.id}`}
+                  className="block border border-line rounded-xl p-4 bg-card hover:border-gold-500"
+                >
+                  <p className="font-semibold">{t.title}</p>
+                  <p className="text-sm text-ink/50">
+                    {formatMoney(t.price, t.currency)} &middot; Toolbox
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {!loading && referralCode && (
+          <section className="mt-10 border border-gold-400 bg-gold-100/40 rounded-xl p-6">
+            <h2 className="font-display text-xl text-heading mb-2">
+              🎁 Invite Friends
+            </h2>
+            <p className="text-sm text-ink/60 mb-4">
+              Share your referral link — you&apos;ve brought{" "}
+              <strong>{referredCount}</strong> {referredCount === 1 ? "person" : "people"} to
+              KaamKaro so far.
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <code className="bg-card border border-line rounded-lg px-4 py-2 text-sm">
+                {typeof window !== "undefined" ? window.location.origin : ""}/signup?ref={referralCode}
+              </code>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(
+                    `${window.location.origin}/signup?ref=${referralCode}`
+                  );
+                }}
+                className="rounded-full bg-green-900 text-cream px-4 py-2 text-sm hover:bg-green-800"
+              >
+                Copy Link
+              </button>
             </div>
           </section>
         )}

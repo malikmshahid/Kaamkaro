@@ -12,6 +12,7 @@ export const tools = pgTable("tools", {
   description: text("description").notNull(),
   category: text("category").notNull(),
   price: real("price").notNull(),
+  currency: text("currency").notNull().default("PKR"),
   deliveryDays: integer("delivery_days").notNull().default(1),
   city: text("city"),
   status: text("status", { enum: ["active", "paused"] }).notNull().default("active"),
@@ -34,6 +35,9 @@ export const users = pgTable("users", {
   idType: text("id_type", { enum: ["national_id", "passport", "driver_license", "other"] }),
   idNumber: text("id_number"), // for identity verification only — never used as a login credential
   cnicVerified: boolean("cnic_verified").notNull().default(false), // repurposed as general "ID verified" flag
+  preferredCurrency: text("preferred_currency").notNull().default("PKR"),
+  referralCode: text("referral_code").unique(),
+  referredBy: text("referred_by"), // another user's id, if they signed up via a referral link
   bio: text("bio"),
   skills: text("skills"), // comma-separated for MVP; move to a join table later
   hourlyRate: real("hourly_rate"),
@@ -53,6 +57,7 @@ export const tasks = pgTable("tasks", {
   description: text("description").notNull(),
   category: text("category").notNull(),
   budget: real("budget").notNull(),
+  currency: text("currency").notNull().default("PKR"),
   city: text("city"),
   status: text("status", {
     enum: ["open", "assigned", "submitted", "completed", "disputed", "cancelled"],
@@ -137,6 +142,7 @@ export const payments = pgTable("payments", {
   payerId: text("payer_id").notNull(),
   payeeId: text("payee_id"),
   amount: real("amount").notNull(),
+  currency: text("currency").notNull().default("PKR"),
   provider: text("provider", { enum: ["jazzcash", "easypaisa", "payoneer", "mock"] })
     .notNull()
     .default("mock"),
@@ -157,5 +163,14 @@ export const reviews = pgTable("reviews", {
   revieweeId: text("reviewee_id").notNull(),
   rating: integer("rating").notNull(),
   comment: text("comment"),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+});
+
+// Saved Items: a user bookmarking a task or a Toolbox listing to revisit later.
+export const savedItems = pgTable("saved_items", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  itemType: text("item_type", { enum: ["task", "tool"] }).notNull(),
+  itemId: text("item_id").notNull(),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
 });

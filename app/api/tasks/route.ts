@@ -11,6 +11,7 @@ const createTaskSchema = z.object({
   description: z.string().min(10, "Please add a bit more detail"),
   category: z.string().min(2),
   budget: z.number().positive("Budget must be a positive number"),
+  currency: z.string().optional(),
   city: z.string().optional(),
 });
 
@@ -62,7 +63,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { title, description, category, budget, city } = parsed.data;
+    const { title, description, category, budget, currency, city } = parsed.data;
     const id = randomUUID();
 
     await db.insert(tasks).values({
@@ -73,6 +74,7 @@ export async function POST(req: NextRequest) {
       description,
       category,
       budget,
+      currency: currency || "PKR",
       city: city || null,
       status: "open",
     });

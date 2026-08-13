@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
+import { CURRENCIES } from "@/lib/currency";
 
 export default function NewTaskPage() {
   const router = useRouter();
@@ -11,6 +12,7 @@ export default function NewTaskPage() {
     description: "",
     category: "delivery",
     budget: "",
+    currency: "PKR",
     city: "",
   });
   const [error, setError] = useState("");
@@ -93,15 +95,28 @@ export default function NewTaskPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm mb-1">Budget (Rs.)</label>
-              <input
-                type="number"
-                min="1"
-                className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
-                value={form.budget}
-                onChange={(e) => setForm({ ...form, budget: e.target.value })}
-                required
-              />
+              <label className="block text-sm mb-1">Budget</label>
+              <div className="flex gap-2">
+                <select
+                  className="border border-line rounded-lg px-2 py-2.5 bg-card text-sm focus:outline-none focus:ring-2 focus:ring-green-700"
+                  value={form.currency}
+                  onChange={(e) => setForm({ ...form, currency: e.target.value })}
+                >
+                  {CURRENCIES.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.code}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="number"
+                  min="1"
+                  className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
+                  value={form.budget}
+                  onChange={(e) => setForm({ ...form, budget: e.target.value })}
+                  required
+                />
+              </div>
             </div>
           </div>
           <div>
