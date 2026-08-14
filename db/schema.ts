@@ -65,6 +65,9 @@ export const tasks = pgTable("tasks", {
     .notNull()
     .default("open"),
   assignedProviderId: text("assigned_provider_id"),
+  assignedProviderType: text("assigned_provider_type", { enum: ["human", "ai_agent"] })
+    .notNull()
+    .default("human"),
   proofUrl: text("proof_url"),
   sourceToolId: text("source_tool_id"), // set when this task originated from an ordered tool/gig
   verificationStatus: text("verification_status", {
@@ -79,14 +82,39 @@ export const tasks = pgTable("tasks", {
 });
 
 // Applications: a provider applying to an open task.
+// applicantType distinguishes a human freelancer from an AI agent applying
+// via its owner's API key (Agent Economy — Phase 3).
 export const applications = pgTable("applications", {
   id: text("id").primaryKey(),
   taskId: text("task_id").notNull(),
-  providerId: text("provider_id").notNull(),
+  providerId: text("provider_id").notNull(), // users.id — the agent owner's user id when applicantType is ai_agent
+  applicantType: text("applicant_type", { enum: ["human", "ai_agent"] })
+    .notNull()
+    .default("human"),
+  agentListingId: text("agent_listing_id"), // set when an AI agent applied — links to agentListings
   message: text("message"),
   status: text("status", { enum: ["pending", "accepted", "rejected"] })
     .notNull()
     .default("pending"),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+});
+
+// Agent Listings: an AI agent's public "seller profile" in the Agent Marketplace.
+// One API key can have one public listing so it can be discovered and hired
+// like a freelancer — the core Agent-to-Agent Economy differentiator.
+export const agentListings = pgTable("agent_listings", {
+  id: text("id").primaryKey(),
+  apiKeyId: text("api_key_id").notNull().unique(),
+  ownerId: text("owner_id").notNull(), // users.id — the human/business who owns this agent
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  categories: text("categories").notNull(), // comma-separated, e.g. "writing,coding"
+  pricePerTaskPkr: real("price_per_task_pkr"),
+  avgDeliveryHours: integer("avg_delivery_hours").notNull().default(24),
+  status: text("status", { enum: ["active", "paused"] }).notNull().default("active"),
+  taskCount: integer("task_count").notNull().default(0),
+  ratingAvg: real("rating_avg").notNull().default(0),
+  ratingCount: integer("rating_count").notNull().default(0),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
 });
 
@@ -161,6 +189,7 @@ export const reviews = pgTable("reviews", {
   taskId: text("task_id").notNull(),
   reviewerId: text("reviewer_id").notNull(),
   revieweeId: text("reviewee_id").notNull(),
+  agentListingId: text("agent_listing_id"), // set when the reviewee was an AI agent
   rating: integer("rating").notNull(),
   comment: text("comment"),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { tasks, reviews, users } from "@/db/schema";
+import { tasks, reviews, users, applications, agentListings } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
 import { notify } from "@/lib/notify";
@@ -41,26 +41,65 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: "You have already left a review" }, { status: 409 });
     }
 
+    // If the client is reviewing an AI agent, the rating belongs to the
+    // agent's public marketplace listing, not the (human) owner's general
+    // profile — an owner may run several agents with different quality.
+    let agentListingId: string | null = null;
+    if (isClient && task.assignedProviderType === "ai_agent") {
+      const acceptedApp = await db
+        .select()
+        .from(applications)
+        .where(
+          and(
+            eq(applications.taskId, taskId),
+            eq(applications.providerId, task.assignedProviderId!),
+            eq(applications.applicantType, "ai_agent"),
+            eq(applications.status, "accepted")
+          )
+        )
+        .limit(1);
+      agentListingId = acceptedApp[0]?.agentListingId || null;
+    }
+
     const id = randomUUID();
     await db.insert(reviews).values({
       id,
       taskId,
       reviewerId: session.userId,
       revieweeId,
+      agentListingId,
       rating,
       comment: comment || null,
     });
 
-    // Recompute the reviewee's running average rating.
-    const revieweeRow = await db.select().from(users).where(eq(users.id, revieweeId)).limit(1);
-    const reviewee = revieweeRow[0];
-    if (reviewee) {
-      const newCount = reviewee.ratingCount + 1;
-      const newAvg = (reviewee.ratingAvg * reviewee.ratingCount + rating) / newCount;
-      await db
-        .update(users)
-        .set({ ratingAvg: newAvg, ratingCount: newCount })
-        .where(eq(users.id, revieweeId));
+    if (agentListingId) {
+      // Update the agent listing's rating instead of a human user's rating.
+      const listingRow = await db
+        .select()
+        .from(agentListings)
+        .where(eq(agentListings.id, agentListingId))
+        .limit(1);
+      const listing = listingRow[0];
+      if (listing) {
+        const newCount = listing.ratingCount + 1;
+        const newAvg = (listing.ratingAvg * listing.ratingCount + rating) / newCount;
+        await db
+          .update(agentListings)
+          .set({ ratingAvg: newAvg, ratingCount: newCount })
+          .where(eq(agentListings.id, agentListingId));
+      }
+    } else {
+      // Normal human rating path — recompute the reviewee's running average.
+      const revieweeRow = await db.select().from(users).where(eq(users.id, revieweeId)).limit(1);
+      const reviewee = revieweeRow[0];
+      if (reviewee) {
+        const newCount = reviewee.ratingCount + 1;
+        const newAvg = (reviewee.ratingAvg * reviewee.ratingCount + rating) / newCount;
+        await db
+          .update(users)
+          .set({ ratingAvg: newAvg, ratingCount: newCount })
+          .where(eq(users.id, revieweeId));
+      }
     }
 
     await notify(revieweeId, "review_received", `You received a ${rating}-star review`, taskId);

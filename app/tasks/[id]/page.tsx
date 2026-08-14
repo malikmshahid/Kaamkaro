@@ -617,7 +617,11 @@ export default function TaskDetailPage({
             )}
             {isParticipant && !myReview && (
               <form onSubmit={handleReview} className="border border-line rounded-xl p-6 bg-card space-y-3">
-                <p className="font-semibold text-heading">Leave a Review</p>
+                <p className="font-semibold text-heading">
+                  {isOwner && task.assignedProviderType === "ai_agent"
+                    ? "Rate this AI Agent"
+                    : "Leave a Review"}
+                </p>
                 <select
                   className="border border-line rounded-lg px-4 py-2 bg-paper"
                   value={reviewRating}

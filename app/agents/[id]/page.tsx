@@ -27,6 +27,14 @@ type RecentTask = {
   status: string;
 };
 
+type Review = {
+  id: string;
+  rating: number;
+  comment: string | null;
+  createdAt: string;
+  reviewerName: string | null;
+};
+
 function levelBadge(taskCount: number) {
   if (taskCount >= 30) return { label: "Elite Agent", emoji: "🏆" };
   if (taskCount >= 10) return { label: "Trusted Agent", emoji: "🔥" };
@@ -42,6 +50,7 @@ export default function AgentProfilePage({
   const { id } = use(params);
   const [agent, setAgent] = useState<Agent | null>(null);
   const [recentTasks, setRecentTasks] = useState<RecentTask[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -50,6 +59,7 @@ export default function AgentProfilePage({
       .then((data) => {
         setAgent(data.agent || null);
         setRecentTasks(data.recentTasks || []);
+        setReviews(data.reviews || []);
       })
       .finally(() => setLoading(false));
   }, [id]);
@@ -155,6 +165,28 @@ export default function AgentProfilePage({
                 <span className="font-semibold text-green-800">
                   {formatMoney(t.budget, t.currency)}
                 </span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-12">
+          <h2 className="font-display text-2xl text-heading mb-4">Reviews</h2>
+          {reviews.length === 0 && (
+            <p className="text-sm text-ink/50">No reviews yet for this agent.</p>
+          )}
+          <div className="space-y-3">
+            {reviews.map((r) => (
+              <div key={r.id} className="border border-line rounded-xl p-4 bg-card">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="font-semibold text-sm text-heading">
+                    {r.reviewerName || "Anonymous"}
+                  </p>
+                  <span className="text-sm text-gold-500">
+                    {"⭐".repeat(r.rating)}
+                  </span>
+                </div>
+                {r.comment && <p className="text-sm text-ink/60">{r.comment}</p>}
               </div>
             ))}
           </div>

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { agentListings, applications, tasks } from "@/db/schema";
+import { agentListings, applications, tasks, reviews, users } from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 
 // GET /api/agents/[id] — public detail view of one AI agent's marketplace listing.
@@ -36,7 +36,22 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       .orderBy(desc(tasks.createdAt))
       .limit(10);
 
-    return NextResponse.json({ agent, recentTasks: completed });
+    // Reviews left specifically for this agent listing.
+    const agentReviews = await db
+      .select({
+        id: reviews.id,
+        rating: reviews.rating,
+        comment: reviews.comment,
+        createdAt: reviews.createdAt,
+        reviewerName: users.name,
+      })
+      .from(reviews)
+      .leftJoin(users, eq(reviews.reviewerId, users.id))
+      .where(eq(reviews.agentListingId, agent.id))
+      .orderBy(desc(reviews.createdAt))
+      .limit(20);
+
+    return NextResponse.json({ agent, recentTasks: completed, reviews: agentReviews });
   } catch (err) {
     console.error("GET /api/agents/[id] failed:", err);
     return NextResponse.json(
@@ -45,3 +60,4 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     );
   }
 }
+
