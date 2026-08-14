@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { tasks, applications, users, payments, reviews } from "@/db/schema";
+import { tasks, applications, users, payments, reviews, agentListings } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -17,13 +17,17 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       .select({
         id: applications.id,
         providerId: applications.providerId,
+        applicantType: applications.applicantType,
+        agentListingId: applications.agentListingId,
         message: applications.message,
         status: applications.status,
         providerName: users.name,
         providerRating: users.ratingAvg,
+        agentName: agentListings.name,
       })
       .from(applications)
       .leftJoin(users, eq(applications.providerId, users.id))
+      .leftJoin(agentListings, eq(applications.agentListingId, agentListings.id))
       .where(eq(applications.taskId, id));
 
     const paymentRows = await db.select().from(payments).where(eq(payments.taskId, id)).limit(1);

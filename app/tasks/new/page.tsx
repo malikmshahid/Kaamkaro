@@ -18,6 +18,48 @@ export default function NewTaskPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [idea, setIdea] = useState("");
+  const [copilotLoading, setCopilotLoading] = useState(false);
+  const [copilotError, setCopilotError] = useState("");
+  const [copilotReasoning, setCopilotReasoning] = useState("");
+  const [showManualForm, setShowManualForm] = useState(false);
+
+  async function handleCopilot(e: React.FormEvent) {
+    e.preventDefault();
+    setCopilotError("");
+    setCopilotReasoning("");
+    setCopilotLoading(true);
+    try {
+      const res = await fetch("/api/ai/copilot/task", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idea, city: form.city || undefined }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setCopilotError(data.error || "AI Copilot could not draft this. Try the manual form.");
+        return;
+      }
+      const d = data.draft;
+      setForm({
+        title: d.title,
+        description: d.description,
+        category: d.category,
+        budget: String(d.suggestedBudgetPkr),
+        currency: "PKR",
+        city: form.city,
+      });
+      setCopilotReasoning(
+        `${d.reasoning} Suggested range: PKR ${d.budgetRangeLow}–${d.budgetRangeHigh}, ~${d.deliveryDays} day(s) delivery.`
+      );
+      setShowManualForm(true);
+    } catch {
+      setCopilotError("Could not connect to AI Copilot. Try the manual form.");
+    } finally {
+      setCopilotLoading(false);
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
@@ -52,7 +94,58 @@ export default function NewTaskPage() {
           The more detail you give, the better your match will be.
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="mb-8 rounded-xl border border-green-700/30 bg-green-50 dark:bg-green-950/20 p-5">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-lg">✨</span>
+            <h2 className="font-medium text-heading">AI Copilot</h2>
+          </div>
+          <p className="text-sm text-ink/60 mb-3">
+            Type your idea in a line or two — even in Roman Urdu. AI will write the
+            title, description, category, and a fair PKR budget for you.
+          </p>
+          <form onSubmit={handleCopilot} className="space-y-3">
+            <textarea
+              className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700 min-h-20"
+              placeholder="e.g. mujhe apne laptop ki screen fix karwani hai, Lahore mein"
+              value={idea}
+              onChange={(e) => setIdea(e.target.value)}
+              required
+            />
+            {copilotError && (
+              <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-2">
+                {copilotError}
+              </p>
+            )}
+            <button
+              type="submit"
+              disabled={copilotLoading}
+              className="rounded-full bg-green-900 text-cream px-5 py-2 text-sm hover:bg-green-800 transition-colors disabled:opacity-50"
+            >
+              {copilotLoading ? "Drafting..." : "Draft with AI"}
+            </button>
+          </form>
+        </div>
+
+        {copilotReasoning && (
+          <p className="text-sm text-ink/60 bg-card border border-line rounded-lg px-4 py-2.5 mb-4">
+            💡 {copilotReasoning}
+          </p>
+        )}
+
+        {!showManualForm && (
+          <button
+            type="button"
+            onClick={() => setShowManualForm(true)}
+            className="text-sm text-ink/50 underline mb-6 block"
+          >
+            Skip AI, fill the form manually
+          </button>
+        )}
+
+        <form
+          onSubmit={handleSubmit}
+          className={`space-y-4 ${showManualForm ? "" : "hidden"}`}
+        >
           <div>
             <label className="block text-sm mb-1">Task Title</label>
             <input

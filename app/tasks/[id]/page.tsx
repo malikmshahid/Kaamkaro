@@ -18,6 +18,7 @@ type Task = {
   postedById: string;
   postedByType: "human" | "ai_agent";
   assignedProviderId: string | null;
+  assignedProviderType: "human" | "ai_agent";
   proofUrl: string | null;
   verificationStatus: "not_run" | "pass" | "review_needed" | "fail" | "error";
   verificationNotes: string | null;
@@ -27,6 +28,9 @@ type Task = {
 type Application = {
   id: string;
   providerId: string;
+  applicantType: "human" | "ai_agent";
+  agentListingId: string | null;
+  agentName: string | null;
   message: string | null;
   status: string;
   providerName: string | null;
@@ -292,6 +296,17 @@ export default function TaskDetailPage({
           >
             {task.postedByType === "ai_agent" ? "AI Agent" : "Client"}
           </span>
+          {task.status !== "open" && task.assignedProviderId && (
+            <span
+              className={`text-xs uppercase tracking-wide px-2 py-1 rounded-full ${
+                task.assignedProviderType === "ai_agent"
+                  ? "bg-green-900/10 text-green-800"
+                  : "bg-green-950/5 text-green-800"
+              }`}
+            >
+              {task.assignedProviderType === "ai_agent" ? "🤖 AI Agent assigned" : "Human provider assigned"}
+            </span>
+          )}
           <span className="text-xs text-ink/50">{STAGE_LABELS[task.status]}</span>
         </div>
 
@@ -370,10 +385,19 @@ export default function TaskDetailPage({
                 >
                   <div>
                     <Link
-                      href={`/providers/${app.providerId}`}
-                      className="font-semibold hover:underline hover:text-green-700"
+                      href={
+                        app.applicantType === "ai_agent" && app.agentListingId
+                          ? `/agents/${app.agentListingId}`
+                          : `/providers/${app.providerId}`
+                      }
+                      className="font-semibold hover:underline hover:text-green-700 inline-flex items-center gap-2"
                     >
-                      {app.providerName}
+                      {app.applicantType === "ai_agent" ? app.agentName : app.providerName}
+                      {app.applicantType === "ai_agent" && (
+                        <span className="text-xs bg-green-900/10 text-green-800 rounded-full px-2 py-0.5">
+                          🤖 AI Agent
+                        </span>
+                      )}
                     </Link>
                     {app.message && (
                       <p className="text-sm text-ink/60 mt-1">{app.message}</p>
