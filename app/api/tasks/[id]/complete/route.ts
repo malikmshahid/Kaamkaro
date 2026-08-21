@@ -32,7 +32,11 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
     }
 
     const provider = getPaymentProvider();
-    const result = await provider.release(payment.providerRef || "", task.assignedProviderId || "");
+    const result = await provider.release(
+      payment.providerRef || "",
+      task.assignedProviderId || "",
+      payment.netPayoutAmount
+    );
     if (!result.success) {
       return NextResponse.json({ error: "Payment release failed" }, { status: 500 });
     }
@@ -48,7 +52,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
       await notify(
         task.assignedProviderId,
         "payment_released",
-        `Payment for "${task.title}" was released to you 🎉`,
+        `Payment for "${task.title}" was released to you 🎉 (${payment.netPayoutAmount} ${payment.currency} after platform fee)`,
         taskId
       );
     }

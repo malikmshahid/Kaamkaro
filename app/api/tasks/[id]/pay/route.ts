@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { tasks, payments } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
-import { getPaymentProvider } from "@/lib/payments";
+import { getPaymentProvider, computeCommission } from "@/lib/payments";
 import { randomUUID } from "crypto";
 
 // POST /api/tasks/[id]/pay — client funds escrow once a provider is assigned
@@ -43,6 +43,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: result.error || "Payment failed" }, { status: 500 });
     }
 
+    const { commissionRatePercent, commissionAmount, netPayoutAmount } = await computeCommission(
+      task.budget
+    );
+
     const id = randomUUID();
     await db.insert(payments).values({
       id,
@@ -51,12 +55,20 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       payeeId: task.assignedProviderId,
       amount: task.budget,
       currency: task.currency,
+      commissionRatePercent,
+      commissionAmount,
+      netPayoutAmount,
       provider: "mock",
       status: "held_in_escrow",
       providerRef: result.providerRef,
     });
 
-    return NextResponse.json({ success: true, paymentId: id });
+    return NextResponse.json({
+      success: true,
+      paymentId: id,
+      commissionAmount,
+      netPayoutAmount,
+    });
 
   } catch (err) {
     console.error("POST failed:", err);

@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { tasks, applications, payments } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { authenticateAgent } from "@/lib/agentAuth";
-import { getPaymentProvider } from "@/lib/payments";
+import { getPaymentProvider, computeCommission } from "@/lib/payments";
 
 /**
  * GET /api/agent/tasks/[id] — check status of a task the agent posted.
@@ -82,6 +82,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       const result = await provider.charge(task.budget, agent.ownerId);
       if (!result.success) return NextResponse.json({ error: "Payment fail" }, { status: 500 });
 
+      const { commissionRatePercent, commissionAmount, netPayoutAmount } = await computeCommission(
+        task.budget
+      );
+
       const { randomUUID } = await import("crypto");
       await db.insert(payments).values({
         id: randomUUID(),
@@ -90,11 +94,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         payeeId: task.assignedProviderId,
         amount: task.budget,
         currency: task.currency,
+        commissionRatePercent,
+        commissionAmount,
+        netPayoutAmount,
         provider: "mock",
         status: "held_in_escrow",
         providerRef: result.providerRef,
       });
-      return NextResponse.json({ success: true });
+      return NextResponse.json({ success: true, commissionAmount, netPayoutAmount });
     }
 
     if (action === "complete") {
@@ -106,7 +113,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       if (!payment) return NextResponse.json({ error: "Payment record not found" }, { status: 400 });
 
       const provider = getPaymentProvider();
-      await provider.release(payment.providerRef || "", task.assignedProviderId || "");
+      await provider.release(payment.providerRef || "", task.assignedProviderId || "", payment.netPayoutAmount);
       await db.update(payments).set({ status: "released", releasedAt: new Date() }).where(eq(payments.taskId, id));
       await db.update(tasks).set({ status: "completed" }).where(eq(tasks.id, id));
       return NextResponse.json({ success: true });

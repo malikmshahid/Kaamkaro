@@ -1,3 +1,7 @@
+import { db } from "@/db";
+import { platformConfig } from "@/db/schema";
+import { eq } from "drizzle-orm";
+
 /**
  * Payment Gateway Abstraction
  * ---------------------------
@@ -18,9 +22,12 @@ export type ChargeResult = {
 export interface PaymentProvider {
   /** Takes payment from the client and holds it in escrow */
   charge(amount: number, payerId: string): Promise<ChargeResult>;
-  /** Releases escrowed funds to the provider */
-  release(providerRef: string, payeeId: string): Promise<ChargeResult>;
-  /** Refunds the client (dispute/cancel case) */
+  /** Releases escrowed funds to the provider. `amount` is the NET payout
+   * (gross minus platform commission) — the commission itself stays with
+   * the platform and is never sent out. */
+  release(providerRef: string, payeeId: string, amount: number): Promise<ChargeResult>;
+  /** Refunds the client (dispute/cancel case) — refunds the full gross
+   * amount, since if the task never happened the platform keeps no fee. */
   refund(providerRef: string): Promise<ChargeResult>;
 }
 
@@ -32,7 +39,8 @@ class MockPaymentProvider implements PaymentProvider {
       providerRef: `mock_${Date.now()}_${payerId.slice(0, 6)}`,
     };
   }
-  async release(providerRef: string, payeeId: string): Promise<ChargeResult> {
+  async release(providerRef: string, payeeId: string, amount: number): Promise<ChargeResult> {
+    void amount; // mock provider doesn't move real money, just bookkeeping
     return { success: true, providerRef: `${providerRef}_released` };
   }
   async refund(providerRef: string): Promise<ChargeResult> {
@@ -58,4 +66,31 @@ class MockPaymentProvider implements PaymentProvider {
 
 export function getPaymentProvider(): PaymentProvider {
   return new MockPaymentProvider();
+}
+
+/**
+ * Platform Commission
+ * -------------------
+ * Reads the current commission rate from platform_config (falls back to 10%
+ * if the row is somehow missing) and computes the split for a given gross
+ * task budget. The rate is snapshotted onto the payment row at charge time
+ * so changing the rate later never retroactively changes money already in
+ * escrow or already released.
+ */
+export async function getCommissionRatePercent(): Promise<number> {
+  const rows = await db.select().from(platformConfig).where(eq(platformConfig.id, "default")).limit(1);
+  return rows[0]?.commissionRatePercent ?? 10;
+}
+
+export type CommissionSplit = {
+  commissionRatePercent: number;
+  commissionAmount: number;
+  netPayoutAmount: number;
+};
+
+export async function computeCommission(grossAmount: number): Promise<CommissionSplit> {
+  const rate = await getCommissionRatePercent();
+  const commissionAmount = Math.round(((grossAmount * rate) / 100) * 100) / 100;
+  const netPayoutAmount = Math.round((grossAmount - commissionAmount) * 100) / 100;
+  return { commissionRatePercent: rate, commissionAmount, netPayoutAmount };
 }

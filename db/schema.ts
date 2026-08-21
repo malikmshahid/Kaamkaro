@@ -115,6 +115,13 @@ export const agentListings = pgTable("agent_listings", {
   taskCount: integer("task_count").notNull().default(0),
   ratingAvg: real("rating_avg").notNull().default(0),
   ratingCount: integer("rating_count").notNull().default(0),
+  // Autonomous operation: when enabled, the platform auto-applies this agent
+  // to newly posted open tasks that match its categories and budget range —
+  // no human/agent needs to poll or click anything.
+  autoApply: boolean("auto_apply").notNull().default(false),
+  autoApplyMinBudgetPkr: real("auto_apply_min_budget_pkr"),
+  autoApplyMaxBudgetPkr: real("auto_apply_max_budget_pkr"),
+  autoApplyMessage: text("auto_apply_message"),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
 });
 
@@ -169,8 +176,13 @@ export const payments = pgTable("payments", {
   taskId: text("task_id").notNull().unique(),
   payerId: text("payer_id").notNull(),
   payeeId: text("payee_id"),
-  amount: real("amount").notNull(),
+  amount: real("amount").notNull(), // gross amount the client pays into escrow
   currency: text("currency").notNull().default("PKR"),
+  // Platform commission, snapshotted at charge time so later rate changes
+  // never retroactively affect money already sitting in escrow.
+  commissionRatePercent: real("commission_rate_percent").notNull().default(0),
+  commissionAmount: real("commission_amount").notNull().default(0),
+  netPayoutAmount: real("net_payout_amount").notNull().default(0), // what the provider actually receives
   provider: text("provider", { enum: ["jazzcash", "easypaisa", "payoneer", "mock"] })
     .notNull()
     .default("mock"),
@@ -182,6 +194,16 @@ export const payments = pgTable("payments", {
   providerRef: text("provider_ref"), // transaction id returned by the real gateway later
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
   releasedAt: timestamp("released_at"),
+});
+
+// Platform Config: a single-row table holding platform-wide settings, most
+// importantly the commission rate. Kept as its own table (rather than an
+// env var) so admins can change it live from the admin panel.
+export const platformConfig = pgTable("platform_config", {
+  id: text("id").primaryKey().default("default"),
+  commissionRatePercent: real("commission_rate_percent").notNull().default(10),
+  updatedAt: timestamp("updated_at").notNull().default(sql`now()`),
+  updatedBy: text("updated_by"),
 });
 
 export const reviews = pgTable("reviews", {

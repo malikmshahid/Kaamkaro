@@ -42,13 +42,22 @@ type AdminTask = {
   createdAt: string;
 };
 
+type Revenue = {
+  commissionRatePercent: number;
+  earnedByCurrency: { currency: string; total: number; count: number }[];
+  pendingByCurrency: { currency: string; total: number; count: number }[];
+};
+
 export default function AdminPage() {
   const { user, loading: userLoading } = useUser();
-  const [tab, setTab] = useState<"overview" | "disputes" | "users" | "tasks">("overview");
+  const [tab, setTab] = useState<"overview" | "disputes" | "users" | "tasks" | "revenue">("overview");
   const [stats, setStats] = useState<Stats | null>(null);
   const [disputes, setDisputes] = useState<AdminTask[]>([]);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [allTasks, setAllTasks] = useState<AdminTask[]>([]);
+  const [revenue, setRevenue] = useState<Revenue | null>(null);
+  const [newRate, setNewRate] = useState("");
+  const [savingRate, setSavingRate] = useState(false);
   const [forbidden, setForbidden] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -81,6 +90,28 @@ export default function AdminPage() {
     setAllTasks(data.tasks || []);
   }
 
+  async function loadRevenue() {
+    const res = await fetch("/api/admin/revenue");
+    const data = await res.json();
+    setRevenue(data);
+    setNewRate(String(data.commissionRatePercent ?? ""));
+  }
+
+  async function handleSaveRate(e: React.FormEvent) {
+    e.preventDefault();
+    setSavingRate(true);
+    try {
+      const res = await fetch("/api/admin/settings/commission", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ commissionRatePercent: Number(newRate) }),
+      });
+      if (res.ok) loadRevenue();
+    } finally {
+      setSavingRate(false);
+    }
+  }
+
   useEffect(() => {
     if (!userLoading && user) loadAll();
     if (!userLoading && !user) setLoading(false);
@@ -90,6 +121,7 @@ export default function AdminPage() {
   useEffect(() => {
     if (tab === "users" && users.length === 0) loadUsers();
     if (tab === "tasks" && allTasks.length === 0) loadTasks();
+    if (tab === "revenue" && !revenue) loadRevenue();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab]);
 
@@ -150,7 +182,7 @@ export default function AdminPage() {
         <p className="text-ink/60 mb-8">Platform overview and dispute resolution.</p>
 
         <div className="flex gap-2 mb-8 border-b border-line">
-          {(["overview", "disputes", "users", "tasks"] as const).map((t) => (
+          {(["overview", "revenue", "disputes", "users", "tasks"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -160,7 +192,7 @@ export default function AdminPage() {
                   : "border-transparent text-ink/50 hover:text-ink"
               }`}
             >
-              {t === "overview" ? "Overview" : t === "disputes" ? `Disputes${stats && stats.disputedCount > 0 ? ` (${stats.disputedCount})` : ""}` : t === "users" ? "Users" : "All Tasks"}
+              {t === "overview" ? "Overview" : t === "revenue" ? "💰 Revenue" : t === "disputes" ? `Disputes${stats && stats.disputedCount > 0 ? ` (${stats.disputedCount})` : ""}` : t === "users" ? "Users" : "All Tasks"}
             </button>
           ))}
         </div>
@@ -175,6 +207,79 @@ export default function AdminPage() {
             <StatCard label="Active Disputes" value={stats.disputedCount} accent={stats.disputedCount > 0} />
             <StatCard label="GMV (Released, mixed currencies)" value={`Rs. ${stats.gmv.toLocaleString()}`} />
             <StatCard label="Escrow Held (mixed currencies)" value={`Rs. ${stats.escrowHeld.toLocaleString()}`} />
+          </div>
+        )}
+
+        {tab === "revenue" && (
+          <div className="space-y-8">
+            {!revenue && <p className="text-ink/50 text-sm">Loading...</p>}
+            {revenue && (
+              <>
+                <div className="border border-line rounded-xl p-6 bg-card max-w-md">
+                  <h2 className="font-display text-lg text-heading mb-1">Commission Rate</h2>
+                  <p className="text-xs text-ink/50 mb-4">
+                    Applied to every new task payment going forward. Existing escrow/released
+                    payments keep the rate that was in effect when they were created.
+                  </p>
+                  <form onSubmit={handleSaveRate} className="flex items-center gap-3">
+                    <input
+                      type="number"
+                      min="0"
+                      max="50"
+                      step="0.5"
+                      className="w-24 border border-line rounded-lg px-3 py-2 bg-card text-sm focus:outline-none focus:ring-2 focus:ring-green-700"
+                      value={newRate}
+                      onChange={(e) => setNewRate(e.target.value)}
+                    />
+                    <span className="text-sm text-ink/60">%</span>
+                    <button
+                      type="submit"
+                      disabled={savingRate}
+                      className="rounded-full bg-green-900 text-cream px-4 py-2 text-sm hover:bg-green-800 disabled:opacity-50"
+                    >
+                      {savingRate ? "Saving..." : "Save"}
+                    </button>
+                  </form>
+                </div>
+
+                <div>
+                  <h2 className="font-display text-lg text-heading mb-3">
+                    Commission Earned (Released)
+                  </h2>
+                  {revenue.earnedByCurrency.length === 0 && (
+                    <p className="text-sm text-ink/50">No released payments yet.</p>
+                  )}
+                  <div className="grid md:grid-cols-3 gap-4">
+                    {revenue.earnedByCurrency.map((r) => (
+                      <StatCard
+                        key={r.currency}
+                        label={`${r.currency} earned (${r.count} payments)`}
+                        value={`${r.currency} ${r.total.toLocaleString()}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h2 className="font-display text-lg text-heading mb-3">
+                    Commission Pending (In Escrow)
+                  </h2>
+                  {revenue.pendingByCurrency.length === 0 && (
+                    <p className="text-sm text-ink/50">Nothing currently held in escrow.</p>
+                  )}
+                  <div className="grid md:grid-cols-3 gap-4">
+                    {revenue.pendingByCurrency.map((r) => (
+                      <StatCard
+                        key={r.currency}
+                        label={`${r.currency} pending (${r.count} payments)`}
+                        value={`${r.currency} ${r.total.toLocaleString()}`}
+                        accent
+                      />
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         )}
 

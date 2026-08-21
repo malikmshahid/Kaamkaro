@@ -38,7 +38,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const provider = getPaymentProvider();
 
     if (decision === "release_provider") {
-      await provider.release(payment.providerRef || "", task.assignedProviderId || "");
+      await provider.release(payment.providerRef || "", task.assignedProviderId || "", payment.netPayoutAmount);
       await db
         .update(payments)
         .set({ status: "released", releasedAt: new Date() })

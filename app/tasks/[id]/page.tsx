@@ -41,6 +41,9 @@ type Payment = {
   id: string;
   status: string;
   amount: number;
+  currency: string;
+  commissionAmount: number;
+  netPayoutAmount: number;
   provider: string;
 };
 
@@ -445,6 +448,15 @@ export default function TaskDetailPage({
         {isAssignedProvider && task.status === "assigned" && payment?.status === "held_in_escrow" && (
           <form onSubmit={handleSubmitProof} className="mb-10 border border-line rounded-xl p-6 bg-card space-y-3">
             <p className="font-semibold text-heading">Submit Your Work</p>
+            {payment.commissionAmount > 0 && (
+              <p className="text-xs text-ink/50 bg-paper rounded-lg px-3 py-2">
+                Escrow held: {formatMoney(payment.amount, payment.currency)} · Platform fee:{" "}
+                {formatMoney(payment.commissionAmount, payment.currency)} · You&apos;ll receive:{" "}
+                <span className="font-semibold text-green-800">
+                  {formatMoney(payment.netPayoutAmount, payment.currency)}
+                </span>
+              </p>
+            )}
             <textarea
               className="w-full border border-line rounded-lg px-4 py-2.5 bg-paper focus:outline-none focus:ring-2 focus:ring-green-700 min-h-20"
               placeholder="Link to proof (photo URL, description)..."
