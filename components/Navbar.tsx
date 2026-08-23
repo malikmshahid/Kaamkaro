@@ -43,6 +43,11 @@ export default function Navbar() {
           API Keys
         </Link>
       )}
+      {!loading && user && (
+        <Link href="/messages" onClick={() => setMenuOpen(false)} className="hover:text-green-700">
+          Messages
+        </Link>
+      )}
       {!loading && user && user.role === "admin" && (
         <Link
           href="/admin"
