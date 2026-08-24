@@ -167,6 +167,7 @@ export const messages = pgTable("messages", {
   senderId: text("sender_id").notNull(),
   body: text("body").notNull(),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
+  isRead: boolean("is_read").notNull().default(false),
 });
 
 // Payments: escrow record per task. Provider field abstracts JazzCash/EasyPaisa/Payoneer
