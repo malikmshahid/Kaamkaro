@@ -15,7 +15,7 @@ const signupSchema = z
     password: z.string().min(6, "Password must be at least 6 characters"),
     role: z.enum(["client", "provider", "both"]).default("both"),
     city: z.string().optional(),
-    country: z.enum(COUNTRIES).optional(),
+    country: z.enum(COUNTRIES).optional().or(z.literal("")),
     idType: z.enum(["national_id", "passport", "driver_license", "other"]).optional(),
     idNumber: z.string().optional(),
     preferredCurrency: z.string().optional(),

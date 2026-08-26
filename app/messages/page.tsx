@@ -12,7 +12,6 @@ export default function MessagesPage() {
             <h1 className="font-display text-3xl text-heading sm:text-4xl">Messages</h1>
             <p className="mt-2 max-w-xl text-sm text-ink/60">Keep project details, updates, and next steps close at hand.</p>
           </div>
-          <span className="hidden rounded-full bg-green-950/5 px-3 py-1.5 text-xs font-semibold text-green-800 sm:inline-flex">4 conversations</span>
         </div>
         <MessagesInterface />
       </main>
