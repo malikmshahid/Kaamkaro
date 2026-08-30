@@ -21,12 +21,40 @@ export default function SettingsPage() {
   const [newKey, setNewKey] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Agent Marketplace listing (one per user)
+  const [listingName, setListingName] = useState("");
+  const [listingDescription, setListingDescription] = useState("");
+  const [listingCategories, setListingCategories] = useState("");
+  const [listingPrice, setListingPrice] = useState("");
+  const [listingDeliveryHours, setListingDeliveryHours] = useState("1");
+  const [listingSaved, setListingSaved] = useState(false);
+  const [listingSaving, setListingSaving] = useState(false);
+
   async function load() {
     const res = await fetch("/api/keys");
     if (!res.ok) return setLoading(false);
     const data = await res.json();
     setKeys(data.keys || []);
     setLoading(false);
+  }
+
+  async function handleSaveListing(e: React.FormEvent) {
+    e.preventDefault();
+    setListingSaving(true);
+    setListingSaved(false);
+    const res = await fetch("/api/agents", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: listingName,
+        description: listingDescription,
+        categories: listingCategories,
+        pricePerTaskPkr: listingPrice ? Number(listingPrice) : null,
+        avgDeliveryHours: Number(listingDeliveryHours) || 1,
+      }),
+    });
+    setListingSaving(false);
+    if (res.ok) setListingSaved(true);
   }
 
   useEffect(() => {
@@ -150,6 +178,71 @@ export default function SettingsPage() {
               )}
             </div>
           ))}
+        </div>
+
+        <div className="mt-12 border-t border-line pt-8">
+          <h2 className="font-display text-xl text-heading mb-2">
+            🤖 Your Agent Marketplace Listing
+          </h2>
+          <p className="text-ink/60 mb-6 text-sm">
+            List your AI agent so humans can hire it directly from the{" "}
+            <a href="/agents" className="text-green-700 underline">
+              Agent Marketplace
+            </a>
+            . One listing per account — saving again updates it.
+          </p>
+          <form onSubmit={handleSaveListing} className="space-y-3 mb-4">
+            <input
+              className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
+              placeholder="Agent name (e.g. 'Document Scanner Bot')"
+              value={listingName}
+              onChange={(e) => setListingName(e.target.value)}
+              required
+            />
+            <textarea
+              className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
+              placeholder="What does this agent do?"
+              rows={3}
+              value={listingDescription}
+              onChange={(e) => setListingDescription(e.target.value)}
+              required
+            />
+            <input
+              className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
+              placeholder="Categories, comma-separated (e.g. coding,writing)"
+              value={listingCategories}
+              onChange={(e) => setListingCategories(e.target.value)}
+              required
+            />
+            <div className="flex gap-3">
+              <input
+                type="number"
+                className="flex-1 border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
+                placeholder="Starting price (PKR, optional)"
+                value={listingPrice}
+                onChange={(e) => setListingPrice(e.target.value)}
+              />
+              <input
+                type="number"
+                className="w-40 border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
+                placeholder="Avg hours"
+                value={listingDeliveryHours}
+                onChange={(e) => setListingDeliveryHours(e.target.value)}
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={listingSaving}
+              className="rounded-full bg-green-900 text-cream px-6 py-2.5 hover:bg-green-800 transition-colors disabled:opacity-50"
+            >
+              {listingSaving ? "Saving..." : "Save Listing"}
+            </button>
+            {listingSaved && (
+              <p className="text-sm text-green-700">
+                Saved — your agent is now visible in the marketplace.
+              </p>
+            )}
+          </form>
         </div>
 
         <div className="mt-12 border-t border-line pt-8">

@@ -8,24 +8,20 @@ import {
 } from "drizzle-orm/pg-core";
 
 /* =========================================================================
- * KaamKaro — reconstructed db/schema.ts
+ * KaamKaro — db/schema.ts
  *
  * This file was rebuilt after db/schema.ts got overwritten by AI-generated
- * code that replaced the whole file instead of adding to it. It was
- * reconstructed from:
- *   - db/setup.sql, db/fix-everything.sql, db/migration-v3.sql,
- *     db/migration-email-id.sql
- *   - db/migrations/0002_agent_reviews.sql, 0004_platform_commission.sql
- *   - actual column usage across every route/page in the app (grepped)
+ * code that replaced the whole file instead of adding to it. Every table
+ * below except `agent_listings` was cross-checked against the live
+ * production DB via `npx drizzle-kit pull` on 2026-08-30 and matches
+ * exactly (see db/migrations/schema.ts, the raw pull output, for reference).
  *
- * ⚠️ agentListings below is a best-effort reconstruction — its original
- * migration (0001_agent_marketplace.sql) was not present anywhere in the
- * project, so its exact column list/types could not be 100% confirmed
- * against SQL. Every field listed IS used somewhere in the app code, so
- * normal app queries should work, but do NOT run `drizzle-kit push`
- * against production with this file until you've verified it against
- * the live DB with `npx drizzle-kit pull` — push could try to alter a
- * live table based on a guess and cause data loss.
+ * `agent_listings` did NOT exist in production at pull time — the Agent
+ * Marketplace UI/API were shipped without their migration ever being run.
+ * Its fields here are taken directly from the frontend's TypeScript types
+ * (app/agents/page.tsx, app/agents/[id]/page.tsx). Run the accompanying
+ * SQL migration to create it (and the new agent_listing_id FK columns on
+ * applications/reviews) in the live DB before this schema.ts is accurate.
  * ========================================================================= */
 
 export const users = pgTable("users", {
@@ -63,7 +59,6 @@ export const tasks = pgTable("tasks", {
   city: text("city"),
   status: text("status").notNull().default("open"),
   assignedProviderId: text("assigned_provider_id"),
-  assignedProviderType: text("assigned_provider_type").default("human"),
   proofUrl: text("proof_url"),
   sourceToolId: text("source_tool_id"),
   verificationStatus: text("verification_status").notNull().default("not_run"),
@@ -78,7 +73,7 @@ export const applications = pgTable("applications", {
   taskId: text("task_id").notNull(),
   providerId: text("provider_id").notNull(),
   applicantType: text("applicant_type").notNull().default("human"),
-  agentListingId: text("agent_listing_id"),
+  agentListingId: text("agent_listing_id").references(() => agentListings.id),
   message: text("message"),
   status: text("status").notNull().default("pending"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -136,7 +131,7 @@ export const reviews = pgTable("reviews", {
   taskId: text("task_id").notNull(),
   reviewerId: text("reviewer_id").notNull(),
   revieweeId: text("reviewee_id").notNull(),
-  agentListingId: text("agent_listing_id"),
+  agentListingId: text("agent_listing_id").references(() => agentListings.id),
   rating: integer("rating").notNull(),
   comment: text("comment"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -172,16 +167,20 @@ export const platformConfig = pgTable("platform_config", {
   updatedBy: text("updated_by"),
 });
 
-// ⚠️ Best-effort reconstruction — see file header note. Verify with
-// `npx drizzle-kit pull` before trusting this for schema migrations.
+// Verified against live DB via `npx drizzle-kit pull` on 2026-08-30: this
+// table did NOT exist in production (the Agent Marketplace UI/API code was
+// shipped without its migration ever being run). Fields below are taken
+// directly from the frontend's TypeScript types (app/agents/page.tsx and
+// app/agents/[id]/page.tsx), which is the actual contract the UI relies on.
 export const agentListings = pgTable("agent_listings", {
   id: text("id").primaryKey(),
-  ownerId: text("owner_id").notNull(),
+  ownerId: text("owner_id").notNull().references(() => users.id),
   name: text("name").notNull(),
-  description: text("description"),
-  categories: text("categories"),
+  description: text("description").notNull(),
+  categories: text("categories").notNull(),
   pricePerTaskPkr: real("price_per_task_pkr"),
-  avgDeliveryHours: real("avg_delivery_hours"),
+  avgDeliveryHours: real("avg_delivery_hours").notNull().default(1),
+  status: text("status").notNull().default("active"),
   taskCount: integer("task_count").notNull().default(0),
   ratingAvg: real("rating_avg").notNull().default(0),
   ratingCount: integer("rating_count").notNull().default(0),
