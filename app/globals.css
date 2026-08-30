@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+/* Enables `dark:` utility classes to respond to a `.dark` class on <html>,
+   instead of only the OS-level prefers-color-scheme media query. This is
+   what makes the manual theme toggle (sun/moon button) work. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Brand colors — fixed, same in both themes (buttons, accents) */
+  --color-green-950: #0d2318;
+  --color-green-900: #123a26;
+  --color-green-800: #1c5236;
+  --color-green-700: #256b46;
+  --color-gold-500: #c8963e;
+  --color-gold-400: #d9ac5f;
+  --color-gold-100: #f3e6cc;
+  --color-cream: #f7f4ec;
+
+  /* Theme-aware colors — these flip between light and dark below */
+  --color-ink: #16241c;
+  --color-paper: #f7f4ec;
+  --color-heading: #0d2318;
+  --color-line: #dcd4bf;
+  --color-card: #ffffff;
+
+  --font-display: "Fraunces", "Georgia", serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  color-scheme: light;
+}
+
+.dark {
+  color-scheme: dark;
+  --color-ink: #e9e6dc;
+  --color-paper: #12140f;
+  --color-heading: #eef3ea;
+  --color-line: #33362c;
+  --color-card: #1b1e17;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
