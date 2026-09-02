@@ -57,7 +57,7 @@ export default function SettingsPage() {
     const data = await res.json().catch(() => ({}));
     setProfileSaving(false);
     if (!res.ok) {
-      setProfileError(data.error || "Save nahi ho saka");
+      setProfileError(data.error || "Could not save changes");
       return;
     }
     setProfileSaved(true);
@@ -85,11 +85,11 @@ export default function SettingsPage() {
     const data = await res.json().catch(() => ({}));
     setEmailLoading(false);
     if (!res.ok) {
-      setEmailError(data.error || "Kuch ghalat ho gaya");
+      setEmailError(data.error || "Something went wrong");
       return;
     }
     setEmailStep("otp-sent");
-    setEmailMessage(data.message || "Code bhej diya gaya hai");
+    setEmailMessage(data.message || "Verification code sent");
   }
 
   async function handleVerifyEmailOtp(e: React.FormEvent) {
@@ -104,10 +104,10 @@ export default function SettingsPage() {
     const data = await res.json().catch(() => ({}));
     setEmailLoading(false);
     if (!res.ok) {
-      setEmailError(data.error || "Code verify nahi ho saka");
+      setEmailError(data.error || "Could not verify code");
       return;
     }
-    setEmailMessage("Email successfully change ho gaya!");
+    setEmailMessage("Email address updated successfully.");
     setEmailStep("idle");
     setNewEmail("");
     setOtpInput("");

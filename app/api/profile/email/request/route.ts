@@ -53,11 +53,21 @@ export async function POST(req: NextRequest) {
       expiresAt,
     });
 
-    await sendEmailChangeOtp(newEmail, otp);
+    const emailSent = await sendEmailChangeOtp(newEmail, otp);
+
+    if (!emailSent) {
+      return NextResponse.json(
+        {
+          error:
+            "Email delivery isn't configured on this server yet, so the code couldn't be sent. Please contact the site admin.",
+        },
+        { status: 503 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
-      message: `Code bhej diya gaya hai ${newEmail} par. 10 minute mein enter kar dein.`,
+      message: `A verification code was sent to ${newEmail}. Enter it within 10 minutes.`,
     });
   } catch (err) {
     console.error("POST /api/profile/email/request failed:", err);

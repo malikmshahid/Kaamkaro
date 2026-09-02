@@ -6,7 +6,7 @@ import crypto, { randomUUID } from "crypto";
 import { sendPasswordResetEmail } from "@/lib/email";
 
 const GENERIC_MESSAGE = {
-  message: "Agar ye account registered hai to reset link bheja gaya hai.",
+  message: "If this account is registered, a reset link has been sent.",
 };
 
 const TOKEN_TTL_MINUTES = 30;

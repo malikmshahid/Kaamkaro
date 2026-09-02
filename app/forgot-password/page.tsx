@@ -23,10 +23,10 @@ export default function ForgotPasswordPage() {
 
       // ✅ Only ever show the generic message.
       // ❌ Never read/store/display data.resetToken, data.resetLink, data.token, etc.
-      setMessage(data.message ?? "Agar ye account registered hai to reset link bheja gaya hai.");
+      setMessage(data.message ?? "If this account is registered, a reset link has been sent.");
     } catch (err) {
       console.error(err);
-      setMessage("Kuch masla ho gaya. Baad mein dobara koshish karein.");
+      setMessage("Something went wrong. Please try again later.");
     } finally {
       setLoading(false);
       setEmail("");
@@ -41,7 +41,7 @@ export default function ForgotPasswordPage() {
         <input
           type="email"
           required
-          placeholder="Apna email likhein"
+          placeholder="Enter your email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className="w-full border rounded-md px-3 py-2"
@@ -51,7 +51,7 @@ export default function ForgotPasswordPage() {
           disabled={loading}
           className="w-full bg-black text-white rounded-md py-2 disabled:opacity-50"
         >
-          {loading ? "Bhej rahe hain..." : "Reset Link Bhejain"}
+          {loading ? "Sending..." : "Send Reset Link"}
         </button>
       </form>
 
