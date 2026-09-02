@@ -23,6 +23,10 @@ export default function LoginPage() {
       });
       const data = await res.json();
       if (!res.ok) {
+        if (data.requiresEmailVerification) {
+          router.push(`/verify-email?userId=${data.userId}`);
+          return;
+        }
         setError(data.error || "Could not log in");
         return;
       }

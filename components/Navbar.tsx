@@ -40,7 +40,7 @@ export default function Navbar() {
       )}
       {!loading && user && (
         <Link href="/settings" onClick={() => setMenuOpen(false)} className="hover:text-green-700">
-          API Keys
+          Settings
         </Link>
       )}
       {!loading && user && user.role === "admin" && (

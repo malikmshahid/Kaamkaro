@@ -19,9 +19,12 @@ export default function SettingsPage() {
   const [keys, setKeys] = useState<ApiKey[]>([]);
   const [agentName, setAgentName] = useState("");
 
-  // Profile fields (name, city, bio, skills, hourlyRate)
+  // Profile fields (name, city, address, gender, phone, bio, skills, hourlyRate)
   const [profileName, setProfileName] = useState("");
   const [profileCity, setProfileCity] = useState("");
+  const [profileAddress, setProfileAddress] = useState("");
+  const [profileGender, setProfileGender] = useState("");
+  const [profilePhone, setProfilePhone] = useState("");
   const [profileBio, setProfileBio] = useState("");
   const [profileSkills, setProfileSkills] = useState("");
   const [profileHourlyRate, setProfileHourlyRate] = useState("");
@@ -29,14 +32,38 @@ export default function SettingsPage() {
   const [profileSaved, setProfileSaved] = useState(false);
   const [profileError, setProfileError] = useState("");
 
+  // Profile photo
+  const [photoUploading, setPhotoUploading] = useState(false);
+  const [photoError, setPhotoError] = useState("");
+
   useEffect(() => {
     if (!user) return;
     setProfileName(user.name || "");
     setProfileCity(user.city || "");
+    setProfileAddress(user.address || "");
+    setProfileGender(user.gender || "");
+    setProfilePhone(user.phone || "");
     setProfileBio(user.bio || "");
     setProfileSkills(user.skills || "");
     setProfileHourlyRate(user.hourlyRate != null ? String(user.hourlyRate) : "");
   }, [user]);
+
+  async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPhotoUploading(true);
+    setPhotoError("");
+    const formData = new FormData();
+    formData.append("photo", file);
+    const res = await fetch("/api/profile/photo", { method: "POST", body: formData });
+    const data = await res.json().catch(() => ({}));
+    setPhotoUploading(false);
+    if (!res.ok) {
+      setPhotoError(data.error || "Could not upload photo");
+      return;
+    }
+    if (user) setUser({ ...user, photoUrl: data.photoUrl });
+  }
 
   async function handleSaveProfile(e: React.FormEvent) {
     e.preventDefault();
@@ -49,6 +76,9 @@ export default function SettingsPage() {
       body: JSON.stringify({
         name: profileName,
         city: profileCity,
+        address: profileAddress,
+        gender: profileGender,
+        phone: profilePhone,
         bio: profileBio,
         skills: profileSkills,
         hourlyRate: profileHourlyRate ? Number(profileHourlyRate) : null,
@@ -61,7 +91,15 @@ export default function SettingsPage() {
       return;
     }
     setProfileSaved(true);
-    if (user) setUser({ ...user, name: profileName, city: profileCity || null });
+    if (user)
+      setUser({
+        ...user,
+        name: profileName,
+        city: profileCity || null,
+        address: profileAddress || null,
+        gender: profileGender || null,
+        phone: profilePhone,
+      });
   }
 
   // Email change (two-step: request OTP -> verify OTP)
@@ -206,6 +244,32 @@ export default function SettingsPage() {
           verification code sent to the new address.
         </p>
 
+        <div className="mb-8 flex items-center gap-4">
+          <div className="w-20 h-20 rounded-full overflow-hidden bg-card border border-line flex items-center justify-center">
+            {user?.photoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={user.photoUrl} alt="Profile photo" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-2xl text-ink/30">
+                {(user?.name || "?").charAt(0).toUpperCase()}
+              </span>
+            )}
+          </div>
+          <div>
+            <label className="inline-block rounded-full border border-line px-4 py-2 text-sm cursor-pointer hover:bg-card transition-colors">
+              {photoUploading ? "Uploading..." : "Change Photo"}
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={handlePhotoChange}
+                disabled={photoUploading}
+                className="hidden"
+              />
+            </label>
+            {photoError && <p className="text-sm text-red-500 mt-1">{photoError}</p>}
+          </div>
+        </div>
+
         <form onSubmit={handleSaveProfile} className="space-y-3 mb-6">
           <div>
             <label className="text-sm text-ink/60 mb-1 block">Name</label>
@@ -217,11 +281,46 @@ export default function SettingsPage() {
             />
           </div>
           <div>
+            <label className="text-sm text-ink/60 mb-1 block">Gender</label>
+            <select
+              className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
+              value={profileGender}
+              onChange={(e) => setProfileGender(e.target.value)}
+            >
+              <option value="">Prefer not to say</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-sm text-ink/60 mb-1 block">
+              Contact number
+            </label>
+            <input
+              className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
+              value={profilePhone}
+              onChange={(e) => setProfilePhone(e.target.value)}
+            />
+            <p className="text-xs text-ink/40 mt-1">
+              Note: unlike email, phone number changes aren&apos;t SMS-verified yet.
+            </p>
+          </div>
+          <div>
             <label className="text-sm text-ink/60 mb-1 block">City</label>
             <input
               className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
               value={profileCity}
               onChange={(e) => setProfileCity(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="text-sm text-ink/60 mb-1 block">Address</label>
+            <input
+              className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
+              value={profileAddress}
+              onChange={(e) => setProfileAddress(e.target.value)}
+              placeholder="Street address (optional)"
             />
           </div>
           <div>

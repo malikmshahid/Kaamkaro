@@ -24,8 +24,27 @@ export async function PATCH(req: NextRequest) {
       update.name = name;
     }
     if (typeof body.city === "string") update.city = body.city.trim() || null;
+    if (typeof body.address === "string") update.address = body.address.trim() || null;
+    if (typeof body.gender === "string") update.gender = body.gender.trim() || null;
     if (typeof body.bio === "string") update.bio = body.bio.trim() || null;
     if (typeof body.skills === "string") update.skills = body.skills.trim() || null;
+    if (typeof body.phone === "string") {
+      const phone = body.phone.trim();
+      if (phone) {
+        const [taken] = await db
+          .select({ id: users.id })
+          .from(users)
+          .where(eq(users.phone, phone))
+          .limit(1);
+        if (taken && taken.id !== session.userId) {
+          return NextResponse.json(
+            { error: "This phone number is already in use by another account" },
+            { status: 409 }
+          );
+        }
+      }
+      update.phone = phone || null;
+    }
     if (body.hourlyRate === null) update.hourlyRate = null;
     else if (typeof body.hourlyRate === "number") update.hourlyRate = body.hourlyRate;
 

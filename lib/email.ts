@@ -55,3 +55,26 @@ export async function sendEmailChangeOtp(to: string, otp: string): Promise<boole
   });
   return true;
 }
+
+export async function sendSignupVerificationOtp(to: string, otp: string): Promise<boolean> {
+  const client = getResendClient();
+  if (!client) {
+    console.warn(
+      "RESEND_API_KEY not set — skipping signup verification OTP send. " +
+        "Set RESEND_API_KEY in your environment to actually deliver codes."
+    );
+    return false;
+  }
+  await client.emails.send({
+    from: process.env.RESEND_FROM_EMAIL || "no-reply@kaamkaro.ai",
+    to,
+    subject: "Verify your KaamKaro account",
+    html: `
+      <p>Welcome to KaamKaro! Enter the code below to verify your email and
+      finish creating your account (valid for 10 minutes):</p>
+      <p style="font-size: 28px; font-weight: bold; letter-spacing: 4px;">${otp}</p>
+      <p>If you didn't sign up for KaamKaro, you can safely ignore this email.</p>
+    `,
+  });
+  return true;
+}

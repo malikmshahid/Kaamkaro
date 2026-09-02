@@ -13,6 +13,6 @@ export async function GET() {
   const user = found[0];
   if (!user) return NextResponse.json({ user: null });
 
-  const { passwordHash, ...safeUser } = user;
+  const { passwordHash, emailOtpHash, emailOtpExpiresAt, ...safeUser } = user;
   return NextResponse.json({ user: safeUser });
 }
