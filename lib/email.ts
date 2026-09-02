@@ -31,3 +31,25 @@ export async function sendPasswordResetEmail(to: string, resetUrl: string) {
     `,
   });
 }
+
+export async function sendEmailChangeOtp(to: string, otp: string) {
+  const client = getResendClient();
+  if (!client) {
+    console.warn(
+      "RESEND_API_KEY not set — skipping email-change OTP send. " +
+        "Set RESEND_API_KEY in your environment to actually deliver codes."
+    );
+    return;
+  }
+  await client.emails.send({
+    from: process.env.RESEND_FROM_EMAIL || "no-reply@kaamkaro.ai",
+    to,
+    subject: "Confirm your new KaamKaro email",
+    html: `
+      <p>Apna KaamKaro account ka email is address par change karne ke liye,
+      neeche diya gaya code apni settings page par darj karein (10 minutes ke liye valid hai):</p>
+      <p style="font-size: 28px; font-weight: bold; letter-spacing: 4px;">${otp}</p>
+      <p>Agar aap ne yeh request nahi ki, is email ko ignore kar dein — aapka account tab tak safe hai.</p>
+    `,
+  });
+}

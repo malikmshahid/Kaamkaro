@@ -10,10 +10,18 @@ import {
 /* =========================================================================
  * KaamKaro — db/schema.ts
  *
- * Every table below except `agent_listings` was cross-checked against the
- * live production DB via `npx drizzle-kit pull` on 2026-08-30 and matches
- * exactly. `agent_listings` was added as part of deploying the Agent
- * Marketplace feature (see db/migrations/0005_agent_marketplace_deploy.sql).
+ * This file was rebuilt after db/schema.ts got overwritten by AI-generated
+ * code that replaced the whole file instead of adding to it. Every table
+ * below except `agent_listings` was cross-checked against the live
+ * production DB via `npx drizzle-kit pull` on 2026-08-30 and matches
+ * exactly (see db/migrations/schema.ts, the raw pull output, for reference).
+ *
+ * `agent_listings` did NOT exist in production at pull time — the Agent
+ * Marketplace UI/API were shipped without their migration ever being run.
+ * Its fields here are taken directly from the frontend's TypeScript types
+ * (app/agents/page.tsx, app/agents/[id]/page.tsx). Run the accompanying
+ * SQL migration to create it (and the new agent_listing_id FK columns on
+ * applications/reviews) in the live DB before this schema.ts is accurate.
  * ========================================================================= */
 
 export const users = pgTable("users", {
@@ -159,6 +167,11 @@ export const platformConfig = pgTable("platform_config", {
   updatedBy: text("updated_by"),
 });
 
+// Verified against live DB via `npx drizzle-kit pull` on 2026-08-30: this
+// table did NOT exist in production (the Agent Marketplace UI/API code was
+// shipped without its migration ever being run). Fields below are taken
+// directly from the frontend's TypeScript types (app/agents/page.tsx and
+// app/agents/[id]/page.tsx), which is the actual contract the UI relies on.
 export const agentListings = pgTable("agent_listings", {
   id: text("id").primaryKey(),
   ownerId: text("owner_id").notNull().references(() => users.id),
@@ -174,10 +187,23 @@ export const agentListings = pgTable("agent_listings", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+/* ---------- New table added for the forgot-password security fix ---------- */
 export const passwordResetTokens = pgTable("password_resets", {
   id: text("id").primaryKey(),
   userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   tokenHash: text("token_hash").notNull().unique(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  used: boolean("used").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// New email is only written to `users.email` after the OTP sent to it is
+// verified — the pending new address lives here in the meantime.
+export const emailChangeRequests = pgTable("email_change_requests", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  newEmail: text("new_email").notNull(),
+  otpHash: text("otp_hash").notNull(),
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   used: boolean("used").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

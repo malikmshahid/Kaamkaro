@@ -6,6 +6,7 @@ export type SafeUser = {
   id: string;
   name: string;
   phone: string;
+  email: string | null;
   role: "client" | "provider" | "both" | "admin";
   city: string | null;
   cnicVerified: boolean;
