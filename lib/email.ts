@@ -43,3 +43,38 @@ export function passwordResetEmailHtml(resetLink: string) {
     </div>
   `;
 }
+
+function otpEmailHtml(heading: string, intro: string, otp: string) {
+  return `
+    <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+      <h2 style="color: #123a26;">${heading}</h2>
+      <p>${intro}</p>
+      <div style="font-size: 32px; font-weight: 700; letter-spacing: 6px; background: #f7f4ec; color: #123a26; padding: 16px 24px; border-radius: 12px; text-align: center; margin: 16px 0;">
+        ${otp}
+      </div>
+      <p style="color: #666; font-size: 13px;">This code expires in 10 minutes. If you didn't request this, you can safely ignore this email.</p>
+    </div>
+  `;
+}
+
+// Step 1 of changing an account's email — code is sent to the NEW address.
+export async function sendEmailChangeOtp(to: string, otp: string): Promise<boolean> {
+  const html = otpEmailHtml(
+    "Confirm your new KaamKaro email",
+    "Enter this code to confirm this is your new email address:",
+    otp
+  );
+  const result = await sendEmail(to, "Confirm your new KaamKaro email", html);
+  return result.sent;
+}
+
+// Final step of signup when an email was provided.
+export async function sendSignupVerificationOtp(to: string, otp: string): Promise<boolean> {
+  const html = otpEmailHtml(
+    "Verify your KaamKaro email",
+    "Enter this code to verify your email and finish creating your account:",
+    otp
+  );
+  const result = await sendEmail(to, "Verify your KaamKaro email", html);
+  return result.sent;
+}

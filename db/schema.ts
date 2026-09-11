@@ -43,6 +43,15 @@ export const users = pgTable("users", {
   hourlyRate: real("hourly_rate"),
   ratingAvg: real("rating_avg").notNull().default(0),
   ratingCount: integer("rating_count").notNull().default(0),
+  // Signup email verification (OTP-based) — emailVerified stays false until
+  // the OTP sent to `email` at signup is confirmed via /api/auth/verify-email.
+  emailVerified: boolean("email_verified").notNull().default(false),
+  emailOtpHash: text("email_otp_hash"),
+  emailOtpExpiresAt: timestamp("email_otp_expires_at", { withTimezone: true }),
+  // Extra profile fields.
+  gender: text("gender"),
+  address: text("address"),
+  photoUrl: text("photo_url"), // Vercel Blob URL, set via /api/profile/photo
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
 });
 
@@ -158,6 +167,20 @@ export const passwordResets = pgTable("password_resets", {
   expiresAt: timestamp("expires_at").notNull(),
   used: boolean("used").notNull().default(false),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
+});
+
+// Email Change Requests: OTP-verified flow for changing an existing account's
+// email. A row is created with a hashed 6-digit code when the change is
+// requested; users.email is only updated once /api/profile/email/verify
+// confirms the code and marks the row used.
+export const emailChangeRequests = pgTable("email_change_requests", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  newEmail: text("new_email").notNull(),
+  otpHash: text("otp_hash").notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  used: boolean("used").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
 });
 
 // Messages: simple per-task chat between client and assigned provider.
