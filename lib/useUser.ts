@@ -6,13 +6,8 @@ export type SafeUser = {
   id: string;
   name: string;
   phone: string;
-  email: string | null;
-  emailVerified: boolean;
   role: "client" | "provider" | "both" | "admin";
   city: string | null;
-  address: string | null;
-  gender: string | null;
-  photoUrl: string | null;
   cnicVerified: boolean;
   bio: string | null;
   skills: string | null;

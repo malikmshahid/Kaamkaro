@@ -71,7 +71,7 @@ function ResetPasswordForm() {
         <PasswordInput
           value={password}
           onChange={setPassword}
-          minLength={8}
+          minLength={6}
           required
           autoComplete="new-password"
         />
@@ -81,7 +81,7 @@ function ResetPasswordForm() {
         <PasswordInput
           value={confirm}
           onChange={setConfirm}
-          minLength={8}
+          minLength={6}
           required
           autoComplete="new-password"
         />

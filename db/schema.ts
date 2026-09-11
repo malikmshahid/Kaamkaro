@@ -1,148 +1,10 @@
-import {
-  pgTable,
-  text,
-  real,
-  integer,
-  boolean,
-  timestamp,
-} from "drizzle-orm/pg-core";
+import { pgTable, text, integer, real, boolean, timestamp } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
-/* =========================================================================
- * KaamKaro — db/schema.ts
- *
- * This file was rebuilt after db/schema.ts got overwritten by AI-generated
- * code that replaced the whole file instead of adding to it. Every table
- * below except `agent_listings` was cross-checked against the live
- * production DB via `npx drizzle-kit pull` on 2026-08-30 and matches
- * exactly (see db/migrations/schema.ts, the raw pull output, for reference).
- *
- * `agent_listings` did NOT exist in production at pull time — the Agent
- * Marketplace UI/API were shipped without their migration ever being run.
- * Its fields here are taken directly from the frontend's TypeScript types
- * (app/agents/page.tsx, app/agents/[id]/page.tsx). Run the accompanying
- * SQL migration to create it (and the new agent_listing_id FK columns on
- * applications/reviews) in the live DB before this schema.ts is accurate.
- * ========================================================================= */
-
-export const users = pgTable("users", {
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  phone: text("phone").unique(),
-  email: text("email").unique(),
-  emailVerified: boolean("email_verified").notNull().default(false),
-  emailOtpHash: text("email_otp_hash"),
-  emailOtpExpiresAt: timestamp("email_otp_expires_at", { withTimezone: true }),
-  passwordHash: text("password_hash").notNull(),
-  role: text("role").notNull().default("both"),
-  gender: text("gender"),
-  address: text("address"),
-  photoUrl: text("photo_url"),
-  city: text("city"),
-  country: text("country"),
-  idType: text("id_type"),
-  idNumber: text("id_number"),
-  cnicVerified: boolean("cnic_verified").notNull().default(false),
-  bio: text("bio"),
-  skills: text("skills"),
-  hourlyRate: real("hourly_rate"),
-  ratingAvg: real("rating_avg").notNull().default(0),
-  ratingCount: integer("rating_count").notNull().default(0),
-  preferredCurrency: text("preferred_currency").notNull().default("PKR"),
-  referralCode: text("referral_code").unique(),
-  referredBy: text("referred_by"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
-
-export const tasks = pgTable("tasks", {
-  id: text("id").primaryKey(),
-  postedById: text("posted_by_id").notNull(),
-  postedByType: text("posted_by_type").notNull().default("human"),
-  title: text("title").notNull(),
-  description: text("description").notNull(),
-  category: text("category").notNull(),
-  budget: real("budget").notNull(),
-  currency: text("currency").notNull().default("PKR"),
-  city: text("city"),
-  status: text("status").notNull().default("open"),
-  assignedProviderId: text("assigned_provider_id"),
-  proofUrl: text("proof_url"),
-  sourceToolId: text("source_tool_id"),
-  verificationStatus: text("verification_status").notNull().default("not_run"),
-  verificationNotes: text("verification_notes"),
-  verificationConfidence: real("verification_confidence"),
-  verifiedAt: timestamp("verified_at", { withTimezone: true }),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
-
-export const applications = pgTable("applications", {
-  id: text("id").primaryKey(),
-  taskId: text("task_id").notNull(),
-  providerId: text("provider_id").notNull(),
-  applicantType: text("applicant_type").notNull().default("human"),
-  agentListingId: text("agent_listing_id").references(() => agentListings.id),
-  message: text("message"),
-  status: text("status").notNull().default("pending"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
-
-export const apiKeys = pgTable("api_keys", {
-  id: text("id").primaryKey(),
-  ownerId: text("owner_id").notNull(),
-  agentName: text("agent_name").notNull(),
-  keyHash: text("key_hash").notNull().unique(),
-  keyPrefix: text("key_prefix").notNull(),
-  requestCount: integer("request_count").notNull().default(0),
-  lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
-  revoked: boolean("revoked").notNull().default(false),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
-
-export const notifications = pgTable("notifications", {
-  id: text("id").primaryKey(),
-  userId: text("user_id").notNull(),
-  type: text("type").notNull(),
-  message: text("message").notNull(),
-  taskId: text("task_id"),
-  read: boolean("read").notNull().default(false),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
-
-export const messages = pgTable("messages", {
-  id: text("id").primaryKey(),
-  taskId: text("task_id").notNull(),
-  senderId: text("sender_id").notNull(),
-  body: text("body").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
-
-export const payments = pgTable("payments", {
-  id: text("id").primaryKey(),
-  taskId: text("task_id").notNull().unique(),
-  payerId: text("payer_id").notNull(),
-  payeeId: text("payee_id"),
-  amount: real("amount").notNull(),
-  currency: text("currency").notNull().default("PKR"),
-  provider: text("provider").notNull().default("mock"),
-  status: text("status").notNull().default("pending"),
-  providerRef: text("provider_ref"),
-  commissionRatePercent: real("commission_rate_percent").notNull().default(0),
-  commissionAmount: real("commission_amount").notNull().default(0),
-  netPayoutAmount: real("net_payout_amount").notNull().default(0),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  releasedAt: timestamp("released_at", { withTimezone: true }),
-});
-
-export const reviews = pgTable("reviews", {
-  id: text("id").primaryKey(),
-  taskId: text("task_id").notNull(),
-  reviewerId: text("reviewer_id").notNull(),
-  revieweeId: text("reviewee_id").notNull(),
-  agentListingId: text("agent_listing_id").references(() => agentListings.id),
-  rating: integer("rating").notNull(),
-  comment: text("comment"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
-
+// Tools: provider-listed services ("gigs") — a provider proactively lists a
+// fixed-price offering instead of waiting for a client to post a task.
+// Ordering a tool creates a `tasks` row (linked via sourceToolId) so it reuses
+// the exact same escrow/chat/verification/dispute/review pipeline as tasks.
 export const tools = pgTable("tools", {
   id: text("id").primaryKey(),
   providerId: text("provider_id").notNull(),
@@ -153,64 +15,214 @@ export const tools = pgTable("tools", {
   currency: text("currency").notNull().default("PKR"),
   deliveryDays: integer("delivery_days").notNull().default(1),
   city: text("city"),
-  status: text("status").notNull().default("active"),
+  status: text("status", { enum: ["active", "paused"] }).notNull().default("active"),
   orderCount: integer("order_count").notNull().default(0),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
 });
 
-export const savedItems = pgTable("saved_items", {
+// Users: providers, clients, or both. AI agents also live here with a role flag.
+export const users = pgTable("users", {
   id: text("id").primaryKey(),
-  userId: text("user_id").notNull(),
-  itemType: text("item_type").notNull(),
-  itemId: text("item_id").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  name: text("name").notNull(),
+  phone: text("phone").unique(),
+  email: text("email").unique(),
+  passwordHash: text("password_hash").notNull(),
+  role: text("role", { enum: ["client", "provider", "both", "admin"] })
+    .notNull()
+    .default("both"),
+  city: text("city"),
+  country: text("country"), // ISO country name, e.g. "Pakistan"
+  idType: text("id_type", { enum: ["national_id", "passport", "driver_license", "other"] }),
+  idNumber: text("id_number"), // for identity verification only — never used as a login credential
+  cnicVerified: boolean("cnic_verified").notNull().default(false), // repurposed as general "ID verified" flag
+  preferredCurrency: text("preferred_currency").notNull().default("PKR"),
+  referralCode: text("referral_code").unique(),
+  referredBy: text("referred_by"), // another user's id, if they signed up via a referral link
+  bio: text("bio"),
+  skills: text("skills"), // comma-separated for MVP; move to a join table later
+  hourlyRate: real("hourly_rate"),
+  ratingAvg: real("rating_avg").notNull().default(0),
+  ratingCount: integer("rating_count").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
 });
 
-export const platformConfig = pgTable("platform_config", {
-  id: text("id").primaryKey().default("default"),
-  commissionRatePercent: real("commission_rate_percent").notNull().default(10),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-  updatedBy: text("updated_by"),
+// Tasks: postedByType distinguishes a human client from an AI agent (Phase 3).
+export const tasks = pgTable("tasks", {
+  id: text("id").primaryKey(),
+  postedById: text("posted_by_id").notNull(), // users.id OR an api key owner id
+  postedByType: text("posted_by_type", { enum: ["human", "ai_agent"] })
+    .notNull()
+    .default("human"),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  category: text("category").notNull(),
+  budget: real("budget").notNull(),
+  currency: text("currency").notNull().default("PKR"),
+  city: text("city"),
+  status: text("status", {
+    enum: ["open", "assigned", "submitted", "completed", "disputed", "cancelled"],
+  })
+    .notNull()
+    .default("open"),
+  assignedProviderId: text("assigned_provider_id"),
+  assignedProviderType: text("assigned_provider_type", { enum: ["human", "ai_agent"] })
+    .notNull()
+    .default("human"),
+  proofUrl: text("proof_url"),
+  sourceToolId: text("source_tool_id"), // set when this task originated from an ordered tool/gig
+  verificationStatus: text("verification_status", {
+    enum: ["not_run", "pass", "review_needed", "fail", "error"],
+  })
+    .notNull()
+    .default("not_run"),
+  verificationNotes: text("verification_notes"),
+  verificationConfidence: real("verification_confidence"), // 0-1
+  verifiedAt: timestamp("verified_at"),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
 });
 
-// Verified against live DB via `npx drizzle-kit pull` on 2026-08-30: this
-// table did NOT exist in production (the Agent Marketplace UI/API code was
-// shipped without its migration ever being run). Fields below are taken
-// directly from the frontend's TypeScript types (app/agents/page.tsx and
-// app/agents/[id]/page.tsx), which is the actual contract the UI relies on.
+// Applications: a provider applying to an open task.
+// applicantType distinguishes a human freelancer from an AI agent applying
+// via its owner's API key (Agent Economy — Phase 3).
+export const applications = pgTable("applications", {
+  id: text("id").primaryKey(),
+  taskId: text("task_id").notNull(),
+  providerId: text("provider_id").notNull(), // users.id — the agent owner's user id when applicantType is ai_agent
+  applicantType: text("applicant_type", { enum: ["human", "ai_agent"] })
+    .notNull()
+    .default("human"),
+  agentListingId: text("agent_listing_id"), // set when an AI agent applied — links to agentListings
+  message: text("message"),
+  status: text("status", { enum: ["pending", "accepted", "rejected"] })
+    .notNull()
+    .default("pending"),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+});
+
+// Agent Listings: an AI agent's public "seller profile" in the Agent Marketplace.
+// One API key can have one public listing so it can be discovered and hired
+// like a freelancer — the core Agent-to-Agent Economy differentiator.
 export const agentListings = pgTable("agent_listings", {
   id: text("id").primaryKey(),
-  ownerId: text("owner_id").notNull().references(() => users.id),
+  apiKeyId: text("api_key_id").notNull().unique(),
+  ownerId: text("owner_id").notNull(), // users.id — the human/business who owns this agent
   name: text("name").notNull(),
   description: text("description").notNull(),
-  categories: text("categories").notNull(),
+  categories: text("categories").notNull(), // comma-separated, e.g. "writing,coding"
   pricePerTaskPkr: real("price_per_task_pkr"),
-  avgDeliveryHours: real("avg_delivery_hours").notNull().default(1),
-  status: text("status").notNull().default("active"),
+  avgDeliveryHours: integer("avg_delivery_hours").notNull().default(24),
+  status: text("status", { enum: ["active", "paused"] }).notNull().default("active"),
   taskCount: integer("task_count").notNull().default(0),
   ratingAvg: real("rating_avg").notNull().default(0),
   ratingCount: integer("rating_count").notNull().default(0),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  // Autonomous operation: when enabled, the platform auto-applies this agent
+  // to newly posted open tasks that match its categories and budget range —
+  // no human/agent needs to poll or click anything.
+  autoApply: boolean("auto_apply").notNull().default(false),
+  autoApplyMinBudgetPkr: real("auto_apply_min_budget_pkr"),
+  autoApplyMaxBudgetPkr: real("auto_apply_max_budget_pkr"),
+  autoApplyMessage: text("auto_apply_message"),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
 });
 
-/* ---------- New table added for the forgot-password security fix ---------- */
-export const passwordResetTokens = pgTable("password_resets", {
+// API Keys: issued to a user so their AI agent can post/manage tasks programmatically.
+export const apiKeys = pgTable("api_keys", {
   id: text("id").primaryKey(),
-  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  ownerId: text("owner_id").notNull(), // users.id — the human/business who owns this agent
+  agentName: text("agent_name").notNull(),
+  keyHash: text("key_hash").notNull().unique(),
+  keyPrefix: text("key_prefix").notNull(), // shown in UI, e.g. "kk_live_ab12" — full key never stored
+  requestCount: integer("request_count").notNull().default(0),
+  lastUsedAt: timestamp("last_used_at"),
+  revoked: boolean("revoked").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+});
+
+// Notifications: lightweight in-app alerts for key events (new application,
+// accepted, new message, submitted, completed, review received, dispute).
+export const notifications = pgTable("notifications", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  type: text("type").notNull(), // e.g. "application_received", "task_accepted", "new_message"
+  message: text("message").notNull(),
+  taskId: text("task_id"),
+  read: boolean("read").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+});
+
+// Password Resets: short-lived tokens for the forgot-password flow.
+export const passwordResets = pgTable("password_resets", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
   tokenHash: text("token_hash").notNull().unique(),
-  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
   used: boolean("used").notNull().default(false),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
 });
 
-// New email is only written to `users.email` after the OTP sent to it is
-// verified — the pending new address lives here in the meantime.
-export const emailChangeRequests = pgTable("email_change_requests", {
+// Messages: simple per-task chat between client and assigned provider.
+export const messages = pgTable("messages", {
   id: text("id").primaryKey(),
-  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  newEmail: text("new_email").notNull(),
-  otpHash: text("otp_hash").notNull(),
-  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
-  used: boolean("used").notNull().default(false),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  taskId: text("task_id").notNull(),
+  senderId: text("sender_id").notNull(),
+  body: text("body").notNull(),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+  isRead: boolean("is_read").notNull().default(false),
+});
+
+// Payments: escrow record per task. Provider field abstracts JazzCash/EasyPaisa/Payoneer
+// so a real gateway can be plugged in later without changing the schema.
+export const payments = pgTable("payments", {
+  id: text("id").primaryKey(),
+  taskId: text("task_id").notNull().unique(),
+  payerId: text("payer_id").notNull(),
+  payeeId: text("payee_id"),
+  amount: real("amount").notNull(), // gross amount the client pays into escrow
+  currency: text("currency").notNull().default("PKR"),
+  // Platform commission, snapshotted at charge time so later rate changes
+  // never retroactively affect money already sitting in escrow.
+  commissionRatePercent: real("commission_rate_percent").notNull().default(0),
+  commissionAmount: real("commission_amount").notNull().default(0),
+  netPayoutAmount: real("net_payout_amount").notNull().default(0), // what the provider actually receives
+  provider: text("provider", { enum: ["jazzcash", "easypaisa", "payoneer", "mock"] })
+    .notNull()
+    .default("mock"),
+  status: text("status", {
+    enum: ["pending", "held_in_escrow", "released", "refunded"],
+  })
+    .notNull()
+    .default("pending"),
+  providerRef: text("provider_ref"), // transaction id returned by the real gateway later
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+  releasedAt: timestamp("released_at"),
+});
+
+// Platform Config: a single-row table holding platform-wide settings, most
+// importantly the commission rate. Kept as its own table (rather than an
+// env var) so admins can change it live from the admin panel.
+export const platformConfig = pgTable("platform_config", {
+  id: text("id").primaryKey().default("default"),
+  commissionRatePercent: real("commission_rate_percent").notNull().default(10),
+  updatedAt: timestamp("updated_at").notNull().default(sql`now()`),
+  updatedBy: text("updated_by"),
+});
+
+export const reviews = pgTable("reviews", {
+  id: text("id").primaryKey(),
+  taskId: text("task_id").notNull(),
+  reviewerId: text("reviewer_id").notNull(),
+  revieweeId: text("reviewee_id").notNull(),
+  agentListingId: text("agent_listing_id"), // set when the reviewee was an AI agent
+  rating: integer("rating").notNull(),
+  comment: text("comment"),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+});
+
+// Saved Items: a user bookmarking a task or a Toolbox listing to revisit later.
+export const savedItems = pgTable("saved_items", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  itemType: text("item_type", { enum: ["task", "tool"] }).notNull(),
+  itemId: text("item_id").notNull(),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
 });

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { tasks, messages, users } from "@/db/schema";
-import { eq, asc } from "drizzle-orm";
+import { eq, asc, and, ne } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
 import { notify } from "@/lib/notify";
 import { randomUUID } from "crypto";
@@ -13,7 +13,6 @@ async function assertParticipant(taskId: string, userId: string) {
   const isParticipant = task.postedById === userId || task.assignedProviderId === userId;
   if (isParticipant) return task;
 
-  // Admins can read chat history for disputed tasks under review.
   const userRow = await db.select().from(users).where(eq(users.id, userId)).limit(1);
   if (userRow[0]?.role === "admin" && task.status === "disputed") return task;
 
@@ -35,12 +34,24 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
         senderId: messages.senderId,
         body: messages.body,
         createdAt: messages.createdAt,
+        isRead: messages.isRead,
         senderName: users.name,
       })
       .from(messages)
       .leftJoin(users, eq(messages.senderId, users.id))
       .where(eq(messages.taskId, taskId))
       .orderBy(asc(messages.createdAt));
+
+    await db
+      .update(messages)
+      .set({ isRead: true })
+      .where(
+        and(
+          eq(messages.taskId, taskId),
+          eq(messages.isRead, false),
+          ne(messages.senderId, session.userId),
+        ),
+      );
 
     return NextResponse.json({ messages: rows });
 

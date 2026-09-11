@@ -48,10 +48,6 @@ function SignupForm() {
         setError(data.error || "Something went wrong");
         return;
       }
-      if (data.requiresEmailVerification) {
-        router.push(`/verify-email?userId=${data.userId}`);
-        return;
-      }
       router.push("/dashboard");
       router.refresh();
     } catch {

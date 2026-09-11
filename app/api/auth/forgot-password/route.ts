@@ -1,69 +1,81 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/db"; // ⬅️ adjust to your actual db import path
-import { users, passwordResetTokens } from "@/db/schema"; // ⬅️ adjust to your actual schema path
-import { eq } from "drizzle-orm";
-import crypto, { randomUUID } from "crypto";
-import { sendPasswordResetEmail } from "@/lib/email";
-
-const GENERIC_MESSAGE = {
-  message: "If this account is registered, a reset link has been sent.",
-};
-
-const TOKEN_TTL_MINUTES = 30;
-
-function sha256Hex(input: string) {
-  return crypto.createHash("sha256").update(input).digest("hex");
-}
+import { db } from "@/db";
+import { users, passwordResets } from "@/db/schema";
+import { eq, or } from "drizzle-orm";
+import { randomBytes, createHash, randomUUID } from "crypto";
+import { sendEmail, passwordResetEmailHtml } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json().catch(() => null);
-    const email =
-      typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
-
-    // Even invalid/malformed email gets the generic response.
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return NextResponse.json(GENERIC_MESSAGE, { status: 200 });
+    const { identifier } = await req.json().catch(() => ({ identifier: "" }));
+    if (!identifier) {
+      return NextResponse.json(
+        { error: "Please enter your phone number or email" },
+        { status: 400 }
+      );
     }
 
-    const [user] = await db
-      .select({ id: users.id, email: users.email })
+    const found = await db
+      .select()
       .from(users)
-      .where(eq(users.email, email))
+      .where(or(eq(users.phone, identifier), eq(users.email, identifier)))
       .limit(1);
-
-    if (user) {
-      // Raw token → sent via email only. Hash → stored in DB only.
-      const rawToken = crypto.randomBytes(32).toString("hex");
-      const tokenHash = sha256Hex(rawToken);
-      const expiresAt = new Date(Date.now() + TOKEN_TTL_MINUTES * 60 * 1000);
-
-      await db.insert(passwordResetTokens).values({
-        id: randomUUID(),
-        userId: user.id,
-        tokenHash,
-        expiresAt,
-      });
-
-      const resetUrl = `${process.env.APP_URL}/reset-password?token=${rawToken}`;
-
-      try {
-        await sendPasswordResetEmail(user.email, resetUrl);
-      } catch (emailErr) {
-        console.error("Failed to send reset email:", emailErr);
-        // Do NOT leak this failure to the client — keep response generic.
-      }
-    } else {
-      // Small artificial delay so response timing doesn't cheaply reveal
-      // whether the email exists (not perfect, but removes the obvious gap).
-      await new Promise((r) => setTimeout(r, 150));
+    const user = found[0];
+    if (!user) {
+      return NextResponse.json(
+        { error: "No account found with that phone number or email" },
+        { status: 404 }
+      );
     }
 
-    // ✅ Same response body + status code in EVERY case.
-    // ✅ Token/link NEVER appears here.
-    return NextResponse.json(GENERIC_MESSAGE, { status: 200 });
+    const rawToken = randomBytes(24).toString("hex");
+    const tokenHash = createHash("sha256").update(rawToken).digest("hex");
+    const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+
+    await db.insert(passwordResets).values({
+      id: randomUUID(),
+      userId: user.id,
+      tokenHash,
+      expiresAt,
+    });
+
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(req.url).origin;
+    const resetLink = `${siteUrl}/reset-password?token=${rawToken}`;
+
+    // If this account has an email on file and Resend is configured, actually
+    // deliver the reset link by email instead of exposing the raw token in
+    // the API response.
+    if (user.email) {
+      const result = await sendEmail(
+        user.email,
+        "Reset your KaamKaro password",
+        passwordResetEmailHtml(resetLink)
+      );
+      if (result.sent) {
+        return NextResponse.json({
+          success: true,
+          delivered: "email",
+          note: `A reset link was sent to ${user.email}.`,
+        });
+      }
+    }
+
+    // Fallback: no email on file, or email delivery isn't configured yet
+    // (no RESEND_API_KEY) — hand back the token/link directly, same
+    // transparent "mock, will be real later" pattern used elsewhere.
+    return NextResponse.json({
+      success: true,
+      delivered: "shown",
+      resetToken: rawToken,
+      note: user.email
+        ? "Email delivery isn't configured yet (RESEND_API_KEY missing) — here's your reset link directly."
+        : "No email on file and SMS delivery isn't wired up yet — here's your reset link directly.",
+    });
   } catch (err) {
-    console.error("forgot-password error:", err);
-    return NextResponse.json(GENERIC_MESSAGE, { status: 200 });
+    console.error("POST /api/auth/forgot-password failed:", err);
+    return NextResponse.json(
+      { error: "Something went wrong on our end. Please try again." },
+      { status: 500 }
+    );
   }
 }

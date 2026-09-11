@@ -1,65 +1,55 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { passwordResetTokens, users } from "@/db/schema";
-import { eq } from "drizzle-orm";
-import crypto from "crypto";
-import bcrypt from "bcryptjs"; // npm i bcryptjs — or your existing hashing lib
-
-function sha256Hex(input: string) {
-  return crypto.createHash("sha256").update(input).digest("hex");
-}
+import { users, passwordResets } from "@/db/schema";
+import { eq, and, gt } from "drizzle-orm";
+import { createHash } from "crypto";
+import { hashPassword } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   try {
-    const { token, newPassword } = await req.json();
-
-    if (!token || !newPassword || newPassword.length < 8) {
+    const { token, newPassword } = await req.json().catch(() => ({}));
+    if (!token || !newPassword) {
+      return NextResponse.json({ error: "Missing token or new password" }, { status: 400 });
+    }
+    if (newPassword.length < 6) {
       return NextResponse.json(
-        { message: "Invalid request." },
+        { error: "Password must be at least 6 characters" },
         { status: 400 }
       );
     }
 
-    const tokenHash = sha256Hex(token);
+    const tokenHash = createHash("sha256").update(token).digest("hex");
 
-    const [record] = await db
+    const found = await db
       .select()
-      .from(passwordResetTokens)
-      .where(eq(passwordResetTokens.tokenHash, tokenHash))
+      .from(passwordResets)
+      .where(
+        and(
+          eq(passwordResets.tokenHash, tokenHash),
+          eq(passwordResets.used, false),
+          gt(passwordResets.expiresAt, new Date())
+        )
+      )
       .limit(1);
 
-    if (
-      !record ||
-      record.used ||
-      new Date(record.expiresAt).getTime() < Date.now()
-    ) {
-      // Generic — don't reveal whether token was invalid, used, or expired.
+    const resetRecord = found[0];
+    if (!resetRecord) {
       return NextResponse.json(
-        { message: "Reset link invalid ya expire ho chuka hai." },
+        { error: "This reset link is invalid or has expired" },
         { status: 400 }
       );
     }
 
-    const passwordHash = await bcrypt.hash(newPassword, 12);
+    const passwordHash = await hashPassword(newPassword);
+    await db.update(users).set({ passwordHash }).where(eq(users.id, resetRecord.userId));
+    await db.update(passwordResets).set({ used: true }).where(eq(passwordResets.id, resetRecord.id));
 
-    await db
-      .update(users)
-      .set({ passwordHash } as any) // ⬅️ adjust field name to your schema
-      .where(eq(users.id, record.userId));
+    return NextResponse.json({ success: true });
 
-    await db
-      .update(passwordResetTokens)
-      .set({ used: true })
-      .where(eq(passwordResetTokens.id, record.id));
-
-    return NextResponse.json(
-      { message: "Password successfully update ho gaya." },
-      { status: 200 }
-    );
   } catch (err) {
-    console.error("reset-password error:", err);
+    console.error("POST  failed:", err);
     return NextResponse.json(
-      { message: "Kuch masla ho gaya." },
+      { error: "Something went wrong on our end. Please try again." },
       { status: 500 }
     );
   }

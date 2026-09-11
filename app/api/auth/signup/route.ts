@@ -4,14 +4,8 @@ import { users } from "@/db/schema";
 import { eq, or } from "drizzle-orm";
 import { hashPassword, signToken, setSessionCookie } from "@/lib/auth";
 import { validateIdNumber, COUNTRIES } from "@/lib/idValidation";
-import { sendSignupVerificationOtp } from "@/lib/email";
 import { z } from "zod";
-import crypto, { randomUUID, randomBytes } from "crypto";
-
-function sha256Hex(input: string) {
-  return crypto.createHash("sha256").update(input).digest("hex");
-}
-const OTP_TTL_MINUTES = 10;
+import { randomUUID, randomBytes } from "crypto";
 
 const signupSchema = z
   .object({
@@ -21,7 +15,7 @@ const signupSchema = z
     password: z.string().min(6, "Password must be at least 6 characters"),
     role: z.enum(["client", "provider", "both"]).default("both"),
     city: z.string().optional(),
-    country: z.enum(COUNTRIES).optional(),
+    country: z.enum(COUNTRIES).optional().or(z.literal("")),
     idType: z.enum(["national_id", "passport", "driver_license", "other"]).optional(),
     idNumber: z.string().optional(),
     preferredCurrency: z.string().optional(),
@@ -119,7 +113,6 @@ export async function POST(req: NextRequest) {
       name,
       phone: phone || null,
       email: email || null,
-      emailVerified: !email, // no email to verify -> nothing to verify
       passwordHash,
       role,
       city: city || null,
@@ -131,39 +124,10 @@ export async function POST(req: NextRequest) {
       referredBy,
     });
 
-    if (email) {
-      const otp = String(Math.floor(100000 + Math.random() * 900000));
-      const otpHash = sha256Hex(otp);
-      const expiresAt = new Date(Date.now() + OTP_TTL_MINUTES * 60 * 1000);
-      await db
-        .update(users)
-        .set({ emailOtpHash: otpHash, emailOtpExpiresAt: expiresAt })
-        .where(eq(users.id, id));
-
-      const emailSent = await sendSignupVerificationOtp(email, otp);
-      if (!emailSent) {
-        return NextResponse.json(
-          {
-            error:
-              "Account created, but the verification email couldn't be sent because email delivery isn't configured on this server yet. Please contact the site admin.",
-          },
-          { status: 503 }
-        );
-      }
-
-      // No session cookie yet — granted only after /api/auth/verify-email succeeds.
-      return NextResponse.json({
-        success: true,
-        userId: id,
-        requiresEmailVerification: true,
-      });
-    }
-
-    // No email was provided — nothing to verify, log in immediately.
     const token = signToken({ userId: id, role });
     await setSessionCookie(token);
 
-    return NextResponse.json({ success: true, userId: id, requiresEmailVerification: false });
+    return NextResponse.json({ success: true, userId: id });
   } catch (err) {
     console.error("POST /api/auth/signup failed:", err);
     return NextResponse.json({ error: "Server error, please try again" }, { status: 500 });
