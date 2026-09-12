@@ -69,7 +69,7 @@ export const tasks = pgTable("tasks", {
   currency: text("currency").notNull().default("PKR"),
   city: text("city"),
   status: text("status", {
-    enum: ["open", "assigned", "submitted", "completed", "disputed", "cancelled"],
+    enum: ["open", "assigned", "submitted", "completed", "disputed", "cancelled", "expired"],
   })
     .notNull()
     .default("open"),
@@ -87,6 +87,12 @@ export const tasks = pgTable("tasks", {
   verificationNotes: text("verification_notes"),
   verificationConfidence: real("verification_confidence"), // 0-1
   verifiedAt: timestamp("verified_at"),
+  // Poster-chosen expiry — set at creation time from the "Active until" field
+  // on the post-task form. Task closes itself once this passes: GET /api/tasks
+  // lazily flips any past-due open task to "expired" on every read, and a
+  // daily cron job (see app/api/cron/expire-tasks) does the same as a backup
+  // even on days with zero traffic.
+  expiresAt: timestamp("expires_at", { withTimezone: true }),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
 });
 

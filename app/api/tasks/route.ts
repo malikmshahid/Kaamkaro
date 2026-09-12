@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { tasks } from "@/db/schema";
-import { eq, and, desc, or, ilike } from "drizzle-orm";
+import { eq, and, desc, or, ilike, lte, isNotNull } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
 import { z } from "zod";
 import { randomUUID } from "crypto";
+
+const MIN_LIFETIME_HOURS = 1;
+const MAX_LIFETIME_DAYS = 90;
 
 const createTaskSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
@@ -13,11 +16,26 @@ const createTaskSchema = z.object({
   budget: z.number().positive("Budget must be a positive number"),
   currency: z.string().optional(),
   city: z.string().optional(),
+  // ISO date string from the "Active until" field on the post-task form —
+  // the poster decides how long their own task stays open.
+  expiresAt: z.string().datetime({ message: "Pick a valid active-until date" }),
 });
+
+// Flips any open task whose expiresAt has passed to "expired". Runs on every
+// GET so the list is always accurate even with no cron running — the daily
+// cron job (app/api/cron/expire-tasks) is just a tidiness backup.
+async function expirePastDueTasks() {
+  await db
+    .update(tasks)
+    .set({ status: "expired" })
+    .where(and(eq(tasks.status, "open"), isNotNull(tasks.expiresAt), lte(tasks.expiresAt, new Date())));
+}
 
 // GET /api/tasks?category=&city=&status=open
 export async function GET(req: NextRequest) {
   try {
+    await expirePastDueTasks();
+
     const { searchParams } = new URL(req.url);
     const category = searchParams.get("category");
     const city = searchParams.get("city");
@@ -63,7 +81,25 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { title, description, category, budget, currency, city } = parsed.data;
+    const { title, description, category, budget, currency, city, expiresAt } = parsed.data;
+
+    const expiresAtDate = new Date(expiresAt);
+    const now = Date.now();
+    const minAllowed = now + MIN_LIFETIME_HOURS * 60 * 60 * 1000;
+    const maxAllowed = now + MAX_LIFETIME_DAYS * 24 * 60 * 60 * 1000;
+    if (expiresAtDate.getTime() < minAllowed) {
+      return NextResponse.json(
+        { error: `Active-until must be at least ${MIN_LIFETIME_HOURS} hour(s) from now` },
+        { status: 400 }
+      );
+    }
+    if (expiresAtDate.getTime() > maxAllowed) {
+      return NextResponse.json(
+        { error: `Active-until can't be more than ${MAX_LIFETIME_DAYS} days from now` },
+        { status: 400 }
+      );
+    }
+
     const id = randomUUID();
 
     await db.insert(tasks).values({
@@ -77,6 +113,7 @@ export async function POST(req: NextRequest) {
       currency: currency || "PKR",
       city: city || null,
       status: "open",
+      expiresAt: expiresAtDate,
     });
 
     return NextResponse.json({ success: true, taskId: id });
