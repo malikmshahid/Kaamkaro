@@ -5,6 +5,23 @@ import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { CURRENCIES } from "@/lib/currency";
 
+// Default the date picker to 7 days out — the poster can change it to
+// anything from 1 hour up to 90 days from now (enforced again server-side).
+function defaultExpiryLocal() {
+  const d = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+  d.setSeconds(0, 0);
+  // toISOString gives UTC; datetime-local inputs want local wall-clock time.
+  const tzOffsetMs = d.getTimezoneOffset() * 60 * 1000;
+  return new Date(d.getTime() - tzOffsetMs).toISOString().slice(0, 16);
+}
+
+function quickPick(hoursFromNow: number) {
+  const d = new Date(Date.now() + hoursFromNow * 60 * 60 * 1000);
+  d.setSeconds(0, 0);
+  const tzOffsetMs = d.getTimezoneOffset() * 60 * 1000;
+  return new Date(d.getTime() - tzOffsetMs).toISOString().slice(0, 16);
+}
+
 export default function NewTaskPage() {
   const router = useRouter();
   const [form, setForm] = useState({
@@ -14,6 +31,7 @@ export default function NewTaskPage() {
     budget: "",
     currency: "PKR",
     city: "",
+    expiresAt: defaultExpiryLocal(),
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -41,14 +59,14 @@ export default function NewTaskPage() {
         return;
       }
       const d = data.draft;
-      setForm({
+      setForm((prev) => ({
+        ...prev,
         title: d.title,
         description: d.description,
         category: d.category,
         budget: String(d.suggestedBudgetPkr),
         currency: "PKR",
-        city: form.city,
-      });
+      }));
       setCopilotReasoning(
         `${d.reasoning} Suggested range: PKR ${d.budgetRangeLow}–${d.budgetRangeHigh}, ~${d.deliveryDays} day(s) delivery.`
       );
@@ -68,7 +86,11 @@ export default function NewTaskPage() {
       const res = await fetch("/api/tasks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, budget: Number(form.budget) }),
+        body: JSON.stringify({
+          ...form,
+          budget: Number(form.budget),
+          expiresAt: new Date(form.expiresAt).toISOString(),
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -219,6 +241,41 @@ export default function NewTaskPage() {
               placeholder="Lahore, Karachi, Remote..."
               value={form.city}
               onChange={(e) => setForm({ ...form, city: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm mb-1">Active until</label>
+            <p className="text-xs text-ink/50 mb-2">
+              Your task closes itself automatically once this date passes.
+            </p>
+            <div className="flex flex-wrap gap-2 mb-2">
+              {[
+                { label: "1 day", hours: 24 },
+                { label: "3 days", hours: 72 },
+                { label: "7 days", hours: 168 },
+                { label: "30 days", hours: 720 },
+              ].map((opt) => (
+                <button
+                  key={opt.label}
+                  type="button"
+                  onClick={() =>
+                    setForm({ ...form, expiresAt: quickPick(opt.hours) })
+                  }
+                  className="rounded-full border border-line px-3 py-1 text-xs hover:border-green-700 hover:text-green-700 transition-colors"
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+            <input
+              type="datetime-local"
+              className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
+              value={form.expiresAt}
+              min={quickPick(1)}
+              max={quickPick(90 * 24)}
+              onChange={(e) => setForm({ ...form, expiresAt: e.target.value })}
+              required
             />
           </div>
 
