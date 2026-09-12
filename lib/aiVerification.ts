@@ -2,13 +2,15 @@
  * AI Proof-of-Completion Verification
  * -------------------------------------
  * When a provider submits a task, this module compares the submitted proof
- * (a photo URL) against the task description using Grok Vision, and
- * returns an advisory verdict. This is NOT the final decision — the client
- * always presses the "confirm complete" button themselves. It's just an
- * extra signal to help spot fraud or mismatches quickly.
+ * (a photo URL) against the task description using a vision-capable model,
+ * and returns an advisory verdict. This is NOT the final decision — the
+ * client always presses the "confirm complete" button themselves. It's just
+ * an extra signal to help spot fraud or mismatches quickly.
  *
- * Requires the XAI_API_KEY env var. If it's not set, verification is
- * skipped gracefully (the client is told to check manually).
+ * Uses Groq (OpenAI-compatible chat completions API) with Llama 4 Scout, a
+ * natively multimodal model. Requires the GROQ_API_KEY env var. If it's not
+ * set, verification is skipped gracefully (the client is told to check
+ * manually).
  */
 
 export type VerificationResult = {
@@ -36,12 +38,12 @@ export async function verifyTaskProof(
   taskDescription: string,
   proofUrl: string | null
 ): Promise<VerificationResult> {
-  const apiKey = process.env.XAI_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     return {
       status: "review_needed",
       confidence: 0,
-      notes: "AI verification is not configured (XAI_API_KEY not set). Please review manually.",
+      notes: "AI verification is not configured (GROQ_API_KEY not set). Please review manually.",
     };
   }
 
@@ -64,15 +66,16 @@ export async function verifyTaskProof(
   }
 
   try {
-    const res = await fetch("https://api.x.ai/v1/chat/completions", {
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: process.env.GROK_VISION_MODEL || process.env.GROK_MODEL || "grok-4",
+        model: process.env.GROQ_VISION_MODEL || "meta-llama/llama-4-scout-17b-16e-instruct",
         max_tokens: 400,
+        response_format: { type: "json_object" },
         messages: [
           {
             role: "user",

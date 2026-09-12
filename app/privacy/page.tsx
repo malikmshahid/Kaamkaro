@@ -54,7 +54,7 @@ export default function PrivacyPage() {
               <li>
                 <strong>Service providers:</strong> our database runs on Neon (Postgres
                 hosting), the app is hosted on Vercel, and proof photo verification
-                uses the xAI (Grok) API — these are all necessary to run the
+                uses the Groq API — these are all necessary to run the
                 platform
               </li>
               <li>

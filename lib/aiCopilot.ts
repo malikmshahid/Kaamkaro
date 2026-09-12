@@ -8,9 +8,9 @@
  * This is the core "AI-native" differentiator: instead of a blank form,
  * every client gets an AI copilot that writes and prices the task for them.
  *
- * Uses xAI's Grok (OpenAI-compatible chat completions API). Requires
- * XAI_API_KEY. If missing, throws so the caller can fall back to the plain
- * manual form.
+ * Uses Groq (OpenAI-compatible chat completions API — very fast, cheap
+ * inference for open models). Requires GROQ_API_KEY. If missing, throws so
+ * the caller can fall back to the plain manual form.
  */
 
 export type TaskCopilotResult = {
@@ -41,22 +41,23 @@ export async function draftTaskFromIdea(
   idea: string,
   city?: string
 ): Promise<TaskCopilotResult> {
-  const apiKey = process.env.XAI_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
-    throw new Error("AI Copilot is not configured (XAI_API_KEY not set).");
+    throw new Error("AI Copilot is not configured (GROQ_API_KEY not set).");
   }
 
   const userMessage = city ? `Idea: "${idea}"\nCity: ${city}` : `Idea: "${idea}"`;
 
-  const res = await fetch("https://api.x.ai/v1/chat/completions", {
+  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: process.env.GROK_MODEL || "grok-4",
+      model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
       max_tokens: 800,
+      response_format: { type: "json_object" },
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
         { role: "user", content: userMessage },
