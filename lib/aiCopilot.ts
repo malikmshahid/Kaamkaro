@@ -1,5 +1,3 @@
-import Anthropic from "@anthropic-ai/sdk";
-
 /**
  * AI Task Copilot
  * ----------------
@@ -10,8 +8,9 @@ import Anthropic from "@anthropic-ai/sdk";
  * This is the core "AI-native" differentiator: instead of a blank form,
  * every client gets an AI copilot that writes and prices the task for them.
  *
- * Requires ANTHROPIC_API_KEY. If missing, throws so the caller can fall back
- * to the plain manual form.
+ * Uses xAI's Grok (OpenAI-compatible chat completions API). Requires
+ * XAI_API_KEY. If missing, throws so the caller can fall back to the plain
+ * manual form.
  */
 
 export type TaskCopilotResult = {
@@ -42,30 +41,42 @@ export async function draftTaskFromIdea(
   idea: string,
   city?: string
 ): Promise<TaskCopilotResult> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.XAI_API_KEY;
   if (!apiKey) {
-    throw new Error("AI Copilot is not configured (ANTHROPIC_API_KEY not set).");
+    throw new Error("AI Copilot is not configured (XAI_API_KEY not set).");
   }
 
-  const anthropic = new Anthropic({ apiKey });
+  const userMessage = city ? `Idea: "${idea}"\nCity: ${city}` : `Idea: "${idea}"`;
 
-  const userMessage = city
-    ? `Idea: "${idea}"\nCity: ${city}`
-    : `Idea: "${idea}"`;
-
-  const response = await anthropic.messages.create({
-    model: "claude-sonnet-4-6",
-    max_tokens: 800,
-    system: SYSTEM_PROMPT,
-    messages: [{ role: "user", content: userMessage }],
+  const res = await fetch("https://api.x.ai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: process.env.GROK_MODEL || "grok-4",
+      max_tokens: 800,
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: userMessage },
+      ],
+    }),
+    signal: AbortSignal.timeout(30000),
   });
 
-  const textBlock = response.content.find((b) => b.type === "text");
-  if (!textBlock || textBlock.type !== "text") {
+  if (!res.ok) {
+    const errText = await res.text().catch(() => "");
+    throw new Error(`AI Copilot request failed (${res.status}): ${errText.slice(0, 200)}`);
+  }
+
+  const data = await res.json();
+  const text: string | undefined = data?.choices?.[0]?.message?.content;
+  if (!text) {
     throw new Error("AI Copilot returned no text.");
   }
 
-  const cleaned = textBlock.text.replace(/```json|```/g, "").trim();
+  const cleaned = text.replace(/```json|```/g, "").trim();
 
   let parsed: TaskCopilotResult;
   try {

@@ -1,15 +1,13 @@
-import Anthropic from "@anthropic-ai/sdk";
-
 /**
  * AI Proof-of-Completion Verification
  * -------------------------------------
  * When a provider submits a task, this module compares the submitted proof
- * (a photo URL) against the task description using Claude Vision, and
+ * (a photo URL) against the task description using Grok Vision, and
  * returns an advisory verdict. This is NOT the final decision — the client
  * always presses the "confirm complete" button themselves. It's just an
  * extra signal to help spot fraud or mismatches quickly.
  *
- * Requires the ANTHROPIC_API_KEY env var. If it's not set, verification is
+ * Requires the XAI_API_KEY env var. If it's not set, verification is
  * skipped gracefully (the client is told to check manually).
  */
 
@@ -19,7 +17,7 @@ export type VerificationResult = {
   notes: string;
 };
 
-async function fetchImageAsBase64(url: string): Promise<{ data: string; mediaType: string } | null> {
+async function fetchImageAsDataUrl(url: string): Promise<string | null> {
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
     if (!res.ok) return null;
@@ -27,7 +25,7 @@ async function fetchImageAsBase64(url: string): Promise<{ data: string; mediaTyp
     if (!contentType.startsWith("image/")) return null;
     const buf = await res.arrayBuffer();
     const base64 = Buffer.from(buf).toString("base64");
-    return { data: base64, mediaType: contentType };
+    return `data:${contentType};base64,${base64}`;
   } catch {
     return null;
   }
@@ -38,12 +36,12 @@ export async function verifyTaskProof(
   taskDescription: string,
   proofUrl: string | null
 ): Promise<VerificationResult> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.XAI_API_KEY;
   if (!apiKey) {
     return {
       status: "review_needed",
       confidence: 0,
-      notes: "AI verification is not configured (ANTHROPIC_API_KEY not set). Please review manually.",
+      notes: "AI verification is not configured (XAI_API_KEY not set). Please review manually.",
     };
   }
 
@@ -55,8 +53,8 @@ export async function verifyTaskProof(
     };
   }
 
-  const image = await fetchImageAsBase64(proofUrl);
-  if (!image) {
+  const imageDataUrl = await fetchImageAsDataUrl(proofUrl);
+  if (!imageDataUrl) {
     return {
       status: "review_needed",
       confidence: 0,
@@ -66,25 +64,22 @@ export async function verifyTaskProof(
   }
 
   try {
-    const client = new Anthropic({ apiKey });
-    const message = await client.messages.create({
-      model: "claude-sonnet-5",
-      max_tokens: 400,
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "image",
-              source: {
-                type: "base64",
-                media_type: image.mediaType as "image/jpeg" | "image/png" | "image/webp" | "image/gif",
-                data: image.data,
-              },
-            },
-            {
-              type: "text",
-              text: `The task was: "${taskTitle}" — ${taskDescription}
+    const res = await fetch("https://api.x.ai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: process.env.GROK_VISION_MODEL || process.env.GROK_MODEL || "grok-4",
+        max_tokens: 400,
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: `The task was: "${taskTitle}" — ${taskDescription}
 
 Look at this submitted photo and judge whether the task genuinely appears complete.
 Respond ONLY in this JSON format, nothing else:
@@ -93,18 +88,34 @@ Respond ONLY in this JSON format, nothing else:
 - "pass": the photo clearly matches the completed task
 - "review_needed": ambiguous, a human should check
 - "fail": the photo clearly mismatches the task or looks fraudulent`,
-            },
-          ],
-        },
-      ],
+              },
+              {
+                type: "image_url",
+                image_url: { url: imageDataUrl },
+              },
+            ],
+          },
+        ],
+      }),
+      signal: AbortSignal.timeout(30000),
     });
 
-    const textBlock = message.content.find((b) => b.type === "text");
-    if (!textBlock || textBlock.type !== "text") {
+    if (!res.ok) {
+      const errText = await res.text().catch(() => "");
+      return {
+        status: "error",
+        confidence: 0,
+        notes: `AI verification failed (${res.status}): ${errText.slice(0, 200)}`,
+      };
+    }
+
+    const data = await res.json();
+    const text: string | undefined = data?.choices?.[0]?.message?.content;
+    if (!text) {
       return { status: "review_needed", confidence: 0, notes: "Could not parse the AI's response." };
     }
 
-    const cleaned = textBlock.text.replace(/```json|```/g, "").trim();
+    const cleaned = text.replace(/```json|```/g, "").trim();
     const parsed = JSON.parse(cleaned) as { status: string; confidence: number; notes: string };
 
     const status: VerificationResult["status"] = ["pass", "review_needed", "fail"].includes(
