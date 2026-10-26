@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { tasks, applications } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, ne } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
 import { notify } from "@/lib/notify";
 
@@ -12,13 +12,23 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: "Please log in first" }, { status: 401 });
     }
     const { id: taskId } = await params;
-    const { applicationId } = await req.json();
+    const body = await req.json().catch(() => ({}));
+    const applicationId = typeof body?.applicationId === "string" ? body.applicationId : "";
+    if (!applicationId) {
+      return NextResponse.json({ error: "Pick an application first" }, { status: 400 });
+    }
 
     const found = await db.select().from(tasks).where(eq(tasks.id, taskId)).limit(1);
     const task = found[0];
     if (!task) return NextResponse.json({ error: "Task not found" }, { status: 404 });
     if (task.postedById !== session.userId) {
       return NextResponse.json({ error: "Only the task owner can accept applications" }, { status: 403 });
+    }
+    if (task.status !== "open") {
+      return NextResponse.json(
+        { error: "This task is no longer open for applications" },
+        { status: 409 }
+      );
     }
 
     const appFound = await db
@@ -31,6 +41,20 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: "Application not found" }, { status: 404 });
     }
 
+    // Claim the task atomically. Two tabs (or two requests racing) must not be
+    // able to assign two different providers — the loser gets a clear 409.
+    const claimed = await db
+      .update(tasks)
+      .set({ status: "assigned", assignedProviderId: application.providerId })
+      .where(and(eq(tasks.id, taskId), eq(tasks.status, "open")))
+      .returning({ id: tasks.id });
+    if (claimed.length === 0) {
+      return NextResponse.json(
+        { error: "Someone was already accepted for this task" },
+        { status: 409 }
+      );
+    }
+
     await db
       .update(applications)
       .set({ status: "accepted" })
@@ -39,12 +63,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     await db
       .update(applications)
       .set({ status: "rejected" })
-      .where(and(eq(applications.taskId, taskId), eq(applications.status, "pending")));
-
-    await db
-      .update(tasks)
-      .set({ status: "assigned", assignedProviderId: application.providerId })
-      .where(eq(tasks.id, taskId));
+      .where(
+        and(
+          eq(applications.taskId, taskId),
+          eq(applications.status, "pending"),
+          ne(applications.id, applicationId)
+        )
+      );
 
     await notify(
       application.providerId,

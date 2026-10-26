@@ -1,5 +1,6 @@
 import { put } from "@vercel/blob";
 import { createHash } from "crypto";
+import { sniffImageType } from "@/lib/imageSniff";
 
 /**
  * Pull a usable image URL out of whatever the provider typed/pasted.
@@ -70,16 +71,27 @@ export async function uploadProofFile(file: File, userId: string): Promise<Uploa
   }
 
   const bytes = Buffer.from(await file.arrayBuffer());
+
+  // Verify the actual bytes, not the label the uploader chose. A file that
+  // claims to be a PNG but is really HTML/JS must never reach the store.
+  const head = new Uint8Array(bytes.subarray(0, 16));
+  const sniffed = sniffImageType(head);
+  const isPdf = bytes.subarray(0, 5).toString("latin1") === "%PDF-";
+  const realType = sniffed || (isPdf ? "application/pdf" : null);
+  if (!realType || !ALLOWED_PROOF_TYPES.includes(realType)) {
+    throw new Error("That file doesn't look like a real image or PDF");
+  }
+
   const hash = createHash("sha256").update(bytes).digest("hex");
-  const ext = (file.type.split("/")[1] || "bin").replace("jpeg", "jpg");
+  const ext = (realType.split("/")[1] || "bin").replace("jpeg", "jpg");
   const safeName = `${userId}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
   const blob = await put(`proofs/${safeName}`, bytes, {
     access: "private",
-    contentType: file.type,
+    contentType: realType,
     addRandomSuffix: false,
   });
 
-  const dataUrl = `data:${file.type};base64,${bytes.toString("base64")}`;
+  const dataUrl = `data:${realType};base64,${bytes.toString("base64")}`;
   return { ref: blob.pathname, hash, dataUrl };
 }

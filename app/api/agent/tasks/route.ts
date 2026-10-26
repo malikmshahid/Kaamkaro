@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { tasks } from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { authenticateAgent } from "@/lib/agentAuth";
+import { throttleAgent, tooManyRequests } from "@/lib/rateLimit";
 import { z } from "zod";
 import { randomUUID } from "crypto";
 
@@ -59,6 +60,9 @@ export async function POST(req: NextRequest) {
     if (!agent) {
       return NextResponse.json({ error: "Invalid or missing API key" }, { status: 401 });
     }
+
+    const limit = await throttleAgent("createTask", agent.keyId);
+    if (!limit.allowed) return tooManyRequests(limit);
 
     const body = await req.json().catch(() => null);
     const parsed = createTaskSchema.safeParse(body);

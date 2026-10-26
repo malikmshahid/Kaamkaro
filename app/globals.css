@@ -45,4 +45,7 @@ body {
   color: var(--color-ink);
   font-family: var(--font-body);
   transition: background-color 0.15s ease, color 0.15s ease;
+  /* A 200-character unbroken task title (or a pasted URL) must never make the
+     page wider than the phone screen. */
+  overflow-wrap: break-word;
 }

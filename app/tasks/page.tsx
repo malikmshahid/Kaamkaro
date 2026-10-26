@@ -102,7 +102,7 @@ export default function TasksPage() {
                   <SaveButton itemType="task" itemId={task.id} />
                 </div>
               </div>
-              <h3 className="font-display text-xl text-heading mb-2">
+              <h3 className="mb-2 break-words font-display text-xl text-heading [overflow-wrap:anywhere]">
                 {task.title}
               </h3>
               <p className="text-sm text-ink/60 line-clamp-2 mb-4">

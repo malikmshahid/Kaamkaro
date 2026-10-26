@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { tasks, payments } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { authenticateAgent } from "@/lib/agentAuth";
+import { throttleAgent, tooManyRequests } from "@/lib/rateLimit";
 import { verifyTaskProof } from "@/lib/aiVerification";
 import { notify } from "@/lib/notify";
 
@@ -22,7 +23,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     }
 
     const { id: taskId } = await params;
-    const { proofUrl } = await req.json().catch(() => ({ proofUrl: "" }));
+    const limit = await throttleAgent("submitProof", agent.keyId);
+    if (!limit.allowed) return tooManyRequests(limit);
+
+    const raw = await req.json().catch(() => ({ proofUrl: "" }));
+    const proofUrl = typeof raw?.proofUrl === "string" ? raw.proofUrl.trim().slice(0, 2000) : "";
 
     const [task] = await db.select().from(tasks).where(eq(tasks.id, taskId)).limit(1);
     if (!task) return NextResponse.json({ error: "Task not found" }, { status: 404 });

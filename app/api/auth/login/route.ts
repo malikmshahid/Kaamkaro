@@ -36,16 +36,14 @@ export async function POST(req: NextRequest) {
       .where(or(eq(users.phone, identifier), eq(users.email, identifier)))
       .limit(1);
     const user = found[0];
-    if (!user) {
-      return NextResponse.json(
-        { error: "No account found with that phone number or email" },
-        { status: 401 }
-      );
-    }
 
-    const valid = await verifyPassword(password, user.passwordHash);
-    if (!valid) {
-      return NextResponse.json({ error: "Incorrect password" }, { status: 401 });
+    // One message for "no such account" and "wrong password", and a real bcrypt
+    // comparison even when the account is missing — otherwise the response time
+    // tells an attacker which phone numbers are registered.
+    const DUMMY_HASH = "$2a$12$C6UzMDM.H6dfI/f/IKcEe.9Rn0YfQ0eB7jGK1zT0jWlT5lOaQ4J0K";
+    const valid = await verifyPassword(password, user?.passwordHash || DUMMY_HASH);
+    if (!user || !valid) {
+      return NextResponse.json({ error: "Wrong phone/email or password" }, { status: 401 });
     }
 
     const token = signToken({ userId: user.id, role: user.role });

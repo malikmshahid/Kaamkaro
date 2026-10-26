@@ -42,11 +42,22 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "File not found" }, { status: 404 });
     }
 
+    const declared = (blob.blob.contentType || "").toLowerCase();
+    const safeType = ["image/jpeg", "image/png", "image/webp", "image/gif", "application/pdf"].includes(
+      declared
+    )
+      ? declared
+      : "application/octet-stream";
+
     return new NextResponse(blob.stream, {
       headers: {
-        "content-type": blob.blob.contentType || "application/octet-stream",
+        "content-type": safeType,
+        "content-disposition": safeType === "application/pdf" ? "inline" : "inline",
         "cache-control": "private, max-age=3600",
-        "content-disposition": "inline",
+        "x-content-type-options": "nosniff",
+        // Even if something slipped through, it can never run as a document on
+        // our origin.
+        "content-security-policy": "default-src 'none'; sandbox",
       },
     });
   } catch (err) {

@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
 import { notify } from "@/lib/notify";
 import { randomUUID } from "crypto";
+import { throttle, tooManyRequests } from "@/lib/rateLimit";
 
 // POST /api/tools/[id]/order — a client (or AI agent, via the agent API)
 // orders a provider's gig. This skips the open/apply/accept phase entirely:
@@ -15,6 +16,9 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
     const session = await getSessionUser();
     if (!session) return NextResponse.json({ error: "Please log in first" }, { status: 401 });
     const { id: toolId } = await params;
+
+    const orderLimit = await throttle("toolOrder", session.userId);
+    if (!orderLimit.allowed) return tooManyRequests(orderLimit);
 
     const found = await db.select().from(tools).where(eq(tools.id, toolId)).limit(1);
     const tool = found[0];

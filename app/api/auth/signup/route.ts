@@ -10,17 +10,27 @@ import { randomUUID, randomBytes } from "crypto";
 
 const signupSchema = z
   .object({
-    name: z.string().min(2, "Name must be at least 2 characters"),
-    phone: z.string().min(10, "Please enter a valid phone number").optional().or(z.literal("")),
-    email: z.string().email("Please enter a valid email address").optional().or(z.literal("")),
-    password: z.string().min(6, "Password must be at least 6 characters"),
+    name: z.string().trim().min(2, "Name must be at least 2 characters").max(80),
+    phone: z.string().trim().min(10, "Please enter a valid phone number").max(20).optional().or(z.literal("")),
+    email: z
+      .string()
+      .trim()
+      .toLowerCase()
+      .email("Please enter a valid email address")
+      .max(254)
+      .optional()
+      .or(z.literal("")),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .max(200, "That password is too long"),
     role: z.enum(["client", "provider", "both"]).default("both"),
-    city: z.string().optional(),
+    city: z.string().trim().max(80).optional(),
     country: z.enum(COUNTRIES).optional().or(z.literal("")),
     idType: z.enum(["national_id", "passport", "driver_license", "other"]).optional(),
-    idNumber: z.string().optional(),
-    preferredCurrency: z.string().optional(),
-    referralCode: z.string().optional(),
+    idNumber: z.string().trim().max(40).optional(),
+    preferredCurrency: z.string().trim().max(8).optional(),
+    referralCode: z.string().trim().max(24).optional(),
   })
   .refine((data) => (data.phone && data.phone.length > 0) || (data.email && data.email.length > 0), {
     message: "Please provide a phone number or an email address",

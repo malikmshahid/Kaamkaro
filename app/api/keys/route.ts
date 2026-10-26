@@ -5,6 +5,13 @@ import { eq } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
 import { generateApiKey } from "@/lib/agentAuth";
 import { randomUUID } from "crypto";
+import { and } from "drizzle-orm";
+import { z } from "zod";
+
+const MAX_KEYS_PER_USER = 10;
+const keySchema = z.object({
+  agentName: z.string().trim().min(2, "Give your agent a name").max(60).default("My Agent"),
+});
 
 // GET /api/keys — list this user's keys (never returns the raw key again)
 export async function GET() {
@@ -42,14 +49,33 @@ export async function POST(req: NextRequest) {
     const session = await getSessionUser();
     if (!session) return NextResponse.json({ error: "Please log in first" }, { status: 401 });
 
-    const { agentName } = await req.json().catch(() => ({ agentName: "My Agent" }));
+    const parsed = keySchema.safeParse(await req.json().catch(() => ({})));
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message || "Invalid agent name" },
+        { status: 400 }
+      );
+    }
+    const { agentName } = parsed.data;
+
+    const active = await db
+      .select({ id: apiKeys.id })
+      .from(apiKeys)
+      .where(and(eq(apiKeys.ownerId, session.userId), eq(apiKeys.revoked, false)));
+    if (active.length >= MAX_KEYS_PER_USER) {
+      return NextResponse.json(
+        { error: `You can have ${MAX_KEYS_PER_USER} active keys. Revoke one first.` },
+        { status: 400 }
+      );
+    }
+
     const { raw, hash, shownPrefix } = generateApiKey();
     const id = randomUUID();
 
     await db.insert(apiKeys).values({
       id,
       ownerId: session.userId,
-      agentName: agentName || "My Agent",
+      agentName,
       keyHash: hash,
       keyPrefix: shownPrefix,
     });

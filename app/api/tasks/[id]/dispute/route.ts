@@ -12,7 +12,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const session = await getSessionUser();
     if (!session) return NextResponse.json({ error: "Please log in first" }, { status: 401 });
     const { id: taskId } = await params;
-    const { reason } = await req.json().catch(() => ({ reason: "" }));
+    const raw = await req.json().catch(() => ({ reason: "" }));
+    const reason =
+      typeof raw?.reason === "string" ? raw.reason.trim().slice(0, 1000) : "";
 
     const found = await db.select().from(tasks).where(eq(tasks.id, taskId)).limit(1);
     const task = found[0];

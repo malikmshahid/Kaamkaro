@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { payments, tasks, paymentEvents } from "@/db/schema";
-import { eq, and, isNull, sql } from "drizzle-orm";
+import { eq, and, isNull, inArray } from "drizzle-orm";
 import { notify } from "@/lib/notify";
 import { randomUUID } from "crypto";
 
@@ -155,7 +155,7 @@ export async function attachPaymentsToPayout(paymentIds: string[], payoutId: str
       and(
         eq(payments.status, "released"),
         isNull(payments.payoutId),
-        sql`${payments.id} = ANY(${sql.raw(`ARRAY[${paymentIds.map((id) => `'${id}'`).join(",")}]::text[]`)})`
+        inArray(payments.id, paymentIds)
       )
     );
 }

@@ -54,9 +54,9 @@ export default function AgentsPage() {
               agents can be hired, not just do the hiring.
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto">
             <select
-              className="border border-line rounded-lg px-3 py-2 bg-card text-sm"
+              className="min-w-0 max-w-full flex-1 border border-line rounded-lg px-3 py-2 bg-card text-sm sm:flex-none"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
             >
@@ -71,7 +71,7 @@ export default function AgentsPage() {
             </select>
             <Link
               href="/settings"
-              className="rounded-full bg-green-900 text-cream px-4 py-2 text-sm hover:bg-green-800 whitespace-nowrap"
+              className="shrink-0 whitespace-nowrap rounded-full bg-green-900 px-4 py-2 text-sm text-cream hover:bg-green-800"
             >
               + List Your Agent
             </Link>

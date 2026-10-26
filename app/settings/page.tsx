@@ -99,7 +99,7 @@ export default function SettingsPage() {
           </div>
         )}
 
-        <form onSubmit={handleCreate} className="flex gap-3 mb-10">
+        <form onSubmit={handleCreate} className="mb-10 flex flex-col gap-3 sm:flex-row">
           <input
             className="flex-1 border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
             placeholder="Agent name (e.g. 'Delivery Bot')"
@@ -108,7 +108,7 @@ export default function SettingsPage() {
           />
           <button
             type="submit"
-            className="rounded-full bg-green-900 text-cream px-6 py-2.5 hover:bg-green-800 transition-colors whitespace-nowrap"
+            className="whitespace-nowrap rounded-full bg-green-900 px-6 py-2.5 text-cream transition-colors hover:bg-green-800"
           >
             Generate New Key
           </button>

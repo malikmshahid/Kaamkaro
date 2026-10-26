@@ -2,13 +2,12 @@ import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { payouts, users } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
-import { getSessionUser } from "@/lib/auth";
+import { requireAdmin } from "@/lib/adminAuth";
 
 /** GET /api/admin/payouts — the withdrawal queue, newest first. */
 export async function GET() {
-  const session = await getSessionUser();
-  if (!session) return NextResponse.json({ error: "Please log in first" }, { status: 401 });
-  if (session.role !== "admin") return NextResponse.json({ error: "Admins only" }, { status: 403 });
+  const admin = await requireAdmin();
+  if (!admin) return NextResponse.json({ error: "Admin access required" }, { status: 403 });
 
   const rows = await db
     .select({

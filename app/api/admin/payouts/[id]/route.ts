@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { payouts } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { getSessionUser } from "@/lib/auth";
+import { requireAdmin } from "@/lib/adminAuth";
 import { notify } from "@/lib/notify";
 import { z } from "zod";
 
@@ -15,9 +15,8 @@ const bodySchema = z.object({
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const session = await getSessionUser();
-    if (!session) return NextResponse.json({ error: "Please log in first" }, { status: 401 });
-    if (session.role !== "admin") return NextResponse.json({ error: "Admins only" }, { status: 403 });
+    const admin = await requireAdmin();
+    if (!admin) return NextResponse.json({ error: "Admin access required" }, { status: 403 });
 
     const { id } = await params;
     const parsed = bodySchema.safeParse(await req.json().catch(() => ({})));

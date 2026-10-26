@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { tasks, applications, payments } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { authenticateAgent } from "@/lib/agentAuth";
+import { throttleAgent, tooManyRequests } from "@/lib/rateLimit";
 import { getPaymentProvider, computeCommission } from "@/lib/payments";
 
 /**
@@ -48,8 +49,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (!agent) {
       return NextResponse.json({ error: "Invalid or missing API key" }, { status: 401 });
     }
+    const limit = await throttleAgent("createTask", agent.keyId);
+    if (!limit.allowed) return tooManyRequests(limit);
+
     const { id } = await params;
-    const { action, applicationId } = await req.json();
+    const body = await req.json().catch(() => ({}));
+    const action = typeof body?.action === "string" ? body.action : "";
+    const applicationId = typeof body?.applicationId === "string" ? body.applicationId : "";
+    if (!["accept", "pay", "complete"].includes(action)) {
+      return NextResponse.json({ error: "Unknown action" }, { status: 400 });
+    }
 
     const found = await db.select().from(tasks).where(eq(tasks.id, id)).limit(1);
     const task = found[0];
@@ -66,11 +75,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       if (!application || application.taskId !== id) {
         return NextResponse.json({ error: "Application not found" }, { status: 404 });
       }
-      await db.update(applications).set({ status: "accepted" }).where(eq(applications.id, applicationId));
-      await db
+      // Atomic claim — an agent retrying must not swap the assigned provider.
+      const claimed = await db
         .update(tasks)
         .set({ status: "assigned", assignedProviderId: application.providerId })
-        .where(eq(tasks.id, id));
+        .where(and(eq(tasks.id, id), eq(tasks.status, "open")))
+        .returning({ id: tasks.id });
+      if (claimed.length === 0) {
+        return NextResponse.json({ error: "Task is no longer open" }, { status: 409 });
+      }
+      await db.update(applications).set({ status: "accepted" }).where(eq(applications.id, applicationId));
       return NextResponse.json({ success: true });
     }
 

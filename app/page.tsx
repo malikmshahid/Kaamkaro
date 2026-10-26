@@ -739,8 +739,8 @@ export default async function Home() {
               </div>
             </div>
 
-            <div className="mt-8 grid gap-6 md:grid-cols-2">
-              <div className="rounded-2xl border border-line bg-card p-5">
+            <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="min-w-0 rounded-2xl border border-line bg-card p-5">
                 <div className="mb-4 flex items-center justify-between">
                   <p className="text-sm font-semibold text-heading">Open tasks</p>
                   <span className="text-[11px] uppercase tracking-wide text-ink/40">
@@ -771,7 +771,7 @@ export default async function Home() {
                             <span className="block truncate text-sm font-medium text-heading">
                               {t.title}
                             </span>
-                            <span className="block text-[11px] text-ink/45">
+                            <span className="block truncate text-[11px] text-ink/45">
                               {categoryLabel(t.category)}
                               {t.city ? ` · ${t.city}` : ""}
                             </span>
@@ -786,7 +786,7 @@ export default async function Home() {
                 )}
               </div>
 
-              <div className="rounded-2xl border border-line bg-card p-5">
+              <div className="min-w-0 rounded-2xl border border-line bg-card p-5">
                 <div className="mb-4 flex items-center justify-between">
                   <p className="text-sm font-semibold text-heading">The Toolbox</p>
                   <span className="text-[11px] uppercase tracking-wide text-ink/40">
@@ -837,8 +837,8 @@ export default async function Home() {
 
         {/* ------------------------------ FOR AGENTS --------------------------- */}
         <section className="border-b border-line bg-card/50">
-          <div className="mx-auto grid w-full max-w-6xl gap-8 px-5 py-14 sm:px-6 md:grid-cols-2 md:items-center md:py-16">
-            <div>
+          <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-8 px-5 py-14 sm:px-6 md:grid-cols-2 md:items-center md:py-16">
+            <div className="min-w-0">
               <span className="inline-flex items-center gap-2 rounded-full border border-line bg-card px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-green-800">
                 <IconAgent /> For developers
               </span>
@@ -857,7 +857,7 @@ export default async function Home() {
                 Get an API key <IconArrow />
               </Link>
             </div>
-            <div className="rounded-2xl border border-line bg-green-950 p-5 text-cream shadow-sm">
+            <div className="min-w-0 overflow-hidden rounded-2xl border border-line bg-green-950 p-5 text-cream shadow-sm">
               <div className="mb-3 flex gap-1.5">
                 <span className="h-2.5 w-2.5 rounded-full bg-cream/20" />
                 <span className="h-2.5 w-2.5 rounded-full bg-cream/20" />

@@ -8,6 +8,7 @@ import {
   fetchTransactionStatus,
 } from "@/lib/payments/payfast";
 import { fulfilEscrow, logPaymentEvent } from "@/lib/payments/escrow";
+import { throttle, clientIp, tooManyRequests } from "@/lib/rateLimit";
 
 export const maxDuration = 30;
 
@@ -27,6 +28,11 @@ export const maxDuration = 30;
 export async function POST(req: NextRequest) {
   const cfg = getPayFastConfig();
   if (!cfg) return NextResponse.json({ ok: false, reason: "gateway not configured" });
+
+  // A public endpoint that talks to the gateway — cap it so nobody can use us
+  // as a free load generator against PayFast.
+  const limit = await throttle("gatewayCallback", clientIp(req));
+  if (!limit.allowed) return tooManyRequests(limit);
 
   let payload: Record<string, string> = {};
   try {

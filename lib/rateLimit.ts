@@ -31,6 +31,12 @@ export const RULES = {
   aiCopilot: { limit: 20, windowSeconds: 60 * 60 },
   submitProof: { limit: 20, windowSeconds: 60 * 60 },
   chatMessage: { limit: 120, windowSeconds: 60 * 60 },
+  verifyProof: { limit: 12, windowSeconds: 60 * 60 }, // AI calls cost money
+  toolOrder: { limit: 30, windowSeconds: 60 * 60 },
+  uploadFile: { limit: 40, windowSeconds: 60 * 60 },
+  review: { limit: 20, windowSeconds: 60 * 60 },
+  payoutRequest: { limit: 10, windowSeconds: 24 * 60 * 60 },
+  gatewayCallback: { limit: 60, windowSeconds: 60 * 60 },
 } satisfies Record<string, Rule>;
 
 export type RuleName = keyof typeof RULES;
@@ -74,6 +80,14 @@ export async function rateLimit(key: string, rule: Rule): Promise<RateLimitResul
   } catch {
     return { allowed: true, remaining: rule.limit, limit: rule.limit, retryAfterSeconds: 0 };
   }
+}
+
+/** Per-API-key bucket for the agent endpoints (no cookies involved there). */
+export async function throttleAgent(
+  ruleName: RuleName,
+  keyId: string
+): Promise<RateLimitResult> {
+  return rateLimit(`agent:${ruleName}:${keyId}`, RULES[ruleName]);
 }
 
 /** Convenience: throttle by rule + scope + identity (ip or user id). */

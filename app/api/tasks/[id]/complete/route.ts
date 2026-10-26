@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { tasks, payments } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
 import { getPaymentProvider } from "@/lib/payments";
 import { notify } from "@/lib/notify";
+import { logPaymentEvent } from "@/lib/payments/escrow";
 
 // POST /api/tasks/[id]/complete — client confirms work, escrow releases to provider
 export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -41,12 +42,36 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
       return NextResponse.json({ error: "Payment release failed" }, { status: 500 });
     }
 
-    await db
+    // Release exactly once. A double-click, a retried request or an attacker
+    // replaying the call must not pay the provider twice, so the status flip is
+    // a conditional update rather than a blind write.
+    const released = await db
       .update(payments)
       .set({ status: "released", releasedAt: new Date() })
-      .where(eq(payments.taskId, taskId));
+      .where(and(eq(payments.id, payment.id), eq(payments.status, "held_in_escrow")))
+      .returning({ id: payments.id });
+    if (released.length === 0) {
+      return NextResponse.json(
+        { error: "This payment has already been released" },
+        { status: 409 }
+      );
+    }
 
-    await db.update(tasks).set({ status: "completed" }).where(eq(tasks.id, taskId));
+    const completed = await db
+      .update(tasks)
+      .set({ status: "completed" })
+      .where(and(eq(tasks.id, taskId), eq(tasks.status, "submitted")))
+      .returning({ id: tasks.id });
+    if (completed.length === 0) {
+      return NextResponse.json({ error: "This task is no longer awaiting confirmation" }, { status: 409 });
+    }
+
+    await logPaymentEvent(payment.id, "released", "Escrow released to the provider after client confirmation", {
+      amount: payment.netPayoutAmount,
+      currency: payment.currency,
+      commission: payment.commissionAmount,
+      releasedBy: session.userId,
+    });
 
     if (task.assignedProviderId) {
       await notify(

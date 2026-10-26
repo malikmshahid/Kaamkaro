@@ -4,6 +4,7 @@ import { tasks } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
 import { verifyTaskProof } from "@/lib/aiVerification";
+import { throttle, tooManyRequests } from "@/lib/rateLimit";
 
 // POST /api/tasks/[id]/verify — client (or the owner) re-runs AI verification manually
 export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -11,6 +12,10 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
     const session = await getSessionUser();
     if (!session) return NextResponse.json({ error: "Please log in first" }, { status: 401 });
     const { id: taskId } = await params;
+
+    // Every call costs a vision-model request — cap it per user.
+    const limit = await throttle("verifyProof", session.userId);
+    if (!limit.allowed) return tooManyRequests(limit);
 
     const found = await db.select().from(tasks).where(eq(tasks.id, taskId)).limit(1);
     const task = found[0];

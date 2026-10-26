@@ -181,12 +181,12 @@ export default function AdminPage() {
         <h1 className="font-display text-3xl text-heading mb-2">Admin Panel</h1>
         <p className="text-ink/60 mb-8">Platform overview and dispute resolution.</p>
 
-        <div className="flex gap-2 mb-8 border-b border-line">
+        <div className="-mx-6 mb-8 flex gap-2 overflow-x-auto border-b border-line px-6 pb-px sm:mx-0 sm:px-0">
           {(["overview", "revenue", "disputes", "users", "tasks"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-4 py-2 text-sm capitalize border-b-2 -mb-px ${
+              className={`shrink-0 whitespace-nowrap px-4 py-2 text-sm capitalize border-b-2 -mb-px ${
                 tab === t
                   ? "border-green-800 text-green-800 font-semibold"
                   : "border-transparent text-ink/50 hover:text-ink"

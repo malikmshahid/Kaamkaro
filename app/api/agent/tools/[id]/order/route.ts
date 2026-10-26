@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { tools, tasks } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { authenticateAgent } from "@/lib/agentAuth";
+import { throttleAgent, tooManyRequests } from "@/lib/rateLimit";
 import { notify } from "@/lib/notify";
 import { randomUUID } from "crypto";
 
@@ -17,6 +18,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     const found = await db.select().from(tools).where(eq(tools.id, toolId)).limit(1);
     const tool = found[0];
+    const limit = await throttleAgent("toolOrder", agent.keyId);
+    if (!limit.allowed) return tooManyRequests(limit);
+
     if (!tool) return NextResponse.json({ error: "Tool not found" }, { status: 404 });
     if (tool.status !== "active") {
       return NextResponse.json({ error: "This tool is currently paused" }, { status: 400 });

@@ -4,6 +4,14 @@ import { savedItems, tasks, tools } from "@/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
 import { randomUUID } from "crypto";
+import { count } from "drizzle-orm";
+import { z } from "zod";
+
+const MAX_SAVED_ITEMS = 500;
+const saveSchema = z.object({
+  itemType: z.enum(["task", "tool"]),
+  itemId: z.string().uuid("Invalid item"),
+});
 
 // GET /api/saved — list the current user's saved tasks and tools, with details
 export async function GET() {
@@ -42,9 +50,19 @@ export async function POST(req: NextRequest) {
     const session = await getSessionUser();
     if (!session) return NextResponse.json({ error: "Please log in first" }, { status: 401 });
 
-    const { itemType, itemId } = await req.json();
-    if (!["task", "tool"].includes(itemType) || !itemId) {
+    const parsed = saveSchema.safeParse(await req.json().catch(() => null));
+    if (!parsed.success) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+    }
+    const { itemType, itemId } = parsed.data;
+
+    // Only real, visible items can be saved — no junk rows pointing at nothing.
+    const exists =
+      itemType === "task"
+        ? (await db.select({ id: tasks.id }).from(tasks).where(eq(tasks.id, itemId)).limit(1)).length > 0
+        : (await db.select({ id: tools.id }).from(tools).where(eq(tools.id, itemId)).limit(1)).length > 0;
+    if (!exists) {
+      return NextResponse.json({ error: "That item no longer exists" }, { status: 404 });
     }
 
     const existing = await db
@@ -62,6 +80,17 @@ export async function POST(req: NextRequest) {
     if (existing.length > 0) {
       await db.delete(savedItems).where(eq(savedItems.id, existing[0].id));
       return NextResponse.json({ success: true, saved: false });
+    }
+
+    const [{ value: savedCount }] = await db
+      .select({ value: count() })
+      .from(savedItems)
+      .where(eq(savedItems.userId, session.userId));
+    if (Number(savedCount) >= MAX_SAVED_ITEMS) {
+      return NextResponse.json(
+        { error: "You've reached the saved-items limit. Remove a few first." },
+        { status: 400 }
+      );
     }
 
     await db.insert(savedItems).values({

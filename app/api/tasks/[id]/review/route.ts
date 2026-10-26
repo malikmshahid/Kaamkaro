@@ -5,17 +5,28 @@ import { eq, and } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
 import { notify } from "@/lib/notify";
 import { randomUUID } from "crypto";
+import { z } from "zod";
+import { LIMITS } from "@/lib/constants";
+
+const reviewSchema = z.object({
+  rating: z.number().int("Rating must be a whole number").min(1).max(5),
+  comment: z.string().trim().max(LIMITS.reviewComment).optional(),
+});
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getSessionUser();
     if (!session) return NextResponse.json({ error: "Please log in first" }, { status: 401 });
     const { id: taskId } = await params;
-    const { rating, comment } = await req.json();
-
-    if (!rating || rating < 1 || rating > 5) {
-      return NextResponse.json({ error: "Rating must be between 1 and 5" }, { status: 400 });
+    const parsed = reviewSchema.safeParse(await req.json().catch(() => null));
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message || "Rating must be between 1 and 5" },
+        { status: 400 }
+      );
     }
+    const { rating } = parsed.data;
+    const comment = parsed.data.comment || null;
 
     const found = await db.select().from(tasks).where(eq(tasks.id, taskId)).limit(1);
     const task = found[0];

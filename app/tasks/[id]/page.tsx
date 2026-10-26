@@ -406,7 +406,7 @@ export default function TaskDetailPage({
           </span>
         </div>
 
-        <h1 className="font-display text-4xl text-heading mb-4">{task.title}</h1>
+        <h1 className="mb-4 break-words font-display text-4xl text-heading [overflow-wrap:anywhere]">{task.title}</h1>
         <p className="text-ink/70 leading-relaxed mb-6 whitespace-pre-wrap">
           {task.description}
         </p>

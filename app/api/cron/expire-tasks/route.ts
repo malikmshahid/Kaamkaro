@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { timingSafeEqual } from "crypto";
 import { db } from "@/db";
 import { tasks } from "@/db/schema";
 import { eq, and, lte, isNotNull, lt } from "drizzle-orm";
@@ -8,8 +9,17 @@ import { rateLimits } from "@/db/schema";
 // vercel.json). The GET /api/tasks route already expires past-due tasks
 // lazily on every visit; this is just a backup for days with no traffic.
 export async function GET(req: NextRequest) {
-  const authHeader = req.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  const secret = process.env.CRON_SECRET;
+  const authHeader = req.headers.get("authorization") || "";
+  // Fail closed: if CRON_SECRET is unset, "Bearer undefined" must not work.
+  if (!secret || secret.length < 16) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const expected = `Bearer ${secret}`;
+  const a = Buffer.from(authHeader);
+  const b = Buffer.from(expected);
+  const ok = a.length === b.length && timingSafeEqual(a, b);
+  if (!ok) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
     const session = await getSessionUser();
     if (!session) return NextResponse.json({ error: "Please log in first" }, { status: 401 });
 
-    const limit = await throttle("createTask", `payout:${session.userId}`);
+    const limit = await throttle("payoutRequest", session.userId);
     if (!limit.allowed) return tooManyRequests(limit);
 
     const parsed = requestSchema.safeParse(await req.json().catch(() => ({})));

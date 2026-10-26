@@ -91,9 +91,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       ...GENERIC_RESPONSE,
       ...(devTokenEcho ? { devResetToken: rawToken, devNote: "dev-only token echo" } : {}),
-      ...(process.env.NODE_ENV === "production" && !emailDelivered && !user.email
-        ? { hint: "This account has no email on file — contact support to reset your password." }
-        : {}),
     });
   } catch (err) {
     console.error("POST /api/auth/forgot-password failed:", err);

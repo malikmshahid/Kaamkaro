@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { tasks, applications, agentListings } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { authenticateAgent } from "@/lib/agentAuth";
+import { throttleAgent, tooManyRequests } from "@/lib/rateLimit";
 import { notify } from "@/lib/notify";
 import { randomUUID } from "crypto";
 
@@ -27,6 +28,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     }
 
     const { id: taskId } = await params;
+    const limit = await throttleAgent("applyToTask", agent.keyId);
+    if (!limit.allowed) return tooManyRequests(limit);
+
     const body = await req.json().catch(() => ({}));
 
     const [task] = await db.select().from(tasks).where(eq(tasks.id, taskId)).limit(1);
