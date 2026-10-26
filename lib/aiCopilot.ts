@@ -227,11 +227,14 @@ Jobs completed on KaamKaro: ${provider.completedJobs}`;
     const attempt = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      // No response_format here on purpose. Groq's reasoning models return
+      // 400 json_validate_failed when the constrained decoder is cut short, so
+      // we ask for JSON in the prompt and parse leniently instead (the parser
+      // below also accepts a plain-text answer).
       body: JSON.stringify({
         model,
-        max_tokens: 500,
+        max_tokens: 1200,
         temperature: 0.6,
-        response_format: { type: "json_object" },
         messages: [
           { role: "system", content: system },
           { role: "user", content: user },
