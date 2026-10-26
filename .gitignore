@@ -7,3 +7,10 @@ node_modules/
 .env*.local
 
 .env
+mig_pay.sql
+m2.mjs
+m3.mjs
+m4.mjs
+m5.mjs
+m.mjs
+.env
