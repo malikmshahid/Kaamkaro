@@ -661,10 +661,16 @@ export default function TaskDetailPage({
           </p>
         )}
 
-        {/* --- Owner confirms completion (submitted) --- */}
-        {isOwner && task.status === "submitted" && (
+        {/* --- Delivery review: while submitted (actionable) and after
+                completion (read-only archive — the proof and the AI verdict
+                used to vanish the moment the client pressed confirm) --- */}
+        {(isOwner || isAssignedProvider) && ["submitted", "completed"].includes(task.status) && (
           <div className="mb-10 border border-line rounded-xl p-6 bg-card">
-            <p className="font-semibold text-heading mb-1">The provider submitted their work</p>
+            <p className="font-semibold text-heading mb-1">
+              {task.status === "completed"
+                ? "Delivered work — archived"
+                : "The provider submitted their work"}
+            </p>
             {task.proofNote && (
               <p className="text-sm text-ink/70 mb-3 whitespace-pre-wrap">{task.proofNote}</p>
             )}
@@ -750,16 +756,25 @@ export default function TaskDetailPage({
               )}
             </div>
 
-            <button
-              onClick={handleComplete}
-              disabled={busy}
-              className="rounded-full bg-green-900 text-cream px-6 py-2.5 hover:bg-green-800 transition-colors disabled:opacity-50"
-            >
-              {busy ? "..." : "Confirm & Release Payment"}
-            </button>
-            <p className="text-xs text-ink/40 mt-2">
-              AI verification is just a signal — the final call is always yours.
-            </p>
+            {task.status === "submitted" ? (
+              <>
+                <button
+                  onClick={handleComplete}
+                  disabled={busy}
+                  className="rounded-full bg-green-900 px-6 py-2.5 text-cream transition-colors hover:bg-green-800 disabled:opacity-50"
+                >
+                  {busy ? "..." : "Confirm & Release Payment"}
+                </button>
+                <p className="mt-2 text-xs text-ink/40">
+                  AI verification is just a signal — the final call is always yours.
+                </p>
+              </>
+            ) : (
+              <p className="text-xs text-ink/50">
+                Payment was released to the provider. This delivery stays here as
+                a permanent record for both of you.
+              </p>
+            )}
           </div>
         )}
 
