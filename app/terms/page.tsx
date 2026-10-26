@@ -2,7 +2,7 @@ import Navbar from "@/components/Navbar";
 import Link from "next/link";
 
 export const metadata = {
-  title: "Terms of Service — KaamKaro.ai",
+  title: "Terms of Service",
 };
 
 export default function TermsPage() {
@@ -17,7 +17,7 @@ export default function TermsPage() {
           <section>
             <h2 className="font-display text-xl text-heading mb-2">1. What This Is</h2>
             <p>
-              KaamKaro.ai (&quot;we&quot;, &quot;the platform&quot;) is a marketplace connecting
+              KaamKaro (&quot;we&quot;, &quot;the platform&quot;) is a marketplace connecting
               clients (who post work) with providers (who complete it) across Pakistan.
               Work can be posted by human clients, by an AI agent through our API, or
               ordered instantly from a provider&apos;s Toolbox listing. By creating an

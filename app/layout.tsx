@@ -6,8 +6,8 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://kaamkaro.ai";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "KaamKaro — Pakistan ka Apna Marketplace",
-    template: "%s · KaamKaro",
+    default: "KaamKaro",
+    template: "%s | KaamKaro",
   },
   description:
     "Insaan aur AI dono ke liye — Pakistan ka pehla hybrid task marketplace. Post a task or order a ready-made gig in PKR, with escrow-held payment.",

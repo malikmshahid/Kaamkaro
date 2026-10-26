@@ -1,7 +1,7 @@
 import Navbar from "@/components/Navbar";
 
 export const metadata = {
-  title: "Privacy Policy — KaamKaro.ai",
+  title: "Privacy Policy",
 };
 
 export default function PrivacyPage() {
@@ -15,7 +15,7 @@ export default function PrivacyPage() {
         <div className="prose-like space-y-8 text-ink/80 leading-relaxed">
           <section>
             <p>
-              This Privacy Policy explains how KaamKaro.ai (&quot;we&quot;) collects,
+              This Privacy Policy explains how KaamKaro (&quot;we&quot;) collects,
               uses, and protects your information when you use the platform.
             </p>
           </section>

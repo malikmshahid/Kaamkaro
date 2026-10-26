@@ -92,13 +92,8 @@ export default function Navbar() {
       <nav className="max-w-6xl mx-auto flex items-center justify-between px-4 sm:px-6 py-4">
         <Link href="/" className="flex items-center gap-2.5" onClick={() => setMenuOpen(false)}>
           <img src="/logo-mark.svg" alt="" width={32} height={32} className="rounded-lg" />
-          <span className="flex items-baseline gap-1.5">
-            <span className="font-display text-2xl font-semibold text-heading">
-              KaamKaro
-            </span>
-            <span className="text-xs uppercase tracking-wider text-gold-500">
-              .ai
-            </span>
+          <span className="font-display text-2xl font-semibold tracking-tight text-heading">
+            KaamKaro
           </span>
         </Link>
 
