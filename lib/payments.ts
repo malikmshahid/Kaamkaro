@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { platformConfig } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { getPayFastConfig, isPayFastEnabled } from "@/lib/payments/payfast";
 
 /**
  * Payment Gateway Abstraction
@@ -66,6 +67,29 @@ class MockPaymentProvider implements PaymentProvider {
 
 export function getPaymentProvider(): PaymentProvider {
   return new MockPaymentProvider();
+}
+
+/**
+ * Which money flow is the app running?
+ *  - "payfast": real hosted checkout (JazzCash / Easypaisa / Raast / cards).
+ *    Enabled automatically the moment PAYFAST_MERCHANT_ID + PAYFAST_SECURED_KEY
+ *    are present in the environment.
+ *  - "mock":   no gateway credentials yet, escrow is simulated. The UI labels
+ *    this honestly so nobody thinks real money moved.
+ */
+export function paymentMode(): "payfast" | "mock" {
+  return isPayFastEnabled() ? "payfast" : "mock";
+}
+
+/** Safe summary for the browser — never includes the secured key. */
+export function paymentModeInfo() {
+  const cfg = getPayFastConfig();
+  return {
+    mode: cfg ? ("payfast" as const) : ("mock" as const),
+    gateway: cfg ? "payfast" : null,
+    sandbox: cfg ? cfg.mode !== "live" : null,
+    contractVerified: cfg ? cfg.contractVerified : false,
+  };
 }
 
 /**

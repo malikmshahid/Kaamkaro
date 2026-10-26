@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import PayoutPanel from "@/components/PayoutPanel";
 import { useUser } from "@/lib/useUser";
 import { formatMoney } from "@/lib/currency";
 
@@ -208,6 +209,8 @@ export default function DashboardPage() {
             </div>
           </section>
         )}
+
+        {!loading && <PayoutPanel />}
 
         {!loading && (savedTasks.length > 0 || savedTools.length > 0) && (
           <section className="mt-10">

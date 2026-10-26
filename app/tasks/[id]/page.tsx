@@ -2,6 +2,7 @@
 
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { useUser } from "@/lib/useUser";
 import { formatMoney } from "@/lib/currency";
@@ -93,6 +94,7 @@ export default function TaskDetailPage({
   const [proofLink, setProofLink] = useState(""); // optional external link
   const [proofFiles, setProofFiles] = useState<File[]>([]);
   const [proposalLoading, setProposalLoading] = useState(false);
+  const router = useRouter();
   const [aiVerdict, setAiVerdict] = useState<{
     status: string;
     confidence: number;
@@ -204,7 +206,22 @@ export default function TaskDetailPage({
     const res = await fetch(`/api/tasks/${id}/pay`, { method: "POST" });
     const data = await res.json();
     setBusy(false);
-    if (!res.ok) return setNotice(data.error);
+
+    if (!res.ok) {
+      // A pending checkout can be resumed rather than re-created.
+      if (data.resumeUrl) {
+        router.push(data.resumeUrl);
+        return;
+      }
+      return setNotice(data.error);
+    }
+
+    // Real gateway: hand the browser over to PayFast's hosted checkout.
+    if (data.mode === "payfast" && data.paymentId) {
+      router.push(data.continueUrl || `/pay/${data.paymentId}`);
+      return;
+    }
+
     setNotice("Escrow funded — the provider can get to work now.");
     load();
   }
@@ -553,23 +570,39 @@ export default function TaskDetailPage({
         {/* --- Escrow payment step (owner, assigned, no payment yet) --- */}
         {isOwner && task.status === "assigned" && !payment && (
           <div className="mb-10 border border-gold-400 bg-gold-100/40 rounded-xl p-6">
-            <p className="font-semibold text-heading mb-1">Fund Escrow</p>
-            <p className="text-sm text-ink/60 mb-4">
+            <p className="mb-1 font-semibold text-heading">Fund Escrow</p>
+            <p className="mb-4 text-sm text-ink/60">
               Hold {formatMoney(task.budget, task.currency)} in escrow to confirm the
-              provider. The funds stay safely with us until the work is done.
-              <br />
-              <span className="text-xs italic">
-                (Sandbox/mock mode for now — this will process real payments
-                once JazzCash/EasyPaisa is integrated.)
-              </span>
+              provider. Pay by JazzCash, Easypaisa, Raast or card — KaamKaro keeps the
+              money safe until you confirm the work is done.
             </p>
             <button
               onClick={handlePay}
               disabled={busy}
               className="rounded-full bg-green-900 text-cream px-6 py-2.5 hover:bg-green-800 transition-colors disabled:opacity-50"
             >
-              {busy ? "..." : `Fund Escrow — ${formatMoney(task.budget, task.currency)}`}
+              {busy
+                ? "Opening checkout…"
+                : `Fund Escrow — ${formatMoney(task.budget, task.currency)}`}
             </button>
+          </div>
+        )}
+
+        {/* --- Gateway checkout started but not confirmed yet --- */}
+        {isOwner && task.status === "assigned" && payment && payment.status === "pending" && (
+          <div className="mb-10 rounded-xl border border-gold-400 bg-gold-100/40 p-6">
+            <p className="mb-1 font-semibold text-heading">Payment is being confirmed</p>
+            <p className="mb-4 text-sm text-ink/60">
+              Your checkout of {formatMoney(payment.amount, payment.currency)} hasn&apos;t
+              reached us yet. If you completed it, it will show up here automatically —
+              otherwise you can pick it back up.
+            </p>
+            <Link
+              href={`/pay/${payment.id}`}
+              className="inline-block rounded-full bg-green-900 px-6 py-2.5 text-cream transition-colors hover:bg-green-800"
+            >
+              Continue payment
+            </Link>
           </div>
         )}
 

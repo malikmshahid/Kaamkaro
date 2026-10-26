@@ -1,4 +1,4 @@
-import { pgTable, text, integer, real, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, integer, real, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
 // Tools: provider-listed services ("gigs") — a provider proactively lists a
@@ -218,7 +218,7 @@ export const payments = pgTable("payments", {
   commissionRatePercent: real("commission_rate_percent").notNull().default(0),
   commissionAmount: real("commission_amount").notNull().default(0),
   netPayoutAmount: real("net_payout_amount").notNull().default(0), // what the provider actually receives
-  provider: text("provider", { enum: ["jazzcash", "easypaisa", "payoneer", "mock"] })
+  provider: text("provider", { enum: ["payfast", "jazzcash", "easypaisa", "payoneer", "mock"] })
     .notNull()
     .default("mock"),
   status: text("status", {
@@ -226,9 +226,49 @@ export const payments = pgTable("payments", {
   })
     .notNull()
     .default("pending"),
-  providerRef: text("provider_ref"), // transaction id returned by the real gateway later
+  providerRef: text("provider_ref"), // transaction id returned by the gateway
+  // ---- real gateway bookkeeping (PayFast / JazzCash / Easypaisa) ----
+  basketId: text("basket_id"), // our reference sent to the gateway
+  providerTxnId: text("provider_txn_id"), // gateway's own transaction id
+  providerStatus: text("provider_status"), // last status string the gateway reported
+  providerPayload: jsonb("provider_payload"), // last raw callback / status payload
+  paidAt: timestamp("paid_at", { withTimezone: true }), // when money actually landed
+  payoutId: text("payout_id"), // payout batch this net amount was included in
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
   releasedAt: timestamp("released_at"),
+});
+
+// Append-only audit trail for every gateway interaction. Never updated, only
+// inserted — this is what you read when a client says "I paid but it says
+// unpaid". Stores the raw payload so nothing is lost.
+export const paymentEvents = pgTable("payment_events", {
+  id: text("id").primaryKey(),
+  paymentId: text("payment_id").notNull(),
+  kind: text("kind").notNull(), // initiated | callback | status_check | released | refunded | rejected
+  detail: text("detail"),
+  payload: jsonb("payload"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+});
+
+// Provider withdrawals. Escrow releases money to the provider's KaamKaro
+// balance; this is where it leaves the platform for a JazzCash / Easypaisa /
+// bank account. Admin marks each one paid with a reference number.
+export const payouts = pgTable("payouts", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  amount: real("amount").notNull(),
+  currency: text("currency").notNull().default("PKR"),
+  method: text("method", { enum: ["jazzcash", "easypaisa", "bank", "other"] }).notNull(),
+  accountTitle: text("account_title").notNull(),
+  accountNumber: text("account_number").notNull(),
+  bankName: text("bank_name"),
+  status: text("status", { enum: ["requested", "processing", "paid", "rejected"] })
+    .notNull()
+    .default("requested"),
+  reference: text("reference"), // bank/wallet transaction id, filled by admin
+  note: text("note"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+  processedAt: timestamp("processed_at", { withTimezone: true }),
 });
 
 // Platform Config: a single-row table holding platform-wide settings, most
