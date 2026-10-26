@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import { useUser } from "@/lib/useUser";
 import { formatMoney } from "@/lib/currency";
 import { categoryLabel } from "@/lib/constants";
+import { proofDisplayUrl, isImageRef } from "@/lib/proof";
 
 type Task = {
   id: string;
@@ -676,14 +677,16 @@ export default function TaskDetailPage({
               if (shots.length === 0) return null;
               return (
                 <div className="mb-4 grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {shots.map((u, i) =>
-                    /\.(pdf)$/i.test(u) ? (
+                  {shots.map((raw, i) => {
+                    const u = proofDisplayUrl(task.id, raw);
+                    const isPdf = !isImageRef(raw) && /\.pdf(\?|$)/i.test(raw);
+                    return isPdf ? (
                       <a
                         key={i}
                         href={u}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="border border-line rounded-lg px-3 py-4 text-xs text-center bg-paper hover:bg-line/20"
+                        className="border border-line rounded-lg px-3 py-4 text-center text-xs bg-paper hover:bg-line/20"
                       >
                         PDF proof{shots.length > 1 ? ` ${i + 1}` : ""}
                       </a>
@@ -693,11 +696,11 @@ export default function TaskDetailPage({
                         <img
                           src={u}
                           alt={`Proof ${i + 1}`}
-                          className="w-full h-28 object-cover rounded-lg border border-line hover:opacity-90"
+                          className="h-28 w-full rounded-lg border border-line object-cover hover:opacity-90"
                         />
                       </a>
-                    )
-                  )}
+                    );
+                  })}
                 </div>
               );
             })()}

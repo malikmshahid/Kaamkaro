@@ -256,9 +256,29 @@ Jobs completed on KaamKaro: ${provider.completedJobs}`;
   const text: string | undefined = data?.choices?.[0]?.message?.content;
   if (!text) throw new Error("AI Copilot returned an empty draft. Please try again.");
 
-  const parsed = JSON.parse(text.replace(/```json|```/g, "").trim()) as ProposalDraft;
-  if (!parsed?.proposal || typeof parsed.proposal !== "string") {
-    throw new Error("AI Copilot returned an unexpected format. Please try again.");
+  // Models occasionally wrap the JSON in prose or skip the braces entirely.
+  // Rather than 500 on the user, fall back to using the raw text as the draft.
+  const cleaned = text.replace(/```json|```/g, "").trim();
+  let parsed: Partial<ProposalDraft> | null = null;
+  try {
+    parsed = JSON.parse(cleaned) as Partial<ProposalDraft>;
+  } catch {
+    const braces = cleaned.match(/\{[\s\S]*\}/);
+    if (braces) {
+      try {
+        parsed = JSON.parse(braces[0]) as Partial<ProposalDraft>;
+      } catch {
+        parsed = null;
+      }
+    }
   }
-  return { proposal: parsed.proposal.trim(), angle: (parsed.angle || "").trim() };
+
+  if (parsed && typeof parsed.proposal === "string" && parsed.proposal.trim()) {
+    return { proposal: parsed.proposal.trim(), angle: (parsed.angle || "").trim() };
+  }
+  if (cleaned && cleaned.length > 40) {
+    // Last resort: the raw completion is still a usable proposal.
+    return { proposal: cleaned, angle: "" };
+  }
+  throw new Error("AI Copilot returned an empty draft. Please try again.");
 }

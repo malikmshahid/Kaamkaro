@@ -72,7 +72,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const contentType = req.headers.get("content-type") || "";
     let note = "";
     let rawUrl = "";
-    let uploaded: { url: string; hash: string }[] = [];
+    let uploaded: { ref: string; hash: string; dataUrl: string }[] = [];
 
     if (contentType.includes("multipart/form-data")) {
       const form = await req.formData().catch(() => null);
@@ -112,9 +112,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     // Accept "link + a sentence" — grab just the URL so the vision model can
     // actually fetch the image instead of choking on prose.
     const linkedUrl = extractUrl(rawUrl) || extractUrl(note);
-    const proofFiles = uploaded.length > 0 ? uploaded.map((u) => u.url) : linkedUrl ? [linkedUrl] : [];
+    const proofFiles = uploaded.length > 0 ? uploaded.map((u) => u.ref) : linkedUrl ? [linkedUrl] : [];
     const primaryUrl = proofFiles[0] || null;
     const hashes = uploaded.map((u) => u.hash);
+    // For uploaded files we already hold the bytes, so the vision model gets a
+    // data URL — no public URL, no second network hop. Pasted links are fetched
+    // by lib/aiVerification as before.
+    const primaryImage = uploaded.find((u) => u.dataUrl.startsWith("data:image/"))?.dataUrl
+      || (primaryUrl && primaryUrl.startsWith("http") ? primaryUrl : null);
 
     if (!primaryUrl && !note.trim()) {
       return NextResponse.json(
@@ -152,7 +157,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const description = note.trim() ? `${task.description}\n\nProvider's note: ${note.trim()}` : task.description;
 
     const runVerification = async () => {
-      const result = await verifyTaskProof(task.title, description, primaryUrl);
+      const result = await verifyTaskProof(task.title, description, primaryImage);
       if (duplicate.duplicate) {
         // Byte-identical file already used on another task — never auto-pass it.
         result.status = "review_needed";

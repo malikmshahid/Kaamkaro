@@ -46,14 +46,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const ext = file.type.split("/")[1];
+    const ext = file.type.split("/")[1].replace("jpeg", "jpg");
+    // The Blob store is private, so we keep the pathname and serve the image
+    // through /api/files (which requires a login). See lib/proof.ts.
     const blob = await put(`profile-photos/${session.userId}-${Date.now()}.${ext}`, file, {
-      access: "public",
+      access: "private",
+      contentType: file.type,
+      addRandomSuffix: false,
     });
 
-    await db.update(users).set({ photoUrl: blob.url }).where(eq(users.id, session.userId));
+    const servedFrom = `/api/files?f=${encodeURIComponent(blob.pathname)}`;
+    await db.update(users).set({ photoUrl: servedFrom }).where(eq(users.id, session.userId));
 
-    return NextResponse.json({ success: true, photoUrl: blob.url });
+    return NextResponse.json({ success: true, photoUrl: servedFrom });
   } catch (err) {
     console.error("POST /api/profile/photo failed:", err);
     return NextResponse.json(

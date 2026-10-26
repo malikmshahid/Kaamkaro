@@ -20,6 +20,8 @@ export type VerificationResult = {
 };
 
 async function fetchImageAsDataUrl(url: string): Promise<string | null> {
+  // Already an inline image (uploaded proof) — nothing to fetch.
+  if (url.startsWith("data:image/")) return url;
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
     if (!res.ok) return null;
