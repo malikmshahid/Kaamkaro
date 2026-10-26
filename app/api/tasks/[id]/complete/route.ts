@@ -22,6 +22,12 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
     if (task.postedById !== session.userId) {
       return NextResponse.json({ error: "Only the client can confirm completion" }, { status: 403 });
     }
+    if (task.status === "completed") {
+      return NextResponse.json(
+        { error: "This task is already completed and the payment was released" },
+        { status: 409 }
+      );
+    }
     if (task.status !== "submitted") {
       return NextResponse.json({ error: "The provider has not submitted yet" }, { status: 400 });
     }

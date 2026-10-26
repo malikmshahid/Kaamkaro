@@ -411,20 +411,20 @@ export default function TaskDetailPage({
           {task.description}
         </p>
 
-        <div className="grid grid-cols-3 gap-4 sm:flex sm:gap-8 text-sm mb-10 border-y border-line py-4">
-          <div>
+        <div className="mb-10 grid grid-cols-2 gap-4 border-y border-line py-4 text-sm sm:flex sm:gap-8">
+          <div className="min-w-0">
             <p className="text-ink/50">Budget</p>
-            <p className="font-semibold text-green-800 text-lg">
+            <p className="text-lg font-semibold text-green-800">
               {formatMoney(task.budget, task.currency)}
             </p>
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="text-ink/50">City</p>
-            <p className="font-semibold text-lg">{task.city || "Remote"}</p>
+            <p className="text-lg font-semibold">{task.city || "Remote"}</p>
           </div>
-          <div>
+          <div className="col-span-2 min-w-0 sm:col-auto">
             <p className="text-ink/50">Category</p>
-            <p className="font-semibold text-lg">{categoryLabel(task.category)}</p>
+            <p className="text-lg font-semibold">{categoryLabel(task.category)}</p>
           </div>
         </div>
 
