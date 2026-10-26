@@ -3,7 +3,11 @@ import { db } from "@/db";
 import { payouts, users } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
-import { availablePayoutBalance, attachPaymentsToPayout } from "@/lib/payments/escrow";
+import {
+  availablePayoutBalance,
+  attachPaymentsToPayout,
+  attachCreditsToPayout,
+} from "@/lib/payments/escrow";
 import { throttle, tooManyRequests } from "@/lib/rateLimit";
 import { notify } from "@/lib/notify";
 import { randomUUID } from "crypto";
@@ -99,6 +103,7 @@ export async function POST(req: NextRequest) {
     });
 
     await attachPaymentsToPayout(balance.paymentIds, id);
+    await attachCreditsToPayout(balance.creditIds, id);
 
     const admins = await db.select().from(users).where(eq(users.role, "admin")).limit(5);
     for (const admin of admins) {

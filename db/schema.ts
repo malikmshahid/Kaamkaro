@@ -271,6 +271,21 @@ export const payouts = pgTable("payouts", {
   processedAt: timestamp("processed_at", { withTimezone: true }),
 });
 
+// Wallet credits: money owed to a user that did not come from a task — a refund,
+// a goodwill credit or an admin adjustment. Kept separate from `payments` so a
+// payment row always means "a real task was funded"; a credit always means
+// "KaamKaro owes this user". Both flow into the same payout balance.
+export const walletCredits = pgTable("wallet_credits", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  amount: real("amount").notNull(),
+  currency: text("currency").notNull().default("PKR"),
+  reason: text("reason").notNull(),
+  createdBy: text("created_by"), // admin user id
+  payoutId: text("payout_id"), // set when it is included in a payout batch
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+});
+
 // Platform Config: a single-row table holding platform-wide settings, most
 // importantly the commission rate. Kept as its own table (rather than an
 // env var) so admins can change it live from the admin panel.

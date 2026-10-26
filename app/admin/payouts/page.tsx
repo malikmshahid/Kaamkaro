@@ -37,6 +37,32 @@ export default function AdminPayoutsPage() {
   const [busy, setBusy] = useState<string | null>(null);
   const [refs, setRefs] = useState<Record<string, string>>({});
   const [msg, setMsg] = useState("");
+  const [credit, setCredit] = useState({ identifier: "", amount: "", reason: "" });
+  const [creditBusy, setCreditBusy] = useState(false);
+
+  async function giveCredit(e: React.FormEvent) {
+    e.preventDefault();
+    setCreditBusy(true);
+    setMsg("");
+    const res = await fetch("/api/admin/credits", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        identifier: credit.identifier,
+        amount: Number(credit.amount),
+        reason: credit.reason,
+      }),
+    });
+    const data = await res.json();
+    setCreditBusy(false);
+    if (res.ok) {
+      setMsg(`Credited PKR ${Number(data.amount).toLocaleString()} to that account.`);
+      setCredit({ identifier: "", amount: "", reason: "" });
+      load();
+    } else {
+      setMsg(data.error || "Could not create the credit");
+    }
+  }
 
   const load = useCallback(async () => {
     const res = await fetch("/api/admin/payouts", { cache: "no-store" });
@@ -95,6 +121,52 @@ export default function AdminPayoutsPage() {
           <p className="mb-5 rounded-lg bg-green-950/5 px-4 py-2 text-sm text-green-800 dark:bg-green-500/10 dark:text-green-300">
             {msg}
           </p>
+        )}
+
+        {user?.role === "admin" && (
+          <form
+            onSubmit={giveCredit}
+            className="mb-8 grid gap-3 rounded-2xl border border-line bg-card p-5 sm:grid-cols-[1.4fr_0.6fr_1.6fr_auto]"
+          >
+            <div className="sm:col-span-4">
+              <p className="font-semibold text-heading">Add a credit</p>
+              <p className="text-xs text-ink/50">
+                Refund, goodwill or a test credit — it lands in that person&apos;s withdrawable
+                balance with your name and a reason attached.
+              </p>
+            </div>
+            <input
+              required
+              value={credit.identifier}
+              onChange={(e) => setCredit({ ...credit, identifier: e.target.value })}
+              placeholder="Phone or email"
+              className="min-w-0 rounded-lg border border-line bg-paper px-3 py-2 text-sm"
+            />
+            <input
+              required
+              type="number"
+              min="1"
+              step="0.01"
+              value={credit.amount}
+              onChange={(e) => setCredit({ ...credit, amount: e.target.value })}
+              placeholder="PKR"
+              className="min-w-0 rounded-lg border border-line bg-paper px-3 py-2 text-sm"
+            />
+            <input
+              required
+              value={credit.reason}
+              onChange={(e) => setCredit({ ...credit, reason: e.target.value })}
+              placeholder="Reason (e.g. goodwill for late delivery)"
+              className="min-w-0 rounded-lg border border-line bg-paper px-3 py-2 text-sm"
+            />
+            <button
+              type="submit"
+              disabled={creditBusy}
+              className="rounded-full bg-green-900 px-5 py-2 text-sm text-cream hover:bg-green-800 disabled:opacity-50"
+            >
+              {creditBusy ? "Saving…" : "Credit"}
+            </button>
+          </form>
         )}
 
         {userLoading || loading ? (

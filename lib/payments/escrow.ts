@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { payments, tasks, paymentEvents } from "@/db/schema";
+import { payments, tasks, paymentEvents, walletCredits } from "@/db/schema";
 import { eq, and, isNull, inArray } from "drizzle-orm";
 import { notify } from "@/lib/notify";
 import { randomUUID } from "crypto";
@@ -121,28 +121,67 @@ export async function availablePayoutBalance(userId: string): Promise<{
   amount: number;
   currency: string;
   paymentIds: string[];
+  creditIds: string[];
 }> {
-  const rows = await db
-    .select({
-      id: payments.id,
-      net: payments.netPayoutAmount,
-      currency: payments.currency,
-    })
-    .from(payments)
-    .where(
-      and(
-        eq(payments.payeeId, userId),
-        eq(payments.status, "released"),
-        isNull(payments.payoutId)
-      )
-    );
+  const [rows, credits] = await Promise.all([
+    db
+      .select({
+        id: payments.id,
+        net: payments.netPayoutAmount,
+        currency: payments.currency,
+      })
+      .from(payments)
+      .where(
+        and(
+          eq(payments.payeeId, userId),
+          eq(payments.status, "released"),
+          isNull(payments.payoutId)
+        )
+      ),
+    db
+      .select({
+        id: walletCredits.id,
+        net: walletCredits.amount,
+        currency: walletCredits.currency,
+      })
+      .from(walletCredits)
+      .where(and(eq(walletCredits.userId, userId), isNull(walletCredits.payoutId))),
+  ]);
 
-  const amount = rows.reduce((sum: number, r: { net: number }) => sum + Number(r.net || 0), 0);
+  const amount = [...rows, ...credits].reduce(
+    (sum: number, r: { net: number }) => sum + Number(r.net || 0),
+    0
+  );
   return {
     amount: Math.round(amount * 100) / 100,
-    currency: rows[0]?.currency || "PKR",
+    currency: rows[0]?.currency || credits[0]?.currency || "PKR",
     paymentIds: rows.map((r: { id: string }) => r.id),
+    creditIds: credits.map((r: { id: string }) => r.id),
   };
+}
+
+/**
+ * Put money into a user's balance without a task: a refund, a goodwill credit
+ * or an admin adjustment. Only admins can reach the route that uses this, and
+ * every credit is a row with a reason and the admin who created it.
+ */
+export async function creditWallet(input: {
+  userId: string;
+  amount: number;
+  currency?: string;
+  reason: string;
+  adminId: string;
+}) {
+  const id = randomUUID();
+  await db.insert(walletCredits).values({
+    id,
+    userId: input.userId,
+    amount: input.amount,
+    currency: input.currency || "PKR",
+    reason: input.reason,
+    createdBy: input.adminId,
+  });
+  return { id };
 }
 
 /** Mark released payments as included in a payout batch. */
@@ -158,4 +197,13 @@ export async function attachPaymentsToPayout(paymentIds: string[], payoutId: str
         inArray(payments.id, paymentIds)
       )
     );
+}
+
+/** Mark wallet credits as included in a payout batch. */
+export async function attachCreditsToPayout(creditIds: string[], payoutId: string) {
+  if (creditIds.length === 0) return;
+  await db
+    .update(walletCredits)
+    .set({ payoutId })
+    .where(and(isNull(walletCredits.payoutId), inArray(walletCredits.id, creditIds)));
 }
