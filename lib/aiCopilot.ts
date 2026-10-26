@@ -48,33 +48,59 @@ export async function draftTaskFromIdea(
 
   const userMessage = city ? `Idea: "${idea}"\nCity: ${city}` : `Idea: "${idea}"`;
 
-  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
-      max_tokens: 800,
-      response_format: { type: "json_object" },
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: userMessage },
-      ],
-    }),
-    signal: AbortSignal.timeout(30000),
-  });
+  // Groq retired llama-3.3-70b-versatile on 16 Aug 2026 (it now returns 404
+  // model_not_found). Model is env-driven so it never needs a code change
+  // again: set GROQ_MODEL in Vercel. The fallbacks are Groq's own recommended
+  // replacements, tried in order if the configured one is missing.
+  const candidates = [
+    process.env.GROQ_MODEL,
+    "openai/gpt-oss-120b",
+    "openai/gpt-oss-20b",
+  ].filter((m): m is string => Boolean(m));
 
-  if (!res.ok) {
-    const errText = await res.text().catch(() => "");
-    throw new Error(`AI Copilot request failed (${res.status}): ${errText.slice(0, 200)}`);
+  let res: Response | null = null;
+  let lastError = "";
+
+  for (const model of candidates) {
+    const attempt = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: 800,
+        response_format: { type: "json_object" },
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: userMessage },
+        ],
+      }),
+      signal: AbortSignal.timeout(30000),
+    });
+
+    if (attempt.ok) {
+      res = attempt;
+      break;
+    }
+
+    lastError = `${attempt.status} ${(await attempt.text().catch(() => "")).slice(0, 200)}`;
+    // Only try the next model when this one doesn't exist / isn't accessible.
+    // Any other error (rate limit, bad key) would fail the same way again.
+    if (attempt.status !== 404) break;
+  }
+
+  if (!res) {
+    // Details go to the server log only — never to the browser.
+    console.error("AI Copilot provider error:", lastError);
+    throw new Error("AI Copilot is temporarily unavailable. Please fill the form manually.");
   }
 
   const data = await res.json();
   const text: string | undefined = data?.choices?.[0]?.message?.content;
   if (!text) {
-    throw new Error("AI Copilot returned no text.");
+    throw new Error("AI Copilot returned an empty draft. Please try again or fill the form manually.");
   }
 
   const cleaned = text.replace(/```json|```/g, "").trim();

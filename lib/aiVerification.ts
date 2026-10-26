@@ -73,7 +73,7 @@ export async function verifyTaskProof(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: process.env.GROQ_VISION_MODEL || "meta-llama/llama-4-scout-17b-16e-instruct",
+        model: process.env.GROQ_VISION_MODEL || "qwen/qwen3.8-27b",
         max_tokens: 400,
         response_format: { type: "json_object" },
         messages: [
@@ -105,10 +105,13 @@ Respond ONLY in this JSON format, nothing else:
 
     if (!res.ok) {
       const errText = await res.text().catch(() => "");
+      // Log the provider detail, show the user something human. A retired
+      // model id or rate limit should never read like a platform bug.
+      console.error(`AI verification provider error (${res.status}):`, errText.slice(0, 300));
       return {
-        status: "error",
+        status: "review_needed",
         confidence: 0,
-        notes: `AI verification failed (${res.status}): ${errText.slice(0, 200)}`,
+        notes: "AI could not check this proof right now — please review it manually.",
       };
     }
 

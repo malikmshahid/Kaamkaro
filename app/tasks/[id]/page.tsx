@@ -35,6 +35,8 @@ type Application = {
   status: string;
   providerName: string | null;
   providerRating: number | null;
+  providerRatingCount?: number | null;
+  providerVerified?: boolean | null;
 };
 
 type Payment = {
@@ -402,6 +404,26 @@ export default function TaskDetailPage({
                         </span>
                       )}
                     </Link>
+                    <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-ink/60">
+                      {app.providerRating && app.providerRating > 0 ? (
+                        <span className="inline-flex items-center gap-1">
+                          ⭐ {Number(app.providerRating).toFixed(1)}
+                          {typeof app.providerRatingCount === "number" && app.providerRatingCount > 0
+                            ? ` (${app.providerRatingCount})`
+                            : ""}
+                        </span>
+                      ) : (
+                        <span className="text-ink/40">New provider — no reviews yet</span>
+                      )}
+                      {app.providerVerified && (
+                        <span className="bg-green-900/10 text-green-800 rounded-full px-2 py-0.5">
+                          ✓ ID verified
+                        </span>
+                      )}
+                      <Link href={`/providers/${app.providerId}`} className="underline hover:text-green-700">
+                        View profile
+                      </Link>
+                    </div>
                     {app.message && (
                       <p className="text-sm text-ink/60 mt-1">{app.message}</p>
                     )}

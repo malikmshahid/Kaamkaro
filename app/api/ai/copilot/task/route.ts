@@ -28,9 +28,15 @@ export async function POST(req: NextRequest) {
     const draft = await draftTaskFromIdea(parsed.data.idea, parsed.data.city);
     return NextResponse.json({ draft });
   } catch (err) {
+    // Full detail stays in the server log (and Sentry, if configured).
     console.error("AI copilot error:", err);
-    const message =
-      err instanceof Error ? err.message : "AI Copilot failed. Please try again or fill the form manually.";
-    return NextResponse.json({ error: message }, { status: 500 });
+    const friendly =
+      err instanceof Error &&
+      (err.message.startsWith("AI Copilot is temporarily unavailable") ||
+        err.message.startsWith("AI Copilot returned") ||
+        err.message.startsWith("AI Copilot is not configured"))
+        ? err.message
+        : "AI Copilot is temporarily unavailable. Please fill the form manually.";
+    return NextResponse.json({ error: friendly }, { status: 500 });
   }
 }

@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { tasks, applications, users, payments, reviews, agentListings } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { getSessionUser } from "@/lib/auth";
+
+// Fields that must never reach a stranger's browser: the private proof of
+// work, internal user ids, and anything about the money.
+const PRIVATE_TASK_FIELDS = ["proofUrl", "postedById", "assignedProviderId"] as const;
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -11,6 +16,32 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     const task = found[0];
     if (!task) {
       return NextResponse.json({ error: "Task not found" }, { status: 404 });
+    }
+
+    const session = await getSessionUser().catch(() => null);
+    const isParticipant =
+      !!session &&
+      (task.postedById === session.userId || task.assignedProviderId === session.userId);
+    const isAdmin = session?.role === "admin";
+
+    // Anonymous visitors and unrelated users get a public-safe view only.
+    if (!isParticipant && !isAdmin) {
+      const publicTask: Record<string, unknown> = { ...task };
+      for (const key of PRIVATE_TASK_FIELDS) delete publicTask[key];
+      return NextResponse.json({
+        task: publicTask,
+        applications: [],
+        payment: null,
+        reviews: await db
+          .select({
+            id: reviews.id,
+            rating: reviews.rating,
+            comment: reviews.comment,
+            createdAt: reviews.createdAt,
+          })
+          .from(reviews)
+          .where(eq(reviews.taskId, id)),
+      });
     }
 
     const apps = await db
@@ -23,6 +54,8 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
         status: applications.status,
         providerName: users.name,
         providerRating: users.ratingAvg,
+        providerRatingCount: users.ratingCount,
+        providerVerified: users.cnicVerified,
         agentName: agentListings.name,
       })
       .from(applications)
