@@ -87,7 +87,26 @@ export function middleware(req: NextRequest) {
       const requestOrigin = req.headers.get("origin");
       const site = req.headers.get("sec-fetch-site");
 
-      if (requestOrigin && requestOrigin !== origin) {
+      // `req.nextUrl.origin` is not trustworthy behind a proxy / custom domain:
+      // it reports whatever host the runtime baked in, so a legit browser POST
+      // to https://kaamkaro.pk was being rejected as cross-site. Rebuild the
+      // expected origin from the forwarded headers and accept any of them.
+      const host = req.headers.get("x-forwarded-host") || req.headers.get("host") || "";
+      const forwardedProto = req.headers.get("x-forwarded-proto");
+      const proto =
+        forwardedProto ||
+        (host.startsWith("localhost") || host.startsWith("127.") ? "http" : "https");
+      const allowedOrigins = new Set(
+        [
+          origin,
+          host ? `${proto}://${host}` : "",
+          process.env.APP_ORIGIN || "",
+          process.env.NEXT_PUBLIC_SITE_URL || "",
+          "https://kaamkaro-six.vercel.app",
+        ].filter(Boolean)
+      );
+
+      if (requestOrigin && !allowedOrigins.has(requestOrigin)) {
         return NextResponse.json({ error: "Cross-site request blocked" }, { status: 403 });
       }
       // sec-fetch-site is absent on older clients / server-to-server calls; only

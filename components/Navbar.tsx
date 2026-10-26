@@ -97,8 +97,9 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Desktop nav — hidden below md breakpoint */}
-        <div className="hidden md:flex items-center gap-6 text-sm">
+        {/* Desktop nav — hidden below lg. At 768px a logged-in admin has seven
+            nav items plus two buttons, which used to push the page 70px wide. */}
+        <div className="hidden lg:flex items-center gap-5 xl:gap-6 text-sm">
           <ThemeToggle />
           {!loading && user && <NotificationBell />}
           {navLinks}
@@ -106,7 +107,7 @@ export default function Navbar() {
         </div>
 
         {/* Mobile controls: theme + bell always visible, rest behind hamburger */}
-        <div className="flex md:hidden items-center gap-3">
+        <div className="flex lg:hidden items-center gap-3">
           <ThemeToggle />
           {!loading && user && <NotificationBell />}
           <button
@@ -121,7 +122,7 @@ export default function Navbar() {
 
       {/* Mobile dropdown panel */}
       {menuOpen && (
-        <div className="md:hidden border-t border-line bg-paper px-4 py-4 flex flex-col gap-4 text-sm">
+        <div className="lg:hidden border-t border-line bg-paper px-4 py-4 flex flex-col gap-4 text-sm">
           {navLinks}
           <div className="flex flex-col gap-3 pt-2 border-t border-line">{authControls}</div>
         </div>

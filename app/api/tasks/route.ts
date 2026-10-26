@@ -107,7 +107,10 @@ export async function POST(req: NextRequest) {
     const userLimit = await throttle("createTask", session.userId);
     if (!userLimit.allowed) return tooManyRequests(userLimit);
 
-    const body = await req.json();
+    const body = await req.json().catch(() => null);
+    if (!body || typeof body !== "object") {
+      return NextResponse.json({ error: "Send a valid JSON body" }, { status: 400 });
+    }
     const parsed = createTaskSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import SaveButton from "@/components/SaveButton";
@@ -91,6 +91,11 @@ export default function FindWorkPage() {
   const { user, loading: userLoading } = useUser();
   const [data, setData] = useState<Payload | null>(null);
   const [loading, setLoading] = useState(true);
+  // Filters re-query constantly. Only the very first load gets a skeleton —
+  // after that the old results stay on screen (dimmed) so the board doesn't
+  // blink on every keystroke.
+  const [refreshing, setRefreshing] = useState(false);
+  const loadedOnce = useRef(false);
   const [q, setQ] = useState("");
   const [category, setCategory] = useState("");
   const [sort, setSort] = useState<string>("match");
@@ -104,13 +109,16 @@ export default function FindWorkPage() {
     if (sort) params.set("sort", sort);
     if (minBudget) params.set("minBudget", String(minBudget));
     if (remoteOnly) params.set("remote", "1");
-    setLoading(true);
+    if (loadedOnce.current) setRefreshing(true);
+    else setLoading(true);
     try {
       const res = await fetch(`/api/find-work?${params.toString()}`, { cache: "no-store" });
       const json = await res.json();
       setData(json);
+      loadedOnce.current = true;
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, [q, category, sort, minBudget, remoteOnly]);
 
@@ -281,8 +289,14 @@ export default function FindWorkPage() {
         {/* ----------------------------- RESULTS ------------------------------ */}
         <section className="mx-auto w-full max-w-6xl px-5 py-8 sm:px-6 sm:py-10">
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-            <h2 className="font-display text-xl text-heading">
+            <h2 className="flex items-center gap-2 font-display text-xl text-heading">
               {loading ? "Finding work…" : `${tasks.length} task${tasks.length === 1 ? "" : "s"} you can take`}
+              {refreshing && !loading && (
+                <span className="inline-flex items-center gap-1.5 text-xs font-normal text-ink/40">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-gold-500" />
+                  updating
+                </span>
+              )}
             </h2>
             {!loading && (
               <p className="text-xs text-ink/45">
@@ -423,7 +437,11 @@ export default function FindWorkPage() {
 
           {/* Card grid */}
           {!loading && rest.length > 0 && (
-            <div className="grid gap-4 md:grid-cols-2">
+            <div
+              className={`grid gap-4 transition-opacity duration-200 md:grid-cols-2 ${
+                refreshing ? "opacity-60" : ""
+              }`}
+            >
               {rest.map((t) => {
                 const left = timeLeft(t.expiresAt);
                 const fresh = Date.now() - new Date(t.createdAt).getTime() < 6 * 36e5;
