@@ -4,6 +4,8 @@ import { tasks, applications } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
 import { notify } from "@/lib/notify";
+import { throttle, tooManyRequests } from "@/lib/rateLimit";
+import { LIMITS } from "@/lib/constants";
 import { randomUUID } from "crypto";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -13,6 +15,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: "Please log in first" }, { status: 401 });
     }
     const { id: taskId } = await params;
+
+    const applyLimit = await throttle("applyToTask", session.userId);
+    if (!applyLimit.allowed) return tooManyRequests(applyLimit);
+
     const body = await req.json().catch(() => ({}));
 
     const found = await db.select().from(tasks).where(eq(tasks.id, taskId)).limit(1);
@@ -39,7 +45,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       id,
       taskId,
       providerId: session.userId,
-      message: body.message || null,
+      message:
+        typeof body.message === "string"
+          ? body.message.trim().slice(0, LIMITS.applicationMessage) || null
+          : null,
       status: "pending",
     });
 

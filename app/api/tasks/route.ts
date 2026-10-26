@@ -5,17 +5,40 @@ import { eq, and, desc, or, ilike, lte, isNotNull } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
 import { z } from "zod";
 import { randomUUID } from "crypto";
+import { CATEGORY_VALUES, LIMITS } from "@/lib/constants";
+import { throttle, clientIp, tooManyRequests } from "@/lib/rateLimit";
 
 const MIN_LIFETIME_HOURS = 1;
 const MAX_LIFETIME_DAYS = 90;
 
 const createTaskSchema = z.object({
-  title: z.string().min(3, "Title must be at least 3 characters"),
-  description: z.string().min(10, "Please add a bit more detail"),
-  category: z.string().min(2),
-  budget: z.number().positive("Budget must be a positive number"),
-  currency: z.string().optional(),
-  city: z.string().optional(),
+  title: z
+    .string()
+    .trim()
+    .min(3, "Title must be at least 3 characters")
+    .max(LIMITS.taskTitle, `Title can't be longer than ${LIMITS.taskTitle} characters`),
+  description: z
+    .string()
+    .trim()
+    .min(10, "Please add a bit more detail")
+    .max(
+      LIMITS.taskDescription,
+      `Description can't be longer than ${LIMITS.taskDescription} characters`
+    ),
+  // Only the seven real categories get in — "hacking" used to be stored happily.
+  category: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .refine((v) => CATEGORY_VALUES.includes(v), {
+      message: `Pick a category: ${CATEGORY_VALUES.join(", ")}`,
+    }),
+  budget: z
+    .number()
+    .positive("Budget must be a positive number")
+    .max(5_000_000, "Budget looks too large — please double-check it"),
+  currency: z.string().max(8).optional(),
+  city: z.string().trim().max(LIMITS.taskCity).optional(),
   // ISO date string from the "Active until" field on the post-task form —
   // the poster decides how long their own task stays open.
   expiresAt: z.string().datetime({ message: "Pick a valid active-until date" }),
@@ -31,7 +54,7 @@ async function expirePastDueTasks() {
     .where(and(eq(tasks.status, "open"), isNotNull(tasks.expiresAt), lte(tasks.expiresAt, new Date())));
 }
 
-// GET /api/tasks?category=&city=&status=open
+// GET /api/tasks?category=&city=&status=open&limit=&offset=
 export async function GET(req: NextRequest) {
   try {
     await expirePastDueTasks();
@@ -40,7 +63,13 @@ export async function GET(req: NextRequest) {
     const category = searchParams.get("category");
     const city = searchParams.get("city");
     const status = searchParams.get("status") || "open";
-    const q = searchParams.get("q");
+    const q = searchParams.get("q")?.slice(0, 100);
+
+    // Bounded page size — `?limit=99999` used to dump the whole table.
+    const limitRaw = Number(searchParams.get("limit") ?? 60);
+    const limit = Number.isFinite(limitRaw) ? Math.min(Math.max(1, Math.floor(limitRaw)), 100) : 60;
+    const offsetRaw = Number(searchParams.get("offset") ?? 0);
+    const offset = Number.isFinite(offsetRaw) ? Math.max(0, Math.floor(offsetRaw)) : 0;
 
     const conditions = [eq(tasks.status, status as "open")];
     if (category) conditions.push(eq(tasks.category, category));
@@ -55,9 +84,11 @@ export async function GET(req: NextRequest) {
       .select()
       .from(tasks)
       .where(and(...conditions))
-      .orderBy(desc(tasks.createdAt));
+      .orderBy(desc(tasks.createdAt))
+      .limit(limit)
+      .offset(offset);
 
-    return NextResponse.json({ tasks: results });
+    return NextResponse.json({ tasks: results, limit, offset, hasMore: results.length === limit });
   } catch (err) {
     console.error("GET /api/tasks failed:", err);
     return NextResponse.json({ error: "Could not load tasks right now." }, { status: 500 });
@@ -71,6 +102,10 @@ export async function POST(req: NextRequest) {
     if (!session) {
       return NextResponse.json({ error: "Please log in first" }, { status: 401 });
     }
+
+    // 20 new tasks per account per hour is plenty for a human and useless for a spammer.
+    const userLimit = await throttle("createTask", session.userId);
+    if (!userLimit.allowed) return tooManyRequests(userLimit);
 
     const body = await req.json();
     const parsed = createTaskSchema.safeParse(body);

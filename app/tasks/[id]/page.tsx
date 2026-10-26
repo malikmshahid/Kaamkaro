@@ -5,6 +5,7 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { useUser } from "@/lib/useUser";
 import { formatMoney } from "@/lib/currency";
+import { categoryLabel } from "@/lib/constants";
 
 type Task = {
   id: string;
@@ -20,6 +21,8 @@ type Task = {
   assignedProviderId: string | null;
   assignedProviderType: "human" | "ai_agent";
   proofUrl: string | null;
+  proofFiles?: string[] | null;
+  proofNote?: string | null;
   verificationStatus: "not_run" | "pass" | "review_needed" | "fail" | "error";
   verificationNotes: string | null;
   verificationConfidence: number | null;
@@ -85,7 +88,15 @@ export default function TaskDetailPage({
 
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState("");
-  const [proofNote, setProofNote] = useState("");
+  const [proofNote, setProofNote] = useState(""); // delivery note (what I did)
+  const [proofLink, setProofLink] = useState(""); // optional external link
+  const [proofFiles, setProofFiles] = useState<File[]>([]);
+  const [proposalLoading, setProposalLoading] = useState(false);
+  const [aiVerdict, setAiVerdict] = useState<{
+    status: string;
+    confidence: number;
+    notes: string;
+  } | null>(null);
 
   async function load() {
     const res = await fetch(`/api/tasks/${id}`);
@@ -148,6 +159,33 @@ export default function TaskDetailPage({
     load();
   }
 
+  async function handleDraftProposal() {
+    setProposalLoading(true);
+    setNotice("");
+    try {
+      const res = await fetch("/api/ai/copilot/proposal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ taskId: id }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setNotice(data.error || "AI Copilot could not draft a proposal.");
+        return;
+      }
+      setMessage(data.draft.proposal);
+      setNotice(
+        data.draft.angle
+          ? `AI drafted your proposal (${data.draft.angle}). Edit it, then hit Apply.`
+          : "AI drafted your proposal. Edit it, then hit Apply."
+      );
+    } catch {
+      setNotice("Could not reach AI Copilot. Please write your proposal manually.");
+    } finally {
+      setProposalLoading(false);
+    }
+  }
+
   async function handleAccept(applicationId: string) {
     const res = await fetch(`/api/tasks/${id}/accept`, {
       method: "POST",
@@ -174,16 +212,34 @@ export default function TaskDetailPage({
     e.preventDefault();
     setBusy(true);
     setNotice("");
-    const res = await fetch(`/api/tasks/${id}/submit`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ proofUrl: proofNote }),
-    });
+    setAiVerdict(null);
+
+    const fd = new FormData();
+    fd.append("note", proofNote);
+    fd.append("proofUrl", proofLink);
+    for (const f of proofFiles) fd.append("files", f);
+
+    const res = await fetch(`/api/tasks/${id}/submit`, { method: "POST", body: fd });
     const data = await res.json();
     setBusy(false);
     if (!res.ok) return setNotice(data.error);
-    setNotice("Submitted! Waiting on the client to confirm.");
+
+    if (data.verification) setAiVerdict(data.verification);
+    setNotice(
+      data.verification
+        ? "Submitted! AI proof check is done — see the verdict below."
+        : "Submitted! The AI proof check is running in the background."
+    );
+    setProofFiles([]);
+    setProofLink("");
     load();
+  }
+
+  function onPickFiles(e: React.ChangeEvent<HTMLInputElement>) {
+    const picked = Array.from(e.target.files || []);
+    const combined = [...proofFiles, ...picked].slice(0, 5);
+    setProofFiles(combined);
+    e.target.value = "";
   }
 
   async function handleComplete() {
@@ -280,7 +336,7 @@ export default function TaskDetailPage({
 
   const STAGE_LABELS: Record<string, string> = {
     open: "Open — waiting for applicants",
-    assigned: "Assigned — awaiting payment/work",
+    assigned: "Assigned — escrow not funded yet",
     submitted: "Submitted — awaiting client confirmation",
     completed: "Completed ✓",
     disputed: "In dispute",
@@ -312,7 +368,24 @@ export default function TaskDetailPage({
               {task.assignedProviderType === "ai_agent" ? "🤖 AI Agent assigned" : "Human provider assigned"}
             </span>
           )}
-          <span className="text-xs text-ink/50">{STAGE_LABELS[task.status]}</span>
+          {/* Escrow state is the single most important thing on a marketplace
+              page: who is holding the money right now. QA flagged that after
+              funding, the page still said "Assigned — awaiting payment". */}
+          {payment?.status === "held_in_escrow" && (
+            <span className="text-xs uppercase tracking-wide px-2 py-1 rounded-full bg-green-900 text-cream">
+              🔒 Escrow funded
+            </span>
+          )}
+          {payment?.status === "released" && (
+            <span className="text-xs uppercase tracking-wide px-2 py-1 rounded-full bg-green-950/5 text-green-800">
+              Payment released
+            </span>
+          )}
+          <span className="text-xs text-ink/50">
+            {payment?.status === "held_in_escrow" && task.status === "assigned"
+              ? "Assigned — work in progress, money held safely"
+              : STAGE_LABELS[task.status]}
+          </span>
         </div>
 
         <h1 className="font-display text-4xl text-heading mb-4">{task.title}</h1>
@@ -333,7 +406,7 @@ export default function TaskDetailPage({
           </div>
           <div>
             <p className="text-ink/50">Category</p>
-            <p className="font-semibold text-lg">{task.category}</p>
+            <p className="font-semibold text-lg">{categoryLabel(task.category)}</p>
           </div>
         </div>
 
@@ -343,12 +416,45 @@ export default function TaskDetailPage({
           </p>
         )}
 
+        {aiVerdict && (
+          <div
+            className={`mb-6 rounded-lg px-4 py-3 text-sm border ${
+              aiVerdict.status === "pass"
+                ? "bg-green-950/5 text-green-800 border-green-800/20"
+                : aiVerdict.status === "fail"
+                ? "bg-red-50 text-red-700 border-red-200"
+                : "bg-gold-100/60 text-gold-500 border-gold-400/40"
+            }`}
+          >
+            <p className="font-semibold uppercase text-xs tracking-wide mb-1">
+              AI proof check:{" "}
+              {aiVerdict.status === "pass"
+                ? "Pass"
+                : aiVerdict.status === "fail"
+                ? "Fail"
+                : aiVerdict.status === "error"
+                ? "Error"
+                : "Needs manual review"}
+              {aiVerdict.confidence > 0 && ` (${Math.round(aiVerdict.confidence * 100)}% confidence)`}
+            </p>
+            <p>{aiVerdict.notes}</p>
+          </div>
+        )}
+
         {/* --- Apply form (open tasks, non-owner) --- */}
         {user && !isOwner && task.status === "open" && !alreadyApplied && (
           <form onSubmit={handleApply} className="mb-10 space-y-3">
-            <label className="block text-sm mb-1">
-              Write a quick message to apply
-            </label>
+            <div className="flex items-center justify-between gap-3">
+              <label className="block text-sm mb-1">Write a quick message to apply</label>
+              <button
+                type="button"
+                onClick={handleDraftProposal}
+                disabled={proposalLoading}
+                className="text-xs rounded-full border border-green-800/30 text-green-800 px-3 py-1.5 hover:bg-green-950/5 transition-colors disabled:opacity-50 shrink-0"
+              >
+                {proposalLoading ? "Drafting…" : "✨ Draft with AI"}
+              </button>
+            </div>
             <textarea
               className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700 min-h-24"
               placeholder="Why you're a good fit for this..."
@@ -479,26 +585,78 @@ export default function TaskDetailPage({
                 </span>
               </p>
             )}
-            <textarea
-              className="w-full border border-line rounded-lg px-4 py-2.5 bg-paper focus:outline-none focus:ring-2 focus:ring-green-700 min-h-20"
-              placeholder="Link to proof (photo URL, description)..."
-              value={proofNote}
-              onChange={(e) => setProofNote(e.target.value)}
-              required
-            />
+            <label className="block">
+              <span className="text-sm font-medium text-ink">Photos / PDF proof</span>
+              <p className="text-xs text-ink/50 mb-2">
+                Screenshot or photo of the finished work — up to 5 files, 5MB each.
+                This is what the AI checks against the brief.
+              </p>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif,application/pdf"
+                multiple
+                onChange={onPickFiles}
+                className="block w-full text-sm text-ink/70 file:mr-3 file:rounded-full file:border-0 file:bg-green-900 file:px-4 file:py-2 file:text-cream file:text-sm hover:file:bg-green-800"
+              />
+            </label>
+
+            {proofFiles.length > 0 && (
+              <ul className="space-y-1">
+                {proofFiles.map((f, i) => (
+                  <li
+                    key={`${f.name}-${i}`}
+                    className="flex items-center justify-between gap-2 text-xs bg-paper border border-line rounded-lg px-3 py-1.5"
+                  >
+                    <span className="truncate">
+                      {f.name} · {(f.size / 1024).toFixed(0)} KB
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setProofFiles(proofFiles.filter((_, j) => j !== i))}
+                      className="text-red-600 hover:underline shrink-0"
+                    >
+                      Remove
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <label className="block">
+              <span className="text-sm font-medium text-ink">Or paste a link (optional)</span>
+              <input
+                type="url"
+                className="mt-1 w-full border border-line rounded-lg px-4 py-2.5 bg-paper focus:outline-none focus:ring-2 focus:ring-green-700"
+                placeholder="https://drive.google.com/..."
+                value={proofLink}
+                onChange={(e) => setProofLink(e.target.value)}
+              />
+            </label>
+
+            <label className="block">
+              <span className="text-sm font-medium text-ink">What did you deliver?</span>
+              <textarea
+                className="mt-1 w-full border border-line rounded-lg px-4 py-2.5 bg-paper focus:outline-none focus:ring-2 focus:ring-green-700 min-h-20"
+                placeholder="3 logo concepts attached, the client picked option 2, final files in the Drive folder."
+                value={proofNote}
+                onChange={(e) => setProofNote(e.target.value)}
+              />
+            </label>
+
             <button
               type="submit"
-              disabled={busy}
+              disabled={busy || (proofFiles.length === 0 && !proofLink.trim() && !proofNote.trim())}
               className="rounded-full bg-green-900 text-cream px-6 py-2.5 hover:bg-green-800 transition-colors disabled:opacity-50"
             >
-              {busy ? "..." : "Submit Work"}
+              {busy ? "Uploading & checking with AI…" : "Submit Work"}
             </button>
           </form>
         )}
 
         {isAssignedProvider && task.status === "assigned" && payment?.status !== "held_in_escrow" && (
           <p className="mb-10 text-sm text-ink/50 italic">
-            Waiting on the client to fund escrow before you can submit.
+            Waiting on the client to fund escrow before you can submit. You can
+            already message them in the chat below.
           </p>
         )}
 
@@ -506,9 +664,43 @@ export default function TaskDetailPage({
         {isOwner && task.status === "submitted" && (
           <div className="mb-10 border border-line rounded-xl p-6 bg-card">
             <p className="font-semibold text-heading mb-1">The provider submitted their work</p>
-            {task.proofUrl && (
-              <p className="text-sm text-ink/60 mb-4 break-words">Proof: {task.proofUrl}</p>
+            {task.proofNote && (
+              <p className="text-sm text-ink/70 mb-3 whitespace-pre-wrap">{task.proofNote}</p>
             )}
+            {(() => {
+              const shots = (task.proofFiles && task.proofFiles.length > 0
+                ? task.proofFiles
+                : task.proofUrl
+                ? [task.proofUrl]
+                : []) as string[];
+              if (shots.length === 0) return null;
+              return (
+                <div className="mb-4 grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {shots.map((u, i) =>
+                    /\.(pdf)$/i.test(u) ? (
+                      <a
+                        key={i}
+                        href={u}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="border border-line rounded-lg px-3 py-4 text-xs text-center bg-paper hover:bg-line/20"
+                      >
+                        PDF proof{shots.length > 1 ? ` ${i + 1}` : ""}
+                      </a>
+                    ) : (
+                      <a key={i} href={u} target="_blank" rel="noopener noreferrer">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={u}
+                          alt={`Proof ${i + 1}`}
+                          className="w-full h-28 object-cover rounded-lg border border-line hover:opacity-90"
+                        />
+                      </a>
+                    )
+                  )}
+                </div>
+              );
+            })()}
 
             {/* AI verification signal */}
             <div className="mb-5">

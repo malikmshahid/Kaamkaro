@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { formatMoney } from "@/lib/currency";
+import { categoryLabel } from "@/lib/constants";
 import SaveButton from "@/components/SaveButton";
 
 type Task = {
@@ -97,7 +98,7 @@ export default function TasksPage() {
                   {task.postedByType === "ai_agent" ? "AI Agent" : "Client"}
                 </span>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-ink/50">{task.category}</span>
+                  <span className="text-xs text-ink/50">{categoryLabel(task.category)}</span>
                   <SaveButton itemType="task" itemId={task.id} />
                 </div>
               </div>

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 import { draftTaskFromIdea } from "@/lib/aiCopilot";
 import { z } from "zod";
+import { throttle, tooManyRequests } from "@/lib/rateLimit";
 
 const bodySchema = z.object({
   idea: z.string().min(4, "Tell us a bit more about what you need").max(1000),
@@ -15,6 +16,10 @@ export async function POST(req: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: "Please log in first" }, { status: 401 });
     }
+
+    // AI calls cost real money — 20 drafts per account per hour.
+    const aiLimit = await throttle("aiCopilot", user.userId);
+    if (!aiLimit.allowed) return tooManyRequests(aiLimit);
 
     const body = await req.json();
     const parsed = bodySchema.safeParse(body);

@@ -5,12 +5,31 @@ import { eq, and, desc, or, ilike } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
 import { z } from "zod";
 import { randomUUID } from "crypto";
+import { CATEGORY_VALUES, LIMITS } from "@/lib/constants";
+import { throttle, tooManyRequests } from "@/lib/rateLimit";
 
 const createToolSchema = z.object({
-  title: z.string().min(3, "Title must be at least 3 characters"),
-  description: z.string().min(10, "Please add a bit more detail"),
-  category: z.string().min(2),
-  price: z.number().positive("Price must be a positive number"),
+  title: z
+    .string()
+    .trim()
+    .min(3, "Title must be at least 3 characters")
+    .max(LIMITS.toolTitle, `Title can't be longer than ${LIMITS.toolTitle} characters`),
+  description: z
+    .string()
+    .trim()
+    .min(10, "Please add a bit more detail")
+    .max(LIMITS.toolDescription, `Description can't be longer than ${LIMITS.toolDescription} characters`),
+  category: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .refine((v) => CATEGORY_VALUES.includes(v), {
+      message: `Pick a category: ${CATEGORY_VALUES.join(", ")}`,
+    }),
+  price: z
+    .number()
+    .positive("Price must be a positive number")
+    .max(5_000_000, "Price looks too large — please double-check it"),
   currency: z.string().optional(),
   deliveryDays: z.number().int().positive().default(1),
   city: z.string().optional(),
@@ -69,6 +88,9 @@ export async function POST(req: NextRequest) {
   try {
     const session = await getSessionUser();
     if (!session) return NextResponse.json({ error: "Please log in first" }, { status: 401 });
+
+    const toolLimit = await throttle("createTool", session.userId);
+    if (!toolLimit.allowed) return tooManyRequests(toolLimit);
 
     const body = await req.json();
     const parsed = createToolSchema.safeParse(body);

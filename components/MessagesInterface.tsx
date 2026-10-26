@@ -23,8 +23,17 @@ export default function MessagesInterface() {
     return query ? conversations.filter((conversation) => `${conversation.name} ${conversation.taskTitle} ${conversation.lastMessage}`.toLowerCase().includes(query)) : conversations;
   }, [conversations, search]);
 
+  const [signedOut, setSignedOut] = useState(false);
+
   async function loadConversations() {
     const res = await fetch("/api/conversations", { cache: "no-store" });
+    // A logged-out visitor used to trigger a 401 in the console and a bare
+    // "Please log in first" error box. Show a real sign-in prompt instead.
+    if (res.status === 401) {
+      setSignedOut(true);
+      setConversations([]);
+      return;
+    }
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Could not load messages");
     setConversations(data.conversations || []);
@@ -71,6 +80,22 @@ export default function MessagesInterface() {
   }
 
   if (loading) return <section className="rounded-2xl border border-line bg-card p-8 text-sm text-ink/60">Loading messages...</section>;
+
+  if (signedOut)
+    return (
+      <section className="rounded-2xl border border-line bg-card p-8 text-center">
+        <h2 className="font-display text-2xl text-heading">Log in to see your messages</h2>
+        <p className="mx-auto mt-2 max-w-md text-sm text-ink/60">
+          Your task chats and updates live here once you sign in.
+        </p>
+        <a
+          href="/login?next=/messages"
+          className="mt-5 inline-block rounded-full bg-green-900 px-6 py-2.5 text-cream hover:bg-green-800 transition-colors"
+        >
+          Log in
+        </a>
+      </section>
+    );
 
   return <section className="overflow-hidden rounded-2xl border border-line bg-card shadow-sm min-h-[min(680px,calc(100vh-220px))]">
     {error && <p className="border-b border-red-200 bg-red-50 px-5 py-3 text-sm text-red-700">{error}</p>}

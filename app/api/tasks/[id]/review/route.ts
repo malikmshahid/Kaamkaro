@@ -69,7 +69,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       revieweeId,
       agentListingId,
       rating,
-      comment: comment || null,
+      comment:
+        typeof comment === "string" ? comment.trim().slice(0, 1000) || null : null,
     });
 
     if (agentListingId) {

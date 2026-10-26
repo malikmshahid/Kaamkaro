@@ -4,6 +4,8 @@ import { tasks, messages, users } from "@/db/schema";
 import { eq, asc, and, ne } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
 import { notify } from "@/lib/notify";
+import { throttle, tooManyRequests } from "@/lib/rateLimit";
+import { LIMITS } from "@/lib/constants";
 import { randomUUID } from "crypto";
 
 async function assertParticipant(taskId: string, userId: string) {
@@ -73,13 +75,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const task = await assertParticipant(taskId, session.userId);
     if (!task) return NextResponse.json({ error: "Access denied" }, { status: 403 });
 
+    const chatLimit = await throttle("chatMessage", session.userId);
+    if (!chatLimit.allowed) return tooManyRequests(chatLimit);
+
     const { body } = await req.json();
     if (!body || typeof body !== "string" || body.trim().length === 0) {
       return NextResponse.json({ error: "Message cannot be empty" }, { status: 400 });
     }
 
     const id = randomUUID();
-    await db.insert(messages).values({ id, taskId, senderId: session.userId, body: body.trim() });
+    const text = body.trim().slice(0, LIMITS.chatMessage);
+    await db.insert(messages).values({ id, taskId, senderId: session.userId, body: text });
 
     const otherPartyId =
       task.postedById === session.userId ? task.assignedProviderId : task.postedById;

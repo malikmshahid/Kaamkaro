@@ -6,7 +6,13 @@ import { getSessionUser } from "@/lib/auth";
 
 // Fields that must never reach a stranger's browser: the private proof of
 // work, internal user ids, and anything about the money.
-const PRIVATE_TASK_FIELDS = ["proofUrl", "postedById", "assignedProviderId"] as const;
+const PRIVATE_TASK_FIELDS = [
+  "proofUrl",
+  "proofFiles",
+  "proofNote",
+  "postedById",
+  "assignedProviderId",
+] as const;
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {

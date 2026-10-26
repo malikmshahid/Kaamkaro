@@ -4,6 +4,7 @@ import { users } from "@/db/schema";
 import { eq, or } from "drizzle-orm";
 import { hashPassword, signToken, setSessionCookie } from "@/lib/auth";
 import { validateIdNumber, COUNTRIES } from "@/lib/idValidation";
+import { throttle, clientIp, tooManyRequests } from "@/lib/rateLimit";
 import { z } from "zod";
 import { randomUUID, randomBytes } from "crypto";
 
@@ -34,6 +35,10 @@ function generateReferralCode(name: string) {
 
 export async function POST(req: NextRequest) {
   try {
+    // Stops scripted account farms: 6 signups per IP per hour.
+    const ipLimit = await throttle("signup", clientIp(req));
+    if (!ipLimit.allowed) return tooManyRequests(ipLimit);
+
     const body = await req.json();
     const parsed = signupSchema.safeParse(body);
     if (!parsed.success) {

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { formatMoney } from "@/lib/currency";
+import { categoryLabel } from "@/lib/constants";
 import SaveButton from "@/components/SaveButton";
 
 type Tool = {
@@ -108,7 +109,7 @@ export default function ToolsPage() {
                 className="border border-line rounded-xl p-6 bg-card hover:border-gold-500 transition-colors flex flex-col"
               >
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs text-ink/50">{tool.category}</span>
+                  <span className="text-xs text-ink/50">{categoryLabel(tool.category)}</span>
                   <SaveButton itemType="tool" itemId={tool.id} />
                 </div>
                 <h3 className="font-display text-lg text-heading mb-2">

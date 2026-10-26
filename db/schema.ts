@@ -78,6 +78,11 @@ export const tasks = pgTable("tasks", {
     .notNull()
     .default("human"),
   proofUrl: text("proof_url"),
+  // All proof attachments (images/PDFs uploaded to Vercel Blob, or a pasted
+  // link). proofUrl stays the primary/first one for backwards compatibility.
+  proofFiles: text("proof_files").array().default(sql`'{}'::text[]`),
+  // Free-text delivery note from the provider, shown to the client.
+  proofNote: text("proof_note"),
   sourceToolId: text("source_tool_id"), // set when this task originated from an ordered tool/gig
   verificationStatus: text("verification_status", {
     enum: ["not_run", "pass", "review_needed", "fail", "error"],
@@ -254,4 +259,25 @@ export const savedItems = pgTable("saved_items", {
   itemType: text("item_type", { enum: ["task", "tool"] }).notNull(),
   itemId: text("item_id").notNull(),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
+});
+
+// Simple fixed-window counters for rate limiting (see lib/rateLimit.ts).
+// One row per key, e.g. "login:1.2.3.4". Rows are cheap and self-expiring in
+// meaning; a cron sweep deletes anything older than a day.
+export const rateLimits = pgTable("rate_limits", {
+  key: text("key").primaryKey(),
+  count: integer("count").notNull().default(0),
+  resetAt: timestamp("reset_at", { withTimezone: true }).notNull(),
+});
+
+// Content fingerprints of submitted proof files (sha256 of the bytes).
+// If the exact same file shows up on a second task — typically a provider
+// recycling one screenshot for many jobs, or a client re-using someone else's
+// work — we flag it for manual review. No competitor does this, and it costs
+// one hash + one indexed lookup per upload.
+export const proofFingerprints = pgTable("proof_fingerprints", {
+  hash: text("hash").primaryKey(),
+  taskId: text("task_id").notNull(),
+  userId: text("user_id").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
 });

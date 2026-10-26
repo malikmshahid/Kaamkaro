@@ -4,6 +4,7 @@ import { users, passwordResets } from "@/db/schema";
 import { and, eq, or, gte } from "drizzle-orm";
 import { randomBytes, createHash, randomUUID } from "crypto";
 import { sendEmail, passwordResetEmailHtml } from "@/lib/email";
+import { throttle, clientIp, tooManyRequests } from "@/lib/rateLimit";
 
 // Always the same answer, whether or not the account exists. Anything else
 // lets a stranger enumerate which phone numbers / emails are registered.
@@ -18,6 +19,9 @@ const MAX_PER_HOUR = 3;
 
 export async function POST(req: NextRequest) {
   try {
+    const ipLimit = await throttle("forgotPassword", clientIp(req));
+    if (!ipLimit.allowed) return tooManyRequests(ipLimit);
+
     const { identifier } = await req.json().catch(() => ({ identifier: "" }));
     if (!identifier || typeof identifier !== "string") {
       return NextResponse.json(

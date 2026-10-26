@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq, or } from "drizzle-orm";
 import { verifyPassword, signToken, setSessionCookie } from "@/lib/auth";
+import { throttle, clientIp, tooManyRequests } from "@/lib/rateLimit";
 import { z } from "zod";
 
 const loginSchema = z.object({
@@ -12,6 +13,11 @@ const loginSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    // Brute-force guard: 10 attempts per IP per 15 minutes. QA round 2 fired
+    // ten wrong passwords and every single one came back 401 with no slowdown.
+    const ipLimit = await throttle("login", clientIp(req));
+    if (!ipLimit.allowed) return tooManyRequests(ipLimit);
+
     const body = await req.json();
     const parsed = loginSchema.safeParse(body);
     if (!parsed.success) {

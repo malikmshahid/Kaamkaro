@@ -26,7 +26,11 @@ export default function LoginPage() {
         setError(data.error || "Could not log in");
         return;
       }
-      router.push("/dashboard");
+      // Honour ?next=/messages style redirects, but only for same-site paths
+      // (never an absolute URL — that would be an open redirect).
+      const nextParam = new URLSearchParams(window.location.search).get("next") || "";
+      const safeNext = nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : "";
+      router.push(safeNext || "/dashboard");
       router.refresh();
     } catch {
       setError("Could not connect to the server");

@@ -1,5 +1,7 @@
 "use client";
 
+import { categoryLabel } from "@/lib/constants";
+
 import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -87,7 +89,7 @@ export default function ToolDetailPage({
       <Navbar />
       <main className="flex-1 max-w-3xl mx-auto w-full px-6 py-16">
         <span className="text-xs uppercase tracking-wide text-gold-500">
-          {tool.category} &middot; 🧰 Toolbox listing
+          {categoryLabel(tool.category)} &middot; 🧰 Toolbox listing
         </span>
         <h1 className="font-display text-4xl text-heading mt-2 mb-4">
           {tool.title}

@@ -66,6 +66,7 @@ export default function NewTaskPage() {
         category: d.category,
         budget: String(d.suggestedBudgetPkr),
         currency: "PKR",
+        city: prev.city || d.city || "",
       }));
       setCopilotReasoning(
         `${d.reasoning} Suggested range: PKR ${d.budgetRangeLow}–${d.budgetRangeHigh}, ~${d.deliveryDays} day(s) delivery.`
