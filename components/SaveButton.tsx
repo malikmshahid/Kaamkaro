@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useUser } from "@/lib/useUser";
 
 export default function SaveButton({
   itemType,
@@ -13,8 +14,16 @@ export default function SaveButton({
 }) {
   const [saved, setSaved] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const { user, loading: userLoading } = useUser();
 
   useEffect(() => {
+    // Don't ask the API who saved what until we know someone is logged in —
+    // it only ever answers 401 for visitors and fills their console with noise.
+    if (userLoading) return;
+    if (!user) {
+      setLoaded(true);
+      return;
+    }
     fetch("/api/saved")
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
@@ -23,7 +32,7 @@ export default function SaveButton({
         setSaved(list.some((x: { id: string }) => x.id === itemId));
       })
       .finally(() => setLoaded(true));
-  }, [itemType, itemId]);
+  }, [itemType, itemId, user, userLoading]);
 
   async function toggle(e: React.MouseEvent) {
     e.preventDefault();
