@@ -14,3 +14,6 @@ m4.mjs
 m5.mjs
 m.mjs
 .env
+
+# TypeScript build info
+tsconfig.tsbuildinfo
