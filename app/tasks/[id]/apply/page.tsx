@@ -386,7 +386,7 @@ export default function ApplyPage({
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-900 text-2xl text-cream">
             ✓
           </div>
-          <h1 className="mt-4 font-display text-3xl text-heading">
+          <h1 className="mt-4 font-display text-[2rem] leading-tight text-heading">
             Your proposal is in
           </h1>
           <p className="mx-auto mt-3 max-w-md text-sm text-ink/60">
@@ -419,7 +419,7 @@ export default function ApplyPage({
       <>
         <Navbar />
         <main className="mx-auto w-full max-w-2xl px-5 py-16 text-center sm:px-6">
-          <h1 className="font-display text-2xl text-heading">
+          <h1 className="font-display text-[1.6rem] leading-tight text-heading">
             This is your own task
           </h1>
           <p className="mt-2 text-sm text-ink/60">
@@ -441,7 +441,7 @@ export default function ApplyPage({
       <>
         <Navbar />
         <main className="mx-auto w-full max-w-2xl px-5 py-16 text-center sm:px-6">
-          <h1 className="font-display text-2xl text-heading">
+          <h1 className="font-display text-[1.6rem] leading-tight text-heading">
             Applications are closed
           </h1>
           <p className="mt-2 text-sm text-ink/60">
@@ -471,19 +471,11 @@ export default function ApplyPage({
       <Navbar />
       <main className="flex-1 pb-28 lg:pb-12">
         {/* header */}
-        <section className="relative overflow-hidden border-b border-line">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background:
-                "radial-gradient(50% 60% at 92% 0%, rgba(200,150,62,0.16) 0%, rgba(200,150,62,0) 62%), radial-gradient(45% 60% at 0% 100%, rgba(18,58,38,0.10) 0%, rgba(18,58,38,0) 65%)",
-            }}
-          />
-          <div className="relative mx-auto w-full max-w-5xl px-5 pb-7 pt-8 sm:px-6 sm:pt-10">
+        <section className="aurora grain relative isolate overflow-hidden border-b border-line">
+          <div className="relative mx-auto w-full max-w-5xl px-5 pb-7 pt-9 sm:px-6 sm:pt-12">
             <Link
               href={`/tasks/${id}`}
-              className="text-xs text-ink/50 hover:text-green-700"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-ink/50 transition-colors hover:text-green-700"
             >
               ← Back to the task
             </Link>
@@ -497,7 +489,7 @@ export default function ApplyPage({
               <span className="text-ink/30">·</span>
               <span className="text-ink/45">{task.city || "Remote"}</span>
             </div>
-            <h1 className="mt-3 max-w-2xl break-words font-display text-2xl leading-tight text-heading [overflow-wrap:anywhere] sm:text-4xl">
+            <h1 className="mt-3.5 max-w-2xl break-words font-display text-[1.75rem] font-medium leading-[1.08] tracking-[-0.015em] text-heading [overflow-wrap:anywhere] sm:text-[2.6rem]">
               {task.title}
             </h1>
 
@@ -565,10 +557,10 @@ export default function ApplyPage({
 
             {/* STEP 1 — pitch */}
             {step === 1 && (
-              <div className="rounded-2xl border border-line bg-card p-5 sm:p-6">
+              <div className="card-lux p-5 sm:p-6">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <h2 className="font-display text-xl text-heading">
+                    <h2 className="font-display text-[1.2rem] text-heading">
                       What will you do?
                     </h2>
                     <p className="mt-1 text-sm text-ink/60">
@@ -639,8 +631,8 @@ export default function ApplyPage({
 
             {/* STEP 2 — terms */}
             {step === 2 && (
-              <div className="rounded-2xl border border-line bg-card p-5 sm:p-6">
-                <h2 className="font-display text-xl text-heading">
+              <div className="card-lux p-5 sm:p-6">
+                <h2 className="font-display text-[1.2rem] text-heading">
                   Your price and delivery time
                 </h2>
                 <p className="mt-1 text-sm text-ink/60">
@@ -764,8 +756,8 @@ export default function ApplyPage({
             {/* STEP 3 — review */}
             {step === 3 && (
               <div className="space-y-5">
-                <div className="rounded-2xl border border-line bg-card p-5 sm:p-6">
-                  <h2 className="font-display text-xl text-heading">
+                <div className="card-lux p-5 sm:p-6">
+                  <h2 className="font-display text-[1.2rem] text-heading">
                     How the client will see it
                   </h2>
                   <div className="mt-4 rounded-xl border border-line bg-paper/50 p-4">
@@ -802,7 +794,7 @@ export default function ApplyPage({
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-line bg-card p-5 sm:p-6">
+                <div className="card-lux p-5 sm:p-6">
                   <div className="flex items-center justify-between gap-3">
                     <h3 className="font-display text-lg text-heading">
                       Before you send
@@ -862,7 +854,11 @@ export default function ApplyPage({
 
           {/* ---------------------------- sidebar ---------------------------- */}
           <aside className="min-w-0 space-y-4 lg:sticky lg:top-20 lg:self-start">
-            <div className="rounded-2xl border border-green-900/25 bg-gradient-to-br from-green-950 to-green-800 p-5 text-cream">
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-950 via-green-900 to-green-800 p-5 text-cream shadow-[0_26px_60px_-40px_rgba(11,32,22,0.95)] ring-1 ring-inset ring-white/10">
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 opacity-50 [background:radial-gradient(60%_80%_at_88%_-10%,rgba(200,150,62,0.32),transparent_65%)]"
+              />
               <p className="text-[11px] uppercase tracking-[0.14em] text-cream/60">
                 Client budget
               </p>
@@ -905,7 +901,7 @@ export default function ApplyPage({
             </div>
 
             {feed?.matchScore !== null && feed?.matchScore !== undefined && (
-              <div className="rounded-2xl border border-line bg-card p-4">
+              <div className="card-lux p-4">
                 <div className="flex items-center justify-between gap-2">
                   <p className="text-sm font-semibold text-heading">
                     Your match
@@ -935,7 +931,7 @@ export default function ApplyPage({
               </div>
             )}
 
-            <div className="rounded-2xl border border-line bg-card p-4">
+            <div className="card-lux p-4">
               <p className="text-sm font-semibold text-heading">
                 Why apply on KaamKaro
               </p>

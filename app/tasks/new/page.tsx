@@ -109,40 +109,49 @@ export default function NewTaskPage() {
   return (
     <>
       <Navbar />
-      <main className="flex-1 max-w-xl mx-auto w-full px-6 py-16">
-        <h1 className="font-display text-3xl text-heading mb-2">
-          Post a New Task
-        </h1>
-        <p className="text-ink/60 mb-8">
-          The more detail you give, the better your match will be.
-        </p>
+      <main className="flex-1">
+        <div className="aurora grain relative isolate overflow-hidden">
+          <div className="relative mx-auto w-full max-w-2xl px-5 py-12 sm:px-6 sm:py-16">
+            <p className="inline-flex items-center gap-2.5 rounded-full border border-gold-500/35 bg-card/70 px-3.5 py-1.5 text-[10.5px] font-semibold uppercase tracking-[0.18em] text-gold-600 shadow-lux-sm backdrop-blur dark:text-gold-300">
+              <span className="pulse-dot inline-block h-1.5 w-1.5 rounded-full bg-gold-500" />
+              Free to post · escrow protected
+            </p>
+            <h1 className="mt-5 font-display text-[2.1rem] font-medium leading-[1.04] tracking-[-0.02em] text-heading sm:text-[2.8rem]">
+              Post a new task
+            </h1>
+            <p className="mt-3 max-w-lg leading-relaxed text-ink/65">
+              The more detail you give, the better your match will be.
+            </p>
 
-        <div className="mb-8 rounded-xl border border-green-700/30 bg-green-50 dark:bg-green-950/20 p-5">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-lg">✨</span>
-            <h2 className="font-medium text-heading">AI Copilot</h2>
+        <div className="card-lux relative mt-8 overflow-hidden p-5 sm:p-6">
+          <div className="gold-hairline absolute inset-x-5 top-0" aria-hidden="true" />
+          <div className="mb-2 flex items-center gap-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-green-950/[0.06] text-base dark:bg-green-500/15">
+              ✨
+            </span>
+            <h2 className="font-display text-[1.15rem] text-heading">AI Copilot</h2>
           </div>
-          <p className="text-sm text-ink/60 mb-3">
+          <p className="mb-3 text-sm leading-relaxed text-ink/60">
             Type your idea in a line or two — even in Roman Urdu. AI will write the
             title, description, category, and a fair PKR budget for you.
           </p>
           <form onSubmit={handleCopilot} className="space-y-3">
             <textarea
-              className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700 min-h-20"
+              className="min-h-20 w-full rounded-xl border border-line bg-card px-4 py-3 text-sm shadow-lux-sm transition-shadow placeholder:text-ink/30 focus:border-green-800/40 focus:outline-none focus:ring-2 focus:ring-green-700/40"
               placeholder="e.g. mujhe apne laptop ki screen fix karwani hai, Lahore mein"
               value={idea}
               onChange={(e) => setIdea(e.target.value)}
               required
             />
             {copilotError && (
-              <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-2">
+              <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-700">
                 {copilotError}
               </p>
             )}
             <button
               type="submit"
               disabled={copilotLoading}
-              className="rounded-full bg-green-900 text-cream px-5 py-2 text-sm hover:bg-green-800 transition-colors disabled:opacity-50"
+              className="rounded-full bg-green-900 px-5 py-2.5 text-sm font-semibold text-cream shadow-lux-sm transition-all hover:-translate-y-0.5 hover:bg-green-800 disabled:translate-y-0 disabled:opacity-50"
             >
               {copilotLoading ? "Drafting..." : "Draft with AI"}
             </button>
@@ -150,7 +159,7 @@ export default function NewTaskPage() {
         </div>
 
         {copilotReasoning && (
-          <p className="text-sm text-ink/60 bg-card border border-line rounded-lg px-4 py-2.5 mb-4">
+          <p className="mb-4 rounded-xl border border-gold-500/25 bg-gold-100/40 px-4 py-2.5 text-sm text-ink/70 dark:bg-gold-500/10">
             💡 {copilotReasoning}
           </p>
         )}
@@ -159,7 +168,7 @@ export default function NewTaskPage() {
           <button
             type="button"
             onClick={() => setShowManualForm(true)}
-            className="text-sm text-ink/50 underline mb-6 block"
+            className="mb-6 block text-sm font-medium text-ink/50 underline decoration-line underline-offset-4 transition-colors hover:text-green-800"
           >
             Skip AI, fill the form manually
           </button>
@@ -170,9 +179,9 @@ export default function NewTaskPage() {
           className={`space-y-4 ${showManualForm ? "" : "hidden"}`}
         >
           <div>
-            <label className="block text-sm mb-1">Task Title</label>
+            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-ink/50">Task Title</label>
             <input
-              className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
+              className="w-full rounded-xl border border-line bg-card px-4 py-3 text-sm shadow-lux-sm transition-shadow placeholder:text-ink/30 focus:border-green-800/40 focus:outline-none focus:ring-2 focus:ring-green-700/40"
               placeholder="e.g. Package pickup in Lahore"
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
@@ -180,9 +189,9 @@ export default function NewTaskPage() {
             />
           </div>
           <div>
-            <label className="block text-sm mb-1">Description</label>
+            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-ink/50">Description</label>
             <textarea
-              className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700 min-h-32"
+              className="min-h-32 w-full rounded-xl border border-line bg-card px-4 py-3 text-sm shadow-lux-sm transition-shadow placeholder:text-ink/30 focus:border-green-800/40 focus:outline-none focus:ring-2 focus:ring-green-700/40"
               placeholder="Give the full details of what you need..."
               value={form.description}
               onChange={(e) =>
@@ -193,9 +202,9 @@ export default function NewTaskPage() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm mb-1">Category</label>
+              <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-ink/50">Category</label>
               <select
-                className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
+                className="w-full rounded-xl border border-line bg-card px-4 py-3 text-sm shadow-lux-sm transition-shadow placeholder:text-ink/30 focus:border-green-800/40 focus:outline-none focus:ring-2 focus:ring-green-700/40"
                 value={form.category}
                 onChange={(e) =>
                   setForm({ ...form, category: e.target.value })
@@ -211,7 +220,7 @@ export default function NewTaskPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm mb-1">Budget</label>
+              <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-ink/50">Budget</label>
               <div className="flex gap-2">
                 <select
                   className="border border-line rounded-lg px-2 py-2.5 bg-card text-sm focus:outline-none focus:ring-2 focus:ring-green-700"
@@ -227,7 +236,7 @@ export default function NewTaskPage() {
                 <input
                   type="number"
                   min="1"
-                  className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
+                  className="w-full rounded-xl border border-line bg-card px-4 py-3 text-sm shadow-lux-sm transition-shadow placeholder:text-ink/30 focus:border-green-800/40 focus:outline-none focus:ring-2 focus:ring-green-700/40"
                   value={form.budget}
                   onChange={(e) => setForm({ ...form, budget: e.target.value })}
                   required
@@ -236,9 +245,9 @@ export default function NewTaskPage() {
             </div>
           </div>
           <div>
-            <label className="block text-sm mb-1">City</label>
+            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-ink/50">City</label>
             <input
-              className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
+              className="w-full rounded-xl border border-line bg-card px-4 py-3 text-sm shadow-lux-sm transition-shadow placeholder:text-ink/30 focus:border-green-800/40 focus:outline-none focus:ring-2 focus:ring-green-700/40"
               placeholder="Lahore, Karachi, Remote..."
               value={form.city}
               onChange={(e) => setForm({ ...form, city: e.target.value })}
@@ -246,7 +255,7 @@ export default function NewTaskPage() {
           </div>
 
           <div>
-            <label className="block text-sm mb-1">Active until</label>
+            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-ink/50">Active until</label>
             <p className="text-xs text-ink/50 mb-2">
               Your task closes itself automatically once this date passes.
             </p>
@@ -271,7 +280,7 @@ export default function NewTaskPage() {
             </div>
             <input
               type="datetime-local"
-              className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
+              className="w-full rounded-xl border border-line bg-card px-4 py-3 text-sm shadow-lux-sm transition-shadow placeholder:text-ink/30 focus:border-green-800/40 focus:outline-none focus:ring-2 focus:ring-green-700/40"
               value={form.expiresAt}
               min={quickPick(1)}
               max={quickPick(90 * 24)}
@@ -281,7 +290,7 @@ export default function NewTaskPage() {
           </div>
 
           {error && (
-            <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-2">
+            <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-700">
               {error}
             </p>
           )}
@@ -289,11 +298,13 @@ export default function NewTaskPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-full bg-green-900 text-cream px-6 py-3 hover:bg-green-800 transition-colors disabled:opacity-50"
+            className="sheen w-full rounded-full bg-green-900 px-6 py-3.5 text-sm font-semibold text-cream shadow-[0_16px_34px_-22px_rgba(11,32,22,0.9)] ring-1 ring-inset ring-white/10 transition-all hover:-translate-y-0.5 hover:bg-green-800 disabled:translate-y-0 disabled:opacity-50"
           >
             {loading ? "Posting..." : "Post Task"}
           </button>
         </form>
+          </div>
+        </div>
       </main>
     </>
   );

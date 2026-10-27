@@ -60,25 +60,57 @@ function SignupForm() {
   return (
     <>
       <Navbar />
-      <main className="flex-1 max-w-md mx-auto w-full px-6 py-16">
-        <h1 className="font-display text-3xl text-heading mb-2">
-          Create Your Account
-        </h1>
-        <p className="text-ink/60 mb-8">
-          One account, whether you&apos;re here to give work or get it done.
-        </p>
+      <main className="flex-1">
+        <div className="aurora grain relative isolate overflow-hidden">
+          <div className="relative mx-auto grid w-full max-w-5xl items-start gap-10 px-5 py-12 sm:px-6 md:grid-cols-[0.8fr_1fr] md:py-20">
+            <div className="hidden md:sticky md:top-24 md:block">
+              <p className="inline-flex items-center gap-2.5 rounded-full border border-gold-500/35 bg-card/70 px-3.5 py-1.5 text-[10.5px] font-semibold uppercase tracking-[0.18em] text-gold-600 shadow-lux-sm backdrop-blur dark:text-gold-300">
+                <span className="pulse-dot inline-block h-1.5 w-1.5 rounded-full bg-gold-500" />
+                Free · 2 minutes
+              </p>
+              <h2 className="reveal mt-6 font-display text-[2.4rem] font-medium leading-[1.03] tracking-[-0.02em] text-heading">
+                One account.
+                <br />
+                <span className="gold-text">Two ways</span> to win.
+              </h2>
+              <p className="reveal reveal-1 mt-5 max-w-sm leading-relaxed text-ink/65">
+                Post work and get it done, or earn from the work that is already here. No monthly
+                fee, no connects, no bidding credits.
+              </p>
+              <ul className="reveal reveal-2 mt-7 space-y-3 text-sm text-ink/60">
+                {[
+                  ["Post a task", "Escrow holds the money until you confirm."],
+                  ["Take work", "Proposals carry a price and a delivery time."],
+                  ["Hire an AI agent", "Or let one hire you — via real API keys."],
+                ].map(([title, body]) => (
+                  <li key={title} className="rounded-xl border border-line/70 bg-card/60 p-3">
+                    <p className="text-[13px] font-semibold text-heading">{title}</p>
+                    <p className="mt-0.5 text-[12px] text-ink/55">{body}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="card-lux relative mx-auto w-full max-w-md overflow-hidden p-6 sm:p-7">
+              <div className="gold-hairline absolute inset-x-6 top-0" aria-hidden="true" />
+              <h1 className="font-display text-[1.7rem] leading-tight text-heading">
+                Create your account
+              </h1>
+              <p className="mt-1.5 text-sm text-ink/60">
+                One account, whether you&apos;re here to give work or get it done.
+              </p>
 
         {form.referralCode && (
-          <p className="text-sm bg-gold-100/60 text-gold-500 rounded-lg px-4 py-2 mb-6">
+          <p className="mt-4 rounded-xl border border-gold-500/30 bg-gold-100/60 px-4 py-2.5 text-sm font-medium text-gold-600 dark:bg-gold-500/10 dark:text-gold-300">
             🎁 You were invited with code <strong>{form.referralCode}</strong>
           </p>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <div>
-            <label className="block text-sm mb-1">Full Name</label>
+            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-ink/50">Full Name</label>
             <input
-              className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
+              className="w-full rounded-xl border border-line bg-card px-4 py-3 text-sm shadow-lux-sm transition-shadow placeholder:text-ink/30 focus:border-green-800/40 focus:outline-none focus:ring-2 focus:ring-green-700/40"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               required
@@ -87,19 +119,19 @@ function SignupForm() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm mb-1">Phone Number</label>
+              <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-ink/50">Phone Number</label>
               <input
-                className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
+                className="w-full rounded-xl border border-line bg-card px-4 py-3 text-sm shadow-lux-sm transition-shadow placeholder:text-ink/30 focus:border-green-800/40 focus:outline-none focus:ring-2 focus:ring-green-700/40"
                 placeholder="03XXXXXXXXX"
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
               />
             </div>
             <div>
-              <label className="block text-sm mb-1">Email</label>
+              <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-ink/50">Email</label>
               <input
                 type="email"
-                className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
+                className="w-full rounded-xl border border-line bg-card px-4 py-3 text-sm shadow-lux-sm transition-shadow placeholder:text-ink/30 focus:border-green-800/40 focus:outline-none focus:ring-2 focus:ring-green-700/40"
                 placeholder="you@example.com"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -111,9 +143,9 @@ function SignupForm() {
           </p>
 
           <div>
-            <label className="block text-sm mb-1">City</label>
+            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-ink/50">City</label>
             <input
-              className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
+              className="w-full rounded-xl border border-line bg-card px-4 py-3 text-sm shadow-lux-sm transition-shadow placeholder:text-ink/30 focus:border-green-800/40 focus:outline-none focus:ring-2 focus:ring-green-700/40"
               placeholder="Lodhran, Lahore, Karachi..."
               value={form.city}
               onChange={(e) => setForm({ ...form, city: e.target.value })}
@@ -121,9 +153,9 @@ function SignupForm() {
           </div>
 
           <div>
-            <label className="block text-sm mb-1">Country</label>
+            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-ink/50">Country</label>
             <select
-              className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
+              className="w-full rounded-xl border border-line bg-card px-4 py-3 text-sm shadow-lux-sm transition-shadow placeholder:text-ink/30 focus:border-green-800/40 focus:outline-none focus:ring-2 focus:ring-green-700/40"
               value={form.country}
               onChange={(e) => setForm({ ...form, country: e.target.value })}
             >
@@ -139,9 +171,9 @@ function SignupForm() {
           {form.country && (
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm mb-1">ID Type</label>
+                <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-ink/50">ID Type</label>
                 <select
-                  className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
+                  className="w-full rounded-xl border border-line bg-card px-4 py-3 text-sm shadow-lux-sm transition-shadow placeholder:text-ink/30 focus:border-green-800/40 focus:outline-none focus:ring-2 focus:ring-green-700/40"
                   value={form.idType}
                   onChange={(e) =>
                     setForm({ ...form, idType: e.target.value as typeof form.idType })
@@ -154,9 +186,9 @@ function SignupForm() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm mb-1">ID Number</label>
+                <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-ink/50">ID Number</label>
                 <input
-                  className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
+                  className="w-full rounded-xl border border-line bg-card px-4 py-3 text-sm shadow-lux-sm transition-shadow placeholder:text-ink/30 focus:border-green-800/40 focus:outline-none focus:ring-2 focus:ring-green-700/40"
                   value={form.idNumber}
                   onChange={(e) => setForm({ ...form, idNumber: e.target.value })}
                 />
@@ -170,9 +202,9 @@ function SignupForm() {
           )}
 
           <div>
-            <label className="block text-sm mb-1">What brings you here?</label>
+            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-ink/50">What brings you here?</label>
             <select
-              className="w-full border border-line rounded-lg px-4 py-2.5 bg-card focus:outline-none focus:ring-2 focus:ring-green-700"
+              className="w-full rounded-xl border border-line bg-card px-4 py-3 text-sm shadow-lux-sm transition-shadow placeholder:text-ink/30 focus:border-green-800/40 focus:outline-none focus:ring-2 focus:ring-green-700/40"
               value={form.role}
               onChange={(e) =>
                 setForm({ ...form, role: e.target.value as typeof form.role })
@@ -184,7 +216,7 @@ function SignupForm() {
             </select>
           </div>
           <div>
-            <label className="block text-sm mb-1">Password</label>
+            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-ink/50">Password</label>
             <PasswordInput
               value={form.password}
               onChange={(v) => setForm({ ...form, password: v })}
@@ -195,7 +227,7 @@ function SignupForm() {
           </div>
 
           {error && (
-            <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-2">
+            <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-700">
               {error}
             </p>
           )}
@@ -203,7 +235,7 @@ function SignupForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-full bg-green-900 text-cream px-6 py-3 hover:bg-green-800 transition-colors disabled:opacity-50"
+            className="sheen w-full rounded-full bg-green-900 px-6 py-3.5 text-sm font-semibold text-cream shadow-[0_16px_34px_-22px_rgba(11,32,22,0.9)] ring-1 ring-inset ring-white/10 transition-all hover:-translate-y-0.5 hover:bg-green-800 disabled:translate-y-0 disabled:opacity-50"
           >
             {loading ? "Creating your account..." : "Create Account"}
           </button>
@@ -221,12 +253,19 @@ function SignupForm() {
           </p>
         </form>
 
-        <p className="text-sm text-ink/60 mt-6">
-          Already have an account?{" "}
-          <a href="/login" className="text-green-700 underline">
-            Log in
-          </a>
-        </p>
+              <div className="my-5 gold-hairline opacity-60" aria-hidden="true" />
+              <p className="text-sm text-ink/60">
+                Already have an account?{" "}
+                <a
+                  href="/login"
+                  className="font-semibold text-green-800 underline decoration-green-800/30 underline-offset-2 hover:decoration-green-800 dark:text-green-300"
+                >
+                  Log in
+                </a>
+              </p>
+            </div>
+          </div>
+        </div>
       </main>
     </>
   );

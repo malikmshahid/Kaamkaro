@@ -104,43 +104,37 @@ export default function WhyKaamKaroPage() {
     <>
       <Navbar />
       <main className="flex-1">
-        <section className="relative overflow-hidden border-b border-line">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background:
-                "radial-gradient(55% 60% at 88% 0%, rgba(200,150,62,0.16) 0%, rgba(200,150,62,0) 60%), radial-gradient(45% 55% at 4% 100%, rgba(18,58,38,0.10) 0%, rgba(18,58,38,0) 65%)",
-            }}
-          />
-          <div className="relative mx-auto w-full max-w-6xl px-5 py-12 sm:px-6 sm:py-16">
-            <p className="inline-flex items-center gap-2 rounded-full border border-gold-500/40 bg-gold-100/50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-gold-500 dark:bg-gold-500/10">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-gold-500" />
+        <section className="aurora grain relative isolate overflow-hidden border-b border-line">
+          <div className="relative mx-auto w-full max-w-6xl px-5 py-14 sm:px-6 sm:py-20">
+            <p className="reveal inline-flex items-center gap-2.5 rounded-full border border-gold-500/35 bg-card/70 px-3.5 py-1.5 text-[10.5px] font-semibold uppercase tracking-[0.18em] text-gold-600 shadow-lux-sm backdrop-blur dark:text-gold-300">
+              <span className="pulse-dot inline-block h-1.5 w-1.5 rounded-full bg-gold-500" />
               Why KaamKaro
             </p>
-            <h1 className="mt-4 max-w-3xl font-display text-3xl leading-tight text-heading sm:text-5xl">
-              Six things you can do here that you can&apos;t do anywhere else in Pakistan.
+            <h1 className="reveal reveal-1 mt-5 max-w-3xl font-display text-[2.1rem] font-medium leading-[1.04] tracking-[-0.02em] text-heading sm:text-[3.4rem]">
+              Six things you can do here
+              <br className="hidden sm:block" /> that you <span className="gold-text">can&apos;t do</span>{" "}
+              anywhere else in Pakistan.
             </h1>
-            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-ink/65 sm:text-base">
+            <p className="reveal reveal-2 mt-5 max-w-2xl leading-relaxed text-ink/65">
               Every line below is a feature that already works on this site — not a roadmap. Open
               any of them and check for yourself.
             </p>
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="reveal reveal-3 mt-8 flex flex-wrap gap-3">
               <Link
                 href="/tasks"
-                className="rounded-full bg-green-900 px-6 py-3 text-sm font-semibold text-cream hover:bg-green-800"
+                className="sheen inline-flex items-center gap-2 rounded-full bg-green-900 px-6 py-3 text-sm font-semibold text-cream shadow-[0_16px_34px_-22px_rgba(11,32,22,0.9)] ring-1 ring-inset ring-white/10 transition-all hover:-translate-y-0.5 hover:bg-green-800"
               >
                 Find work
               </Link>
               <Link
                 href="/tasks/new"
-                className="rounded-full border border-line bg-card px-6 py-3 text-sm text-ink/70 hover:border-green-800/40"
+                className="glass inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-heading transition-all hover:-translate-y-0.5 hover:bg-card"
               >
                 Post a task
               </Link>
               <Link
                 href="/agents"
-                className="rounded-full border border-line bg-card px-6 py-3 text-sm text-ink/70 hover:border-green-800/40"
+                className="glass inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-heading transition-all hover:-translate-y-0.5 hover:bg-card"
               >
                 Hire an AI agent
               </Link>
@@ -148,17 +142,31 @@ export default function WhyKaamKaroPage() {
           </div>
         </section>
 
-        <section className="mx-auto w-full max-w-6xl px-5 py-12 sm:px-6">
+        <section className="mx-auto w-full max-w-6xl px-5 py-14 sm:px-6 sm:py-16">
           <div className="grid gap-5 md:grid-cols-2">
             {PILLARS.map((p) => (
               <article
                 key={p.kicker}
-                className="flex flex-col rounded-2xl border border-line bg-card p-5 transition-colors hover:border-green-800/40 sm:p-6"
+                className="group relative flex flex-col overflow-hidden rounded-2xl border border-line bg-card p-5 shadow-lux-sm transition-all duration-300 hover:-translate-y-1 hover:border-gold-500/40 hover:shadow-lux-lg sm:p-6"
               >
-                <span className="font-display text-xs tracking-[0.2em] text-gold-500">{p.kicker}</span>
-                <h2 className="mt-2 font-display text-xl leading-snug text-heading">{p.title}</h2>
+                <span
+                  className="gold-hairline absolute inset-x-6 top-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                  aria-hidden="true"
+                />
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-1 -top-4 font-display text-[4.5rem] leading-none text-heading/[0.05] dark:text-white/[0.05]"
+                >
+                  {p.kicker}
+                </span>
+                <span className="text-[10.5px] font-semibold uppercase tracking-[0.2em] text-gold-600 dark:text-gold-400">
+                  {p.kicker}
+                </span>
+                <h2 className="mt-2 font-display text-[1.25rem] leading-snug text-heading">
+                  {p.title}
+                </h2>
                 <p className="mt-2 flex-1 text-sm leading-relaxed text-ink/65">{p.body}</p>
-                <p className="mt-4 rounded-lg bg-paper/70 px-3 py-2 text-[11px] text-ink/55 dark:bg-green-500/5">
+                <p className="mt-4 rounded-xl border border-green-900/15 bg-green-950/[0.04] px-3 py-2 text-[11px] text-ink/55 dark:border-green-500/20 dark:bg-green-500/10">
                   On KaamKaro: <span className="font-semibold text-ink/75">{p.proof}</span>
                 </p>
                 <p className="mt-2 text-[11px] text-ink/40">Elsewhere: {p.others}</p>
@@ -167,15 +175,17 @@ export default function WhyKaamKaroPage() {
           </div>
         </section>
 
-        <section className="border-y border-line bg-card/40">
-          <div className="mx-auto w-full max-w-6xl px-5 py-12 sm:px-6">
-            <h2 className="font-display text-2xl text-heading sm:text-3xl">Straight comparison</h2>
+        <section className="border-y border-line bg-surface-2/40">
+          <div className="mx-auto w-full max-w-6xl px-5 py-14 sm:px-6 sm:py-16">
+            <h2 className="font-display text-[1.7rem] leading-tight text-heading sm:text-[2.2rem]">
+              Straight comparison
+            </h2>
             <p className="mt-2 max-w-2xl text-sm text-ink/60">
               Competitor columns describe their standard product as of late 2026. We would rather
               show the gaps than pretend they don&apos;t exist — but these are the ones that matter
               for work in Pakistan.
             </p>
-            <div className="-mx-5 mt-6 overflow-x-auto px-5 sm:mx-0 sm:px-0">
+            <div className="no-bar fade-x card-lux -mx-5 mt-6 overflow-x-auto px-5 py-2 sm:mx-0 sm:px-4 sm:[mask-image:none] sm:[-webkit-mask-image:none]">
               <table className="w-full min-w-[560px] border-collapse text-left">
                 <thead>
                   <tr className="border-b border-line text-[11px] uppercase tracking-[0.12em] text-ink/45">
@@ -223,16 +233,21 @@ export default function WhyKaamKaroPage() {
                 d: "Every payment step is logged: initiated, funded, released. Proof files are access-controlled, so evidence can't leak.",
               },
             ].map((x) => (
-              <div key={x.t} className="rounded-2xl border border-line bg-card p-5">
-                <h3 className="font-display text-lg text-heading">{x.t}</h3>
+              <div key={x.t} className="card-lux p-5">
+                <h3 className="font-display text-[1.1rem] text-heading">{x.t}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-ink/60">{x.d}</p>
               </div>
             ))}
           </div>
 
-          <div className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-gradient-to-br from-green-950 to-green-800 p-6 text-cream">
-            <div>
-              <p className="font-display text-2xl">Try it with a real task</p>
+          <div className="relative mt-8 flex flex-wrap items-center justify-between gap-4 overflow-hidden rounded-2xl bg-gradient-to-br from-green-950 via-green-900 to-green-800 p-6 text-cream shadow-[0_30px_70px_-40px_rgba(11,32,22,0.95)] ring-1 ring-inset ring-white/10 sm:p-7">
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 opacity-60 [background:radial-gradient(60%_80%_at_88%_-10%,rgba(200,150,62,0.35),transparent_65%)]"
+            />
+            <span className="gold-hairline absolute inset-x-0 top-0 opacity-70" aria-hidden="true" />
+            <div className="relative">
+              <p className="font-display text-[1.5rem]">Try it with a real task</p>
               <p className="mt-1 text-sm text-cream/70">
                 Post a task in a minute, or send a priced proposal today. No fees to apply.
               </p>

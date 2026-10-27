@@ -347,19 +347,11 @@ export default function TaskDetailPage({
       <Navbar />
       <main className="flex-1">
         {/* ------------------------------- HERO ------------------------------- */}
-        <section className="relative overflow-hidden border-b border-line">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background:
-                "radial-gradient(50% 60% at 90% 0%, rgba(200,150,62,0.15) 0%, rgba(200,150,62,0) 62%), radial-gradient(45% 60% at 0% 100%, rgba(18,58,38,0.09) 0%, rgba(18,58,38,0) 65%)",
-            }}
-          />
-          <div className="relative mx-auto w-full max-w-6xl px-5 pb-6 pt-8 sm:px-6 sm:pt-10">
+        <section className="aurora grain relative isolate overflow-hidden border-b border-line">
+          <div className="relative mx-auto w-full max-w-6xl px-5 pb-7 pt-9 sm:px-6 sm:pt-12">
             <Link
               href="/tasks"
-              className="text-xs text-ink/50 hover:text-green-700"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-ink/50 transition-colors hover:text-green-700"
             >
               ← All work
             </Link>
@@ -386,12 +378,12 @@ export default function TaskDetailPage({
               )}
             </div>
 
-            <h1 className="mt-3 max-w-3xl break-words font-display text-2xl leading-tight text-heading [overflow-wrap:anywhere] sm:text-4xl">
+            <h1 className="mt-3.5 max-w-3xl break-words font-display text-[1.75rem] font-medium leading-[1.08] tracking-[-0.015em] text-heading [overflow-wrap:anywhere] sm:text-[2.6rem]">
               {task.title}
             </h1>
 
             <div className="mt-4 flex flex-wrap items-center gap-3">
-              <span className="rounded-xl bg-green-900 px-3.5 py-2 font-display text-xl text-cream">
+              <span className="tnum rounded-xl bg-gradient-to-br from-green-900 to-green-950 px-4 py-2 font-display text-[1.35rem] text-cream shadow-[0_16px_34px_-22px_rgba(11,32,22,0.9)] ring-1 ring-inset ring-white/10">
                 {formatMoney(task.budget, task.currency)}
               </span>
               <span className="rounded-full border border-line bg-card px-3 py-1.5 text-xs font-semibold text-ink/65">
@@ -414,8 +406,9 @@ export default function TaskDetailPage({
         <div className="mx-auto grid w-full max-w-6xl items-start gap-6 px-5 py-7 sm:px-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-8">
           {/* ---------------------------- MAIN COLUMN ---------------------------- */}
           <div className="min-w-0 space-y-6">
-            <div className="rounded-2xl border border-line bg-card p-5 sm:p-6">
-              <h2 className="mb-2 text-[11px] uppercase tracking-[0.14em] text-ink/45">
+            <div className="card-lux relative overflow-hidden p-5 sm:p-6">
+              <div className="gold-hairline absolute inset-x-6 top-0 opacity-70" aria-hidden="true" />
+              <h2 className="mb-2 text-[10.5px] uppercase tracking-[0.18em] text-ink/45">
                 What the client needs
               </h2>
               <p className="whitespace-pre-wrap break-words leading-relaxed text-ink/75 [overflow-wrap:anywhere]">
@@ -519,7 +512,7 @@ export default function TaskDetailPage({
                     </div>
                     <Link
                       href={`/tasks/${id}/apply`}
-                      className="shrink-0 rounded-full bg-cream px-6 py-3 text-sm font-semibold text-green-900 transition-transform hover:-translate-y-0.5"
+                      className="sheen shrink-0 rounded-full bg-cream px-6 py-3 text-sm font-semibold text-green-900 shadow-[0_14px_30px_-20px_rgba(0,0,0,0.9)] transition-transform hover:-translate-y-0.5"
                     >
                       Apply now →
                     </Link>
@@ -529,7 +522,7 @@ export default function TaskDetailPage({
             )}
 
             {!user && task.status === "open" && (
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-card p-5">
+              <div className="card-lux flex flex-wrap items-center justify-between gap-3 p-5">
                 <p className="text-sm text-ink/65">
                   <span className="font-semibold text-heading">
                     Log in to apply.
@@ -538,7 +531,7 @@ export default function TaskDetailPage({
                 </p>
                 <Link
                   href={`/login?next=/tasks/${id}/apply`}
-                  className="shrink-0 rounded-full bg-green-900 px-5 py-2.5 text-sm font-semibold text-cream hover:bg-green-800"
+                  className="sheen shrink-0 rounded-full bg-green-900 px-5 py-2.5 text-sm font-semibold text-cream shadow-lux-sm transition-transform hover:-translate-y-0.5 hover:bg-green-800"
                 >
                   Log in to apply
                 </Link>
@@ -548,7 +541,7 @@ export default function TaskDetailPage({
             {/* --- Applications list (owner, open task) --- */}
             {isOwner && task.status === "open" && (
               <div className="mb-10">
-                <h2 className="mb-1 font-display text-2xl text-heading">
+                <h2 className="mb-1 font-display text-[1.4rem] text-heading">
                   Proposals ({applications.length})
                 </h2>
                 <p className="mb-4 text-sm text-ink/55">
@@ -562,7 +555,7 @@ export default function TaskDetailPage({
                   {applications.map((app) => (
                     <div
                       key={app.id}
-                      className="border border-line rounded-xl p-5 bg-card flex items-start justify-between gap-4"
+                      className="card-lux flex items-start justify-between gap-4 p-5"
                     >
                       <div>
                         <Link
@@ -1033,7 +1026,7 @@ export default function TaskDetailPage({
             {/* --- Reviews (completed) --- */}
             {task.status === "completed" && (
               <div className="mb-10">
-                <h2 className="font-display text-2xl text-heading mb-4">
+                <h2 className="mb-4 font-display text-[1.4rem] text-heading">
                   Reviews
                 </h2>
                 {reviews.length > 0 && (
@@ -1095,7 +1088,7 @@ export default function TaskDetailPage({
 
           {/* ------------------------------ SIDEBAR ------------------------------ */}
           <aside className="min-w-0 space-y-4 lg:sticky lg:top-20 lg:self-start">
-            <div className="rounded-2xl border border-line bg-card p-4">
+            <div className="card-lux p-4">
               <p className="font-display text-xl text-heading">
                 {formatMoney(task.budget, task.currency)}
               </p>
@@ -1140,7 +1133,7 @@ export default function TaskDetailPage({
               </div>
             </div>
 
-            <div className="rounded-2xl border border-line bg-card p-4">
+            <div className="card-lux p-4">
               <p className="text-sm font-semibold text-heading">Progress</p>
               <ol className="mt-3 space-y-3">
                 {[

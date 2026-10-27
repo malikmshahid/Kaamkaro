@@ -71,8 +71,13 @@ export default function ProviderProfilePage({
     return (
       <>
         <Navbar />
-        <main className="flex-1 max-w-4xl mx-auto w-full px-6 py-16">
-          <p className="text-ink/50">Loading...</p>
+        <main className="mx-auto w-full max-w-4xl px-5 py-14 sm:px-6">
+          <div className="animate-pulse space-y-4">
+            <div className="h-3 w-24 rounded bg-line/60" />
+            <div className="h-10 w-2/3 rounded bg-line/60" />
+            <div className="h-24 rounded-2xl bg-line/40" />
+            <div className="h-40 rounded-2xl bg-line/40" />
+          </div>
         </main>
       </>
     );
@@ -82,8 +87,17 @@ export default function ProviderProfilePage({
     return (
       <>
         <Navbar />
-        <main className="flex-1 max-w-4xl mx-auto w-full px-6 py-16">
-          <p className="text-ink/50">This profile couldn&apos;t be found.</p>
+        <main className="mx-auto w-full max-w-3xl px-5 py-20 text-center sm:px-6">
+          <p className="font-display text-2xl text-heading">This profile couldn&apos;t be found</p>
+          <p className="mt-2 text-sm text-ink/60">
+            The provider may have deactivated their account.
+          </p>
+          <Link
+            href="/tools"
+            className="mt-6 inline-block rounded-full bg-green-900 px-6 py-2.5 text-sm font-semibold text-cream hover:bg-green-800"
+          >
+            Browse the Toolbox
+          </Link>
         </main>
       </>
     );
@@ -94,77 +108,106 @@ export default function ProviderProfilePage({
   return (
     <>
       <Navbar />
-      <main className="flex-1 max-w-4xl mx-auto w-full px-6 py-16">
-        <div className="flex items-start justify-between flex-wrap gap-4 mb-8">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="font-display text-4xl text-heading">{provider.name}</h1>
-              <span className="text-xs px-3 py-1 rounded-full bg-gold-100 text-gold-500 font-semibold whitespace-nowrap">
-                {badge.emoji} {badge.label}
-              </span>
-              {provider.cnicVerified && (
-                <span className="text-xs px-3 py-1 rounded-full bg-green-950/5 text-green-800 font-semibold whitespace-nowrap">
-                  ✓ Verified
-                </span>
-              )}
-            </div>
-            <p className="text-ink/60">
-              {provider.city || "Location not set"} &middot;{" "}
-              {provider.ratingCount > 0
-                ? `${provider.ratingAvg.toFixed(1)} ⭐ (${provider.ratingCount} reviews)`
-                : "No reviews yet"}{" "}
-              &middot; {completedCount} tasks completed
-            </p>
-          </div>
-        </div>
-
-        {provider.bio && (
-          <p className="text-ink/70 leading-relaxed mb-10 max-w-2xl">{provider.bio}</p>
-        )}
-
-        {tools.length > 0 && (
-          <section className="mb-12">
-            <h2 className="font-display text-2xl text-heading mb-4">
-              🧰 Toolbox Listings
-            </h2>
-            <div className="grid md:grid-cols-2 gap-4">
-              {tools.map((t) => (
-                <Link
-                  key={t.id}
-                  href={`/tools/${t.id}`}
-                  className="border border-line rounded-xl p-5 bg-card hover:border-gold-500 transition-colors"
-                >
-                  <p className="font-semibold text-heading mb-1">{t.title}</p>
-                  <p className="text-sm text-ink/60 line-clamp-2 mb-3">{t.description}</p>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="font-semibold text-green-800">
-                      {formatMoney(t.price, t.currency)}
+      <main className="flex-1">
+        <section className="aurora grain relative isolate overflow-hidden border-b border-line">
+          <div className="relative mx-auto w-full max-w-5xl px-5 pb-8 pt-10 sm:px-6 sm:pb-10 sm:pt-14">
+            <div className="flex flex-wrap items-start gap-5">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-green-900 to-green-950 font-display text-2xl text-cream shadow-[0_18px_36px_-24px_rgba(11,32,22,0.9)] ring-1 ring-inset ring-white/10">
+                {provider.name?.[0]?.toUpperCase() || "K"}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h1 className="break-words font-display text-[1.9rem] font-medium leading-tight tracking-[-0.015em] text-heading sm:text-[2.5rem] [overflow-wrap:anywhere]">
+                    {provider.name}
+                  </h1>
+                  <span className="rounded-full bg-gold-100 px-2.5 py-1 text-[10.5px] font-semibold uppercase tracking-wide text-gold-600 dark:bg-gold-500/15 dark:text-gold-300">
+                    {badge.emoji} {badge.label}
+                  </span>
+                  {provider.cnicVerified && (
+                    <span className="rounded-full bg-green-900 px-2.5 py-1 text-[10.5px] font-semibold uppercase tracking-wide text-cream">
+                      ✓ ID verified
                     </span>
-                    <span className="text-ink/50">{t.orderCount} orders</span>
+                  )}
+                </div>
+                <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink/55">
+                  <span>{provider.city || "Location not set"}</span>
+                  <span>·</span>
+                  <span>
+                    {provider.ratingCount > 0
+                      ? `${provider.ratingAvg.toFixed(1)} ★ (${provider.ratingCount} reviews)`
+                      : "No reviews yet"}
+                  </span>
+                  <span>·</span>
+                  <span>{completedCount} tasks completed</span>
+                </p>
+                {provider.bio && (
+                  <p className="mt-4 max-w-2xl leading-relaxed text-ink/70">{provider.bio}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div className="mx-auto w-full max-w-5xl px-5 py-8 sm:px-6 sm:py-10">
+          {tools.length > 0 && (
+            <section className="mb-10">
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <h2 className="font-display text-[1.25rem] text-heading">Toolbox listings</h2>
+                <span className="text-[11px] uppercase tracking-[0.14em] text-ink/40">
+                  {tools.length} live
+                </span>
+              </div>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {tools.map((t) => (
+                  <Link
+                    key={t.id}
+                    href={`/tools/${t.id}`}
+                    className="group relative flex flex-col overflow-hidden rounded-2xl border border-line bg-card p-5 shadow-lux-sm transition-all duration-300 hover:-translate-y-1 hover:border-gold-500/40 hover:shadow-lux-lg"
+                  >
+                    <span
+                      className="gold-hairline absolute inset-x-6 top-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                      aria-hidden="true"
+                    />
+                    <p className="break-words font-display text-[1.1rem] leading-snug text-heading [overflow-wrap:anywhere]">
+                      {t.title}
+                    </p>
+                    <p className="mt-1.5 line-clamp-2 flex-1 text-sm text-ink/60">{t.description}</p>
+                    <div className="mt-3 flex items-center justify-between border-t border-line pt-3 text-sm">
+                      <span className="tnum font-display text-[1.1rem] text-green-800 dark:text-green-300">
+                        {formatMoney(t.price, t.currency)}
+                      </span>
+                      <span className="text-[11px] uppercase tracking-wide text-ink/45">
+                        {t.orderCount} orders
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+
+          <section>
+            <h2 className="mb-4 font-display text-[1.25rem] text-heading">Reviews</h2>
+            {reviews.length === 0 && (
+              <div className="rounded-2xl border border-dashed border-line bg-card/50 px-5 py-10 text-center">
+                <p className="text-sm text-ink/55">
+                  No reviews yet — this provider is just getting started.
+                </p>
+              </div>
+            )}
+            <div className="grid gap-3 sm:grid-cols-2">
+              {reviews.map((r) => (
+                <div key={r.id} className="card-lux p-4">
+                  <div className="mb-1 flex items-center justify-between">
+                    <p className="text-gold-500">{"★".repeat(r.rating)}</p>
+                    <p className="text-xs text-ink/40">{r.reviewerName}</p>
                   </div>
-                </Link>
+                  {r.comment && <p className="text-sm leading-relaxed text-ink/60">{r.comment}</p>}
+                </div>
               ))}
             </div>
           </section>
-        )}
-
-        <section>
-          <h2 className="font-display text-2xl text-heading mb-4">Reviews</h2>
-          {reviews.length === 0 && (
-            <p className="text-sm text-ink/50">No reviews yet — this provider is just getting started.</p>
-          )}
-          <div className="space-y-3">
-            {reviews.map((r) => (
-              <div key={r.id} className="border border-line rounded-xl p-4 bg-card">
-                <div className="flex items-center justify-between mb-1">
-                  <p className="text-gold-500">{"⭐".repeat(r.rating)}</p>
-                  <p className="text-xs text-ink/40">{r.reviewerName}</p>
-                </div>
-                {r.comment && <p className="text-sm text-ink/60">{r.comment}</p>}
-              </div>
-            ))}
-          </div>
-        </section>
+        </div>
       </main>
     </>
   );
