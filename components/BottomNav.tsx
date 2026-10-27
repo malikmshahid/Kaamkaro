@@ -3,16 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-type Item = { href: string; label: string; icon: string; exact?: boolean };
+type Item = { href: string; label: string; short?: string; icon: string; exact?: boolean };
 
 const LEFT: Item[] = [
   { href: "/", label: "Home", icon: "⌂", exact: true },
-  { href: "/tasks", label: "Find work", icon: "⌕" },
+  { href: "/tasks", label: "Find work", short: "Find", icon: "⌕" },
   { href: "/messages", label: "Inbox", icon: "✉" },
 ];
 
 const RIGHT: Item[] = [
-  { href: "/dashboard", label: "My work", icon: "◱" },
+  { href: "/dashboard", label: "My work", short: "Work", icon: "◱" },
   { href: "/settings", label: "Agents", icon: "❖" },
 ];
 
@@ -45,7 +45,16 @@ export default function BottomNav() {
         >
           {item.icon}
         </span>
-        <span className="max-w-full truncate">{item.label}</span>
+        {/* 320 px phones: two words per item do not fit, so shorten rather
+            than truncate with an ellipsis. */}
+        {item.short ? (
+          <>
+            <span className="max-w-full truncate min-[360px]:hidden">{item.short}</span>
+            <span className="hidden max-w-full truncate min-[360px]:inline">{item.label}</span>
+          </>
+        ) : (
+          <span className="max-w-full truncate">{item.label}</span>
+        )}
       </Link>
     );
   };
