@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { users, tools, reviews, tasks } from "@/db/schema";
 import { eq, and, desc, sql } from "drizzle-orm";
+import { kaamScore, daysSince } from "@/lib/kaamScore";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -65,6 +66,13 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       tools: activeTools,
       reviews: recentReviews,
       completedCount: completedStats.count,
+      kaamScore: kaamScore({
+        completedTasks: completedStats.count,
+        ratingAvg: Number(provider.ratingAvg || 0),
+        ratingCount: Number(provider.ratingCount || 0),
+        verified: Boolean(provider.cnicVerified),
+        memberSinceDays: daysSince(provider.createdAt),
+      }),
     });
 
   } catch (err) {

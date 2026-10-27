@@ -4,6 +4,7 @@ import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
+import PriceFairness from "@/components/PriceFairness";
 import { useUser } from "@/lib/useUser";
 import { formatMoney } from "@/lib/currency";
 import { categoryLabel } from "@/lib/constants";
@@ -1180,6 +1181,29 @@ export default function TaskDetailPage({
                 </p>
               )}
             </div>
+
+            <PriceFairness
+              category={task.category}
+              city={task.city}
+              amount={Number(task.budget) || null}
+            />
+
+            {task.status === "completed" && (
+              <div className="rounded-2xl border border-gold-500/30 bg-gradient-to-br from-gold-100/70 to-card p-4 dark:from-gold-500/10 dark:to-card">
+                <p className="text-[10px] uppercase tracking-[0.16em] text-ink/45">Proof of work</p>
+                <p className="mt-1 text-sm font-semibold text-heading">This job has a receipt</p>
+                <p className="mt-1 text-xs leading-relaxed text-ink/60">
+                  A public, tamper-evident record of the amount, the escrow release and the proof
+                  hash. Shareable with any future client.
+                </p>
+                <Link
+                  href={`/receipt/${task.id}`}
+                  className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-green-900 px-3.5 py-1.5 text-xs font-semibold text-cream transition-transform hover:-translate-y-0.5 hover:bg-green-800"
+                >
+                  View receipt →
+                </Link>
+              </div>
+            )}
 
             <div className="rounded-2xl border border-green-900/20 bg-green-950/[0.04] p-4 dark:bg-green-500/10">
               <p className="text-sm font-semibold text-heading">

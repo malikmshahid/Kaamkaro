@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import { useUser } from "@/lib/useUser";
 import { formatMoney } from "@/lib/currency";
 import { categoryLabel } from "@/lib/constants";
+import type { KaamScoreResult } from "@/lib/kaamScore";
 
 type Tool = {
   id: string;
@@ -77,11 +78,15 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
   const [ordering, setOrdering] = useState(false);
   const [error, setError] = useState("");
   const [all, setAll] = useState<Tool[]>([]);
+  const [score, setScore] = useState<KaamScoreResult | null>(null);
 
   useEffect(() => {
     fetch(`/api/tools/${id}`)
       .then((r) => r.json())
-      .then((data) => setTool(data.tool))
+      .then((data) => {
+        setTool(data.tool);
+        setScore(data.kaamScore || null);
+      })
       .catch(() => setTool(null))
       .finally(() => setLoading(false));
 
@@ -343,6 +348,27 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
                   </span>
                 )}
               </div>
+
+              {score && (
+                <div className="mt-3 rounded-xl border border-gold-500/25 bg-gradient-to-r from-gold-100/60 to-transparent px-3 py-2.5 dark:from-gold-500/10 dark:to-transparent">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-[10px] uppercase tracking-[0.16em] text-ink/45">KaamScore</p>
+                    <p className="tnum font-display text-[1.05rem] leading-none text-heading">
+                      {score.score}
+                      <span className="text-[10px] text-ink/40">/100</span>
+                    </p>
+                  </div>
+                  <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-line">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-green-800 to-gold-500"
+                      style={{ width: `${score.score}%` }}
+                    />
+                  </div>
+                  <p className="mt-1.5 text-[10.5px] text-ink/45">
+                    {score.grade.label} · completed jobs, reviews, ID check and account age
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="rounded-2xl border border-green-900/20 bg-green-950/[0.04] p-4 dark:bg-green-500/10">

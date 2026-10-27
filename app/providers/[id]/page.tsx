@@ -4,6 +4,7 @@ import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { formatMoney } from "@/lib/currency";
+import type { KaamScoreResult } from "@/lib/kaamScore";
 
 type Provider = {
   id: string;
@@ -53,6 +54,7 @@ export default function ProviderProfilePage({
   const [tools, setTools] = useState<Tool[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [completedCount, setCompletedCount] = useState(0);
+  const [score, setScore] = useState<KaamScoreResult | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -63,6 +65,7 @@ export default function ProviderProfilePage({
         setTools(data.tools || []);
         setReviews(data.reviews || []);
         setCompletedCount(data.completedCount || 0);
+        setScore(data.kaamScore || null);
       })
       .finally(() => setLoading(false));
   }, [id]);
@@ -145,6 +148,46 @@ export default function ProviderProfilePage({
                 )}
               </div>
             </div>
+
+            {score && (
+              <div className="mt-6 grid gap-4 sm:grid-cols-[auto_1fr] sm:items-center">
+                <div className="relative flex h-[104px] w-[104px] shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-green-950 via-green-900 to-green-800 text-cream shadow-[0_22px_44px_-30px_rgba(11,32,22,0.95)] ring-1 ring-inset ring-white/10">
+                  <div className="text-center">
+                    <p className="tnum font-display text-[2.1rem] leading-none">{score.score}</p>
+                    <p className="mt-1 text-[9px] uppercase tracking-[0.16em] text-cream/60">
+                      KaamScore
+                    </p>
+                  </div>
+                </div>
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-display text-[1.15rem] text-heading">{score.grade.label} provider</p>
+                    <span className="rounded-full bg-gold-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gold-600 dark:bg-gold-500/15 dark:text-gold-300">
+                      {score.score} / 100
+                    </span>
+                  </div>
+                  <p className="mt-1 text-[12.5px] leading-relaxed text-ink/55">
+                    Built from completed jobs, review evidence, ID verification and account age —
+                    every point is explained below. Nothing here can be bought.
+                  </p>
+                  <div className="mt-3 grid gap-x-5 gap-y-1.5 sm:grid-cols-2">
+                    {score.parts.map((part) => (
+                      <div key={part.key} className="flex items-center gap-2">
+                        <div className="h-1.5 w-full max-w-[104px] overflow-hidden rounded-full bg-line">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-green-800 to-gold-500"
+                            style={{ width: `${Math.round((part.points / part.max) * 100)}%` }}
+                          />
+                        </div>
+                        <span className="shrink-0 text-[10.5px] text-ink/50">
+                          {part.label} {part.points}/{part.max}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </section>
 

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { tools, users, tasks } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
+import { kaamScore, daysSince } from "@/lib/kaamScore";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -26,6 +27,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
         providerRatingCount: users.ratingCount,
         providerCity: users.city,
         providerVerified: users.cnicVerified,
+        providerCreatedAt: users.createdAt,
         providerCompleted: sql<number>`(
           select count(*)::int from ${tasks}
           where ${tasks.assignedProviderId} = ${tools.providerId} and ${tasks.status} = 'completed'
@@ -39,7 +41,15 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     const tool = found[0];
     if (!tool) return NextResponse.json({ error: "Tool not found" }, { status: 404 });
 
-    return NextResponse.json({ tool });
+    const score = kaamScore({
+      completedTasks: Number(tool.providerCompleted || 0),
+      ratingAvg: Number(tool.providerRating || 0),
+      ratingCount: Number(tool.providerRatingCount || 0),
+      verified: Boolean(tool.providerVerified),
+      memberSinceDays: daysSince(tool.providerCreatedAt),
+    });
+
+    return NextResponse.json({ tool, kaamScore: score });
 
   } catch (err) {
     console.error("GET failed:", err);

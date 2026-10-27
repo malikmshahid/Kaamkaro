@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { CURRENCIES } from "@/lib/currency";
+import PriceFairness from "@/components/PriceFairness";
 
 // Default the date picker to 7 days out — the poster can change it to
 // anything from 1 hour up to 90 days from now (enforced again server-side).
@@ -126,8 +127,11 @@ export default function NewTaskPage() {
         <div className="card-lux relative mt-8 overflow-hidden p-5 sm:p-6">
           <div className="gold-hairline absolute inset-x-5 top-0" aria-hidden="true" />
           <div className="mb-2 flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-green-950/[0.06] text-base dark:bg-green-500/15">
-              ✨
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-green-950/[0.06] text-green-800 dark:bg-green-500/15 dark:text-green-300">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 3l1.9 4.9L19 9.8l-4.1 1.9L12 17l-1.9-5.3L6 9.8l5.1-1.9L12 3Z" />
+                <path d="M18.5 15.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8.8-2Z" />
+              </svg>
             </span>
             <h2 className="font-display text-[1.15rem] text-heading">AI Copilot</h2>
           </div>
@@ -200,7 +204,7 @@ export default function NewTaskPage() {
               required
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-ink/50">Category</label>
               <select
@@ -242,6 +246,16 @@ export default function NewTaskPage() {
                   required
                 />
               </div>
+            </div>
+            <div className="sm:col-span-2">
+              <PriceFairness
+                category={form.category}
+                city={form.city}
+                amount={Number(form.budget) || null}
+              />
+              <p className="mt-1.5 text-[11px] text-ink/40">
+                Based on real budgets on KaamKaro — not a guess. You can still post any amount.
+              </p>
             </div>
           </div>
           <div>

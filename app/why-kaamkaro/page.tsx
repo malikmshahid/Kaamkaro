@@ -5,7 +5,7 @@ import Navbar from "@/components/Navbar";
 export const metadata: Metadata = {
   title: "Why KaamKaro is different",
   description:
-    "Priced proposals, escrow before work starts, AI that drafts your pitch and checks the proof — and a marketplace AI agents can hire from too. Here is what no other Pakistani platform offers.",
+    "Priced proposals, escrow before work starts, AI that drafts your pitch and checks the proof, verifiable work receipts, an explainable KaamScore, a fair-price meter — and a marketplace AI agents can hire from too.",
 };
 
 /**
@@ -49,6 +49,14 @@ const PILLARS = [
   },
   {
     kicker: "05",
+    title: "A finished job comes with a receipt anyone can check",
+    body:
+      "Every completed task issues a public work receipt: the amount, the escrow release and a hash of the delivered file. No client name, no address, no contact details — just proof. Anyone can verify it as JSON.",
+    proof: "Public /receipt/<id> → /api/receipt/<id>",
+    others: "Screenshots and a promise in a chat",
+  },
+  {
+    kicker: "06",
     title: "AI agents can hire, and be hired",
     body:
       "A real API: post a task, read proposals, accept, and release escrow — with hashed keys, per-key rate limits and revoke. Escrow is only ever funded by a real payment, never by an API call.",
@@ -56,12 +64,12 @@ const PILLARS = [
     others: "Human-only marketplaces",
   },
   {
-    kicker: "06",
-    title: "Match scores instead of a lucky feed",
+    kicker: "07",
+    title: "Match scores, KaamScore and a fair-price meter",
     body:
-      "Every open task gets a score against your skills, city and rate, with the reason written on the card. Sort by best match, highest budget, ending soon, or least competition.",
-    proof: "Find Work → match ring + reasons",
-    others: "Chronological lists or paid placement",
+      "Open tasks are scored against your skills, city and rate with the reason on the card. Providers carry an explainable KaamScore, and when you post a task you see what that work actually pays — taken from real budgets here, not a guess.",
+    proof: "Find Work match ring · KaamScore · market-rate meter",
+    others: "Chronological lists, opaque star ratings, blind budgeting",
   },
 ];
 
@@ -72,6 +80,8 @@ const COMPARE = [
   ["Automated proof verification", "yes", "no", "no"],
   ["AI agents can hire humans via API", "yes", "no", "no"],
   ["Match score with reasons", "yes", "no", "no"],
+  ["Public, verifiable work receipts", "yes", "no", "no"],
+  ["Explainable trust score + fair-price meter", "yes", "no", "no"],
   ["JazzCash / Easypaisa checkout", "yes", "no", "no"],
   ["No connects or paid bidding", "yes", "no", "yes"],
 ];
@@ -111,7 +121,7 @@ export default function WhyKaamKaroPage() {
               Why KaamKaro
             </p>
             <h1 className="reveal reveal-1 mt-5 max-w-3xl font-display text-[2.1rem] font-medium leading-[1.04] tracking-[-0.02em] text-heading sm:text-[3.4rem]">
-              Six things you can do here
+              Seven things you can do here
               <br className="hidden sm:block" /> that you <span className="gold-text">can&apos;t do</span>{" "}
               anywhere else in Pakistan.
             </h1>
@@ -218,8 +228,12 @@ export default function WhyKaamKaroPage() {
         </section>
 
         <section className="mx-auto w-full max-w-6xl px-5 py-12 sm:px-6">
-          <div className="grid gap-5 sm:grid-cols-3">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {[
+              {
+                t: "Receipts you can prove",
+                d: "Every completed job issues a public, tamper-evident receipt — amount, escrow release and a proof hash — verifiable as JSON by anyone, with no private data.",
+              },
               {
                 t: "Built for PKR, not translated for it",
                 d: "Pakistan-first checkout through PayFast (JazzCash / Easypaisa / card), prices in rupees, cities in local terms.",
