@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { requireAdmin } from "@/lib/adminAuth";
 import { notify } from "@/lib/notify";
 import { z } from "zod";
+import { guardRequest } from "@/lib/rateLimit";
 
 /** PATCH /api/admin/payouts/[id] — admin settles or rejects a withdrawal. */
 const bodySchema = z.object({
@@ -15,6 +16,8 @@ const bodySchema = z.object({
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const limited = await guardRequest(req, "adminAction");
+    if (limited) return limited;
     const admin = await requireAdmin();
     if (!admin) return NextResponse.json({ error: "Admin access required" }, { status: 403 });
 

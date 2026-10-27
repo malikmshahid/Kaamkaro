@@ -38,7 +38,15 @@ export async function POST(req: NextRequest) {
   try {
     const contentType = req.headers.get("content-type") || "";
     if (contentType.includes("application/json")) {
-      payload = (await req.json()) as Record<string, string>;
+      // Gateways send strings; a JSON caller can send anything. Flatten every
+      // value to a bounded string so no downstream hash/DB call sees an object.
+      const raw = (await req.json()) as Record<string, unknown>;
+      if (raw && typeof raw === "object") {
+        for (const [k, v] of Object.entries(raw).slice(0, 60)) {
+          if (typeof k !== "string" || k.length > 64) continue;
+          payload[k] = typeof v === "string" ? v.slice(0, 512) : String(v ?? "").slice(0, 512);
+        }
+      }
     } else {
       const form = await req.formData();
       form.forEach((v, k) => {

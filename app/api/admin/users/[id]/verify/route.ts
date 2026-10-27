@@ -4,6 +4,13 @@ import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { requireAdmin } from "@/lib/adminAuth";
 import { notify } from "@/lib/notify";
+import { guardRequest } from "@/lib/rateLimit";
+import { z } from "zod";
+
+const verifyUserSchema = z.object({
+  verified: z.boolean({ error: "verified must be true or false" }),
+});
+
 
 // POST /api/admin/users/[id]/verify
 // Body: { verified: boolean }
@@ -12,11 +19,20 @@ import { notify } from "@/lib/notify";
 // platform never auto-verifies IDs.
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const limited = await guardRequest(req, "adminAction");
+    if (limited) return limited;
     const admin = await requireAdmin();
     if (!admin) return NextResponse.json({ error: "Admin access required" }, { status: 403 });
 
     const { id } = await params;
-    const { verified } = await req.json();
+    const parsed = verifyUserSchema.safeParse(await req.json().catch(() => ({})));
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message || "Invalid request" },
+        { status: 400 }
+      );
+    }
+    const { verified } = parsed.data;
 
     const found = await db.select().from(users).where(eq(users.id, id)).limit(1);
     const user = found[0];

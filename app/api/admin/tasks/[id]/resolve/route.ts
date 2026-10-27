@@ -4,6 +4,16 @@ import { tasks, payments } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { requireAdmin } from "@/lib/adminAuth";
 import { getPaymentProvider } from "@/lib/payments";
+import { guardRequest } from "@/lib/rateLimit";
+import { z } from "zod";
+
+const resolveSchema = z.object({
+  decision: z.enum(["refund_client", "release_provider"], {
+    error: "Decision must be refund_client or release_provider",
+  }),
+  notes: z.string().trim().max(1000).optional(),
+});
+
 
 /**
  * POST /api/admin/tasks/[id]/resolve
@@ -16,11 +26,20 @@ import { getPaymentProvider } from "@/lib/payments";
  */
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const limited = await guardRequest(req, "adminAction");
+    if (limited) return limited;
     const admin = await requireAdmin();
     if (!admin) return NextResponse.json({ error: "Admin access required" }, { status: 403 });
 
     const { id: taskId } = await params;
-    const { decision, notes } = await req.json();
+    const parsed = resolveSchema.safeParse(await req.json().catch(() => ({})));
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message || "Invalid decision" },
+        { status: 400 }
+      );
+    }
+    const { decision, notes } = parsed.data;
 
     const found = await db.select().from(tasks).where(eq(tasks.id, taskId)).limit(1);
     const task = found[0];

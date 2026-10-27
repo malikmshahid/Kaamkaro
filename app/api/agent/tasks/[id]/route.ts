@@ -3,10 +3,17 @@ import { db } from "@/db";
 import { tasks, applications, payments } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { authenticateAgent } from "@/lib/agentAuth";
-import { throttleAgent, tooManyRequests } from "@/lib/rateLimit";
+import { throttleAgent, tooManyRequests, guardRequest } from "@/lib/rateLimit";
 import { getPaymentProvider, computeCommission, paymentMode } from "@/lib/payments";
 import { fulfilEscrow, logPaymentEvent } from "@/lib/payments/escrow";
 import { makeBasketId } from "@/lib/payments/payfast";
+import { z } from "zod";
+
+const agentTaskActionSchema = z.object({
+  action: z.enum(["accept", "pay", "complete"], { error: "Unknown action" }),
+  applicationId: z.string().trim().max(64).optional().default(""),
+});
+
 
 /**
  * GET /api/agent/tasks/[id] — check status of a task the agent posted.
@@ -47,6 +54,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
  */
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const limited = await guardRequest(req, "agentAction");
+    if (limited) return limited;
     const agent = await authenticateAgent(req);
     if (!agent) {
       return NextResponse.json({ error: "Invalid or missing API key" }, { status: 401 });
@@ -55,12 +64,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (!limit.allowed) return tooManyRequests(limit);
 
     const { id } = await params;
-    const body = await req.json().catch(() => ({}));
-    const action = typeof body?.action === "string" ? body.action : "";
-    const applicationId = typeof body?.applicationId === "string" ? body.applicationId : "";
-    if (!["accept", "pay", "complete"].includes(action)) {
+    const parsed = agentTaskActionSchema.safeParse(await req.json().catch(() => ({})));
+    if (!parsed.success) {
       return NextResponse.json({ error: "Unknown action" }, { status: 400 });
     }
+    const { action, applicationId } = parsed.data;
 
     const found = await db.select().from(tasks).where(eq(tasks.id, id)).limit(1);
     const task = found[0];

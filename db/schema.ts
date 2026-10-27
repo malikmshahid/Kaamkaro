@@ -52,6 +52,10 @@ export const users = pgTable("users", {
   gender: text("gender"),
   address: text("address"),
   photoUrl: text("photo_url"), // Vercel Blob URL, set via /api/profile/photo
+  // Bumped whenever every existing session for this user must stop working
+  // (password reset, "log out everywhere"). Tokens carry the value they were
+  // signed with; a mismatch means the cookie is stale, not just old.
+  tokenVersion: integer("token_version").notNull().default(0),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
 });
 

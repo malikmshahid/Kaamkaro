@@ -3,7 +3,14 @@ import { db } from "@/db";
 import { users, emailChangeRequests } from "@/db/schema";
 import { and, desc, eq, gt } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
+import { guardRequest } from "@/lib/rateLimit";
 import crypto from "crypto";
+import { z } from "zod";
+
+const emailVerifySchema = z.object({
+  otp: z.string().trim().regex(/^\d{4,8}$/, "The code should be 4–8 digits"),
+});
+
 
 function sha256Hex(input: string) {
   return crypto.createHash("sha256").update(input).digest("hex");
@@ -14,13 +21,17 @@ function sha256Hex(input: string) {
 // users.email and marks the request used.
 export async function POST(req: NextRequest) {
   try {
+    const limited = await guardRequest(req, "profileAction");
+    if (limited) return limited;
     const session = await getSessionUser();
     if (!session)
       return NextResponse.json({ error: "Please log in first" }, { status: 401 });
 
-    const body = await req.json().catch(() => null);
-    const otp = typeof body?.otp === "string" ? body.otp.trim() : "";
-    if (!otp) return NextResponse.json({ error: "Please enter the code" }, { status: 400 });
+    const parsed = emailVerifySchema.safeParse(await req.json().catch(() => null));
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Please enter the code" }, { status: 400 });
+    }
+    const otp = parsed.data.otp;
 
     const otpHash = sha256Hex(otp);
 

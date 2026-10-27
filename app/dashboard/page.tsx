@@ -165,16 +165,25 @@ export default function DashboardPage() {
               )}
               <div className="space-y-3">
                 {postedTasks.map((t) => (
-                  <Link
+                  <div
                     key={t.id}
-                    href={`/tasks/${t.id}`}
-                    className="block rounded-2xl border border-line bg-card p-4 shadow-lux-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-gold-500/40 hover:shadow-lux"
+                    className="rounded-2xl border border-line bg-card p-4 shadow-lux-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-gold-500/40 hover:shadow-lux"
                   >
-                    <p className="font-semibold">{t.title}</p>
-                    <p className="text-sm text-ink/50">
-                      {formatMoney(t.budget, t.currency)} &middot; {t.status}
-                    </p>
-                  </Link>
+                    <Link href={`/tasks/${t.id}`} className="block">
+                      <p className="font-semibold">{t.title}</p>
+                      <p className="text-sm text-ink/50">
+                        {formatMoney(t.budget, t.currency)} &middot; {t.status}
+                      </p>
+                    </Link>
+                    {t.status === "completed" && (
+                      <Link
+                        href={`/receipt/${t.id}`}
+                        className="mt-2.5 inline-flex items-center gap-1.5 rounded-full border border-gold-500/40 bg-gold-100/40 px-2.5 py-1 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-gold-600 transition hover:bg-gold-500 hover:text-cream dark:bg-gold-500/10 dark:text-gold-300"
+                      >
+                        View receipt ↗
+                      </Link>
+                    )}
+                  </div>
                 ))}
               </div>
             </section>
@@ -190,17 +199,26 @@ export default function DashboardPage() {
               )}
               <div className="space-y-3">
                 {myApplications.map((a) => (
-                  <Link
+                  <div
                     key={a.applicationId}
-                    href={`/tasks/${a.taskId}`}
-                    className="block rounded-2xl border border-line bg-card p-4 shadow-lux-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-gold-500/40 hover:shadow-lux"
+                    className="rounded-2xl border border-line bg-card p-4 shadow-lux-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-gold-500/40 hover:shadow-lux"
                   >
-                    <p className="font-semibold">{a.taskTitle}</p>
-                    <p className="text-sm text-ink/50">
-                      {formatMoney(a.taskBudget, a.taskCurrency)} &middot; Application:{" "}
-                      {a.applicationStatus}
-                    </p>
-                  </Link>
+                    <Link href={`/tasks/${a.taskId}`} className="block">
+                      <p className="font-semibold">{a.taskTitle}</p>
+                      <p className="text-sm text-ink/50">
+                        {formatMoney(a.taskBudget, a.taskCurrency)} &middot; Application:{" "}
+                        {a.applicationStatus}
+                      </p>
+                    </Link>
+                    {a.taskStatus === "completed" && (
+                      <Link
+                        href={`/receipt/${a.taskId}`}
+                        className="mt-2.5 inline-flex items-center gap-1.5 rounded-full border border-gold-500/40 bg-gold-100/40 px-2.5 py-1 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-gold-600 transition hover:bg-gold-500 hover:text-cream dark:bg-gold-500/10 dark:text-gold-300"
+                      >
+                        View receipt ↗
+                      </Link>
+                    )}
+                  </div>
                 ))}
               </div>
             </section>

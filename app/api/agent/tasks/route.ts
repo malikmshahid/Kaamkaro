@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { tasks } from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { authenticateAgent } from "@/lib/agentAuth";
-import { throttleAgent, tooManyRequests } from "@/lib/rateLimit";
+import { throttleAgent, tooManyRequests, guardRequest } from "@/lib/rateLimit";
 import { z } from "zod";
 import { randomUUID } from "crypto";
 
@@ -56,6 +56,8 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
   try {
+    const limited = await guardRequest(req, "agentAction");
+    if (limited) return limited;
     const agent = await authenticateAgent(req);
     if (!agent) {
       return NextResponse.json({ error: "Invalid or missing API key" }, { status: 401 });

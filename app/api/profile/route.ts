@@ -4,6 +4,7 @@ import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
 import { z } from "zod";
+import { guardRequest } from "@/lib/rateLimit";
 
 /**
  * Every field is bounded. Unbounded strings here were a cheap way to bloat the
@@ -32,6 +33,8 @@ const profileSchema = z
 // (/api/profile/email/request + /verify, /api/auth/reset-password).
 export async function PATCH(req: NextRequest) {
   try {
+    const limited = await guardRequest(req, "profileAction");
+    if (limited) return limited;
     const session = await getSessionUser();
     if (!session)
       return NextResponse.json({ error: "Please log in first" }, { status: 401 });

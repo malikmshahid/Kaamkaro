@@ -13,6 +13,15 @@ import {
 } from "@/lib/proof";
 import { checkDuplicateProof, rememberProof } from "@/lib/proofIntegrity";
 import { throttle, tooManyRequests } from "@/lib/rateLimit";
+import { z } from "zod";
+
+// The JSON branch of proof submission: a note and/or a link, both bounded.
+const submitJsonSchema = z.object({
+  note: z.string().trim().max(2000, "Keep the note under 2000 characters").optional(),
+  proofNote: z.string().trim().max(2000).optional(),
+  proofUrl: z.string().trim().max(2000, "That link is too long").optional(),
+});
+
 
 export const maxDuration = 30;
 
@@ -104,9 +113,15 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         );
       }
     } else {
-      const body = await req.json().catch(() => ({} as Record<string, string>));
-      note = String(body.note || body.proofNote || "").slice(0, 2000);
-      rawUrl = String(body.proofUrl || "").slice(0, 2000);
+      const parsed = submitJsonSchema.safeParse(await req.json().catch(() => ({})));
+      if (!parsed.success) {
+        return NextResponse.json(
+          { error: parsed.error.issues[0]?.message || "Add a note or a proof link" },
+          { status: 400 }
+        );
+      }
+      note = parsed.data.note || parsed.data.proofNote || "";
+      rawUrl = parsed.data.proofUrl || "";
     }
 
     // Accept "link + a sentence" — grab just the URL so the vision model can

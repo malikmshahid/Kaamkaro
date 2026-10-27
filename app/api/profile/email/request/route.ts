@@ -3,8 +3,19 @@ import { db } from "@/db";
 import { users, emailChangeRequests } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
+import { guardRequest } from "@/lib/rateLimit";
 import { sendEmailChangeOtp } from "@/lib/email";
 import crypto, { randomUUID } from "crypto";
+import { z } from "zod";
+
+const emailRequestSchema = z.object({
+  newEmail: z
+    .string()
+    .trim()
+    .max(254, "That email is too long")
+    .regex(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/, "Please enter a valid email"),
+});
+
 
 const OTP_TTL_MINUTES = 10;
 
@@ -17,17 +28,20 @@ function sha256Hex(input: string) {
 // users.email once that code is verified via /api/profile/email/verify.
 export async function POST(req: NextRequest) {
   try {
+    const limited = await guardRequest(req, "profileAction");
+    if (limited) return limited;
     const session = await getSessionUser();
     if (!session)
       return NextResponse.json({ error: "Please log in first" }, { status: 401 });
 
-    const body = await req.json().catch(() => null);
-    const newEmail =
-      typeof body?.newEmail === "string" ? body.newEmail.trim().toLowerCase() : "";
-
-    if (!newEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
-      return NextResponse.json({ error: "Please enter a valid email" }, { status: 400 });
+    const parsed = emailRequestSchema.safeParse(await req.json().catch(() => null));
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message || "Please enter a valid email" },
+        { status: 400 }
+      );
     }
+    const newEmail = parsed.data.newEmail.toLowerCase();
 
     const [taken] = await db
       .select({ id: users.id })

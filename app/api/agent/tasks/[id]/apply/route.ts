@@ -3,9 +3,22 @@ import { db } from "@/db";
 import { tasks, applications, agentListings } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { authenticateAgent } from "@/lib/agentAuth";
-import { throttleAgent, tooManyRequests } from "@/lib/rateLimit";
+import { throttleAgent, tooManyRequests, guardRequest } from "@/lib/rateLimit";
 import { notify } from "@/lib/notify";
 import { randomUUID } from "crypto";
+import { z } from "zod";
+
+const applySchema = z.object({
+  message: z.string().trim().max(4000, "Keep the pitch under 4000 characters").optional(),
+  proposedAmount: z.number().positive().max(10_000_000).optional(),
+  deliveryDays: z.number().int().min(1).max(365).optional(),
+  portfolioUrl: z
+    .string()
+    .trim()
+    .max(500)
+    .refine((v) => !v || /^https?:\/\//i.test(v), "Portfolio link must start with http(s)://")
+    .optional(),
+});
 
 /**
  * POST /api/agent/tasks/[id]/apply — an AI agent applies to a task as a
@@ -22,6 +35,8 @@ import { randomUUID } from "crypto";
  */
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const limited = await guardRequest(req, "agentAction");
+    if (limited) return limited;
     const agent = await authenticateAgent(req);
     if (!agent) {
       return NextResponse.json({ error: "Invalid or missing API key" }, { status: 401 });
@@ -31,7 +46,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const limit = await throttleAgent("applyToTask", agent.keyId);
     if (!limit.allowed) return tooManyRequests(limit);
 
-    const body = await req.json().catch(() => ({}));
+    const parsed = applySchema.safeParse(await req.json().catch(() => ({})));
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message || "Invalid request body" },
+        { status: 400 }
+      );
+    }
+    const body = parsed.data;
 
     const [task] = await db.select().from(tasks).where(eq(tasks.id, taskId)).limit(1);
     if (!task) return NextResponse.json({ error: "Task not found" }, { status: 404 });
@@ -64,7 +86,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       providerId: agent.ownerId,
       applicantType: "ai_agent",
       agentListingId: listing?.id || null,
-      message: typeof body?.message === "string" ? body.message : null,
+      message: body.message || null,
+      proposedAmount: body.proposedAmount ?? null,
+      deliveryDays: body.deliveryDays ?? null,
+      portfolioUrl: body.portfolioUrl || null,
       status: "pending",
     });
 

@@ -17,6 +17,17 @@ type AgentListing = {
   ratingCount: number;
 };
 
+const CATEGORIES = [
+  { value: "", label: "All categories" },
+  { value: "delivery", label: "Delivery" },
+  { value: "design", label: "Design" },
+  { value: "coding", label: "Coding / IT" },
+  { value: "writing", label: "Writing" },
+  { value: "home", label: "Home services" },
+  { value: "verification", label: "Verification / Photo" },
+  { value: "other", label: "Other" },
+] as const;
+
 export default function AgentsPage() {
   const [agents, setAgents] = useState<AgentListing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,6 +44,7 @@ export default function AgentsPage() {
       fetch(url)
         .then((r) => r.json())
         .then((data) => setAgents(data.agents || []))
+        .catch(() => setAgents([]))
         .finally(() => setLoading(false));
     }, 300);
     return () => clearTimeout(timeout);
@@ -41,103 +53,136 @@ export default function AgentsPage() {
   return (
     <>
       <Navbar />
-      <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-12">
-        <div className="flex items-start justify-between mb-2 flex-wrap gap-4">
-          <div>
-            <h1 className="font-display text-3xl text-heading">
-              🤖 Agent Marketplace
-            </h1>
-            <p className="text-ink/60 mt-1">
-              Hire AI agents directly — the same escrow, chat, and
-              verification pipeline as human providers, but instant and
-              always available. KaamKaro is the first marketplace where AI
-              agents can be hired, not just do the hiring.
-            </p>
+      <main className="flex-1">
+        <section className="aurora grain relative isolate overflow-hidden border-b border-line">
+          <div className="relative mx-auto w-full max-w-6xl px-5 pb-8 pt-11 sm:px-6 sm:pb-11 sm:pt-16">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="min-w-0">
+                <p className="reveal inline-flex items-center gap-2.5 rounded-full border border-gold-500/35 bg-card/70 px-3.5 py-1.5 text-[10.5px] font-semibold uppercase tracking-[0.18em] text-gold-600 shadow-lux-sm backdrop-blur dark:text-gold-300">
+                  <span className="pulse-dot inline-block h-1.5 w-1.5 rounded-full bg-gold-500" />
+                  Agent marketplace · escrow included
+                </p>
+                <h1 className="reveal reveal-1 mt-5 max-w-3xl font-display text-[2.1rem] font-medium leading-[1.02] tracking-[-0.02em] text-heading sm:text-[3.3rem]">
+                  Hire an <span className="gold-text">AI agent</span>,
+                  <br />
+                  not a chatbot.
+                </h1>
+                <p className="reveal reveal-2 mt-4 max-w-xl text-sm leading-relaxed text-ink/65 sm:text-[15.5px]">
+                  Agents on KaamKaro take real jobs — run by real API keys, paid through the same
+                  escrow, rated by the same reviews. Instant, always awake, and accountable.
+                </p>
+              </div>
+              <Link
+                href="/settings"
+                className="sheen reveal reveal-2 shrink-0 rounded-full bg-gold-500 px-5 py-3 text-sm font-semibold text-cream shadow-[0_16px_34px_-22px_rgba(169,119,44,0.95)] ring-1 ring-inset ring-white/20 transition-transform hover:-translate-y-0.5"
+              >
+                + List your agent
+              </Link>
+            </div>
+
+            <div className="reveal reveal-3 mt-6 flex flex-col gap-3 sm:flex-row">
+              <div className="relative min-w-0 flex-1">
+                <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink/40">
+                  ⌕
+                </span>
+                <input
+                  className="w-full rounded-xl border border-line bg-card py-3 pl-10 pr-4 text-sm shadow-lux-sm outline-none transition focus:border-gold-500/60 focus:ring-2 focus:ring-gold-500/20"
+                  placeholder="Search agents by keyword…"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  aria-label="Search agents"
+                />
+              </div>
+              <select
+                className="rounded-xl border border-line bg-card px-4 py-3 text-sm shadow-lux-sm outline-none focus:border-gold-500/60"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                aria-label="Filter by category"
+              >
+                {CATEGORIES.map((c) => (
+                  <option key={c.value} value={c.value}>
+                    {c.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
-          <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto">
-            <select
-              className="min-w-0 max-w-full flex-1 border border-line rounded-lg px-3 py-2 bg-card text-sm sm:flex-none"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-            >
-              <option value="">All Categories</option>
-              <option value="delivery">Delivery</option>
-              <option value="design">Design</option>
-              <option value="coding">Coding / IT</option>
-              <option value="writing">Writing</option>
-              <option value="home">Home Services</option>
-              <option value="verification">Verification / Photo</option>
-              <option value="other">Other</option>
-            </select>
-            <Link
-              href="/settings"
-              className="shrink-0 whitespace-nowrap rounded-full bg-green-900 px-4 py-2 text-sm text-cream hover:bg-green-800"
-            >
-              + List Your Agent
+        </section>
+
+        <section className="mx-auto w-full max-w-6xl px-5 py-9 sm:px-6 sm:py-11">
+          <div className="mb-5 flex items-center justify-between gap-3">
+            <h2 className="font-display text-lg text-heading">
+              {loading ? "Looking…" : `${agents.length} agent${agents.length === 1 ? "" : "s"} available`}
+            </h2>
+            <Link href="/why-kaamkaro" className="text-xs font-semibold text-green-700 underline dark:text-green-300">
+              Why agents belong here
             </Link>
           </div>
-        </div>
 
-        <div className="mt-8">
-          <input
-            className="w-full border border-line rounded-lg px-4 py-2.5 bg-card mb-6 focus:outline-none focus:ring-2 focus:ring-green-700"
-            placeholder="🔍 Search AI agents by keyword..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-
-          {loading && <p className="text-ink/50">Loading...</p>}
-
-          {!loading && agents.length === 0 && (
-            <div className="border border-dashed border-line rounded-xl p-12 text-center text-ink/50">
-              No AI agents listed yet — connect an API key in Settings and be
-              the first agent in the marketplace! 🤖
+          {loading && (
+            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="h-52 animate-pulse rounded-2xl border border-line bg-card/60" />
+              ))}
             </div>
           )}
 
-          <div className="grid md:grid-cols-3 gap-5">
+          {!loading && agents.length === 0 && (
+            <div className="rounded-2xl border border-dashed border-line/90 bg-card/50 px-6 py-14 text-center">
+              <p className="font-display text-xl text-heading">No agents listed yet</p>
+              <p className="mx-auto mt-2 max-w-md text-sm text-ink/55">
+                This shelf is empty because nobody has connected a key. Generate one in{" "}
+                <Link href="/settings" className="text-green-700 underline dark:text-green-300">
+                  Settings
+                </Link>{" "}
+                and your agent becomes the first listing.
+              </p>
+            </div>
+          )}
+
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {agents.map((agent) => (
               <Link
                 key={agent.id}
                 href={`/agents/${agent.id}`}
-                className="border border-line rounded-xl p-6 bg-card hover:border-green-700 transition-colors flex flex-col"
+                className="card-lux lift flex flex-col rounded-2xl p-6 transition-transform"
               >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs text-ink/50">
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <span className="truncate rounded-full border border-line bg-paper/60 px-2.5 py-1 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-ink/55">
                     {agent.categories.split(",")[0]}
                   </span>
-                  <span className="text-xs bg-green-900/10 text-green-800 rounded-full px-2 py-0.5">
-                    🤖 AI Agent
+                  <span className="shrink-0 rounded-full bg-green-700/10 px-2.5 py-1 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-green-700 dark:text-green-300">
+                    AI agent
                   </span>
                 </div>
-                <h3 className="font-display text-lg text-heading mb-2">
-                  {agent.name}
-                </h3>
-                <p className="text-sm text-ink/60 line-clamp-3 mb-4 flex-1">
+                <h3 className="font-display text-lg text-heading">{agent.name}</h3>
+                <p className="mt-2 line-clamp-3 flex-1 text-sm leading-relaxed text-ink/60">
                   {agent.description}
                 </p>
-                <div className="flex items-center justify-between text-xs text-ink/50 mb-3">
-                  <span>{agent.taskCount} task(s) completed</span>
+                <div className="mt-4 flex items-center justify-between gap-2 border-t border-line/70 pt-3 text-xs text-ink/50">
+                  <span>
+                    {agent.taskCount} job{agent.taskCount === 1 ? "" : "s"} done
+                  </span>
                   {agent.ratingCount ? (
-                    <span>{agent.ratingAvg.toFixed(1)} ⭐ ({agent.ratingCount})</span>
+                    <span>
+                      {agent.ratingAvg.toFixed(1)} ★ ({agent.ratingCount})
+                    </span>
                   ) : (
                     <span>New agent</span>
                   )}
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold text-green-800">
+                <div className="mt-3 flex items-center justify-between gap-2">
+                  <span className="text-sm font-semibold text-green-700 dark:text-green-300">
                     {agent.pricePerTaskPkr
                       ? `From ${formatMoney(agent.pricePerTaskPkr, "PKR")}`
                       : "Custom pricing"}
                   </span>
-                  <span className="text-xs text-ink/50">
-                    ~{agent.avgDeliveryHours}h delivery
-                  </span>
+                  <span className="text-xs text-ink/50">~{agent.avgDeliveryHours}h</span>
                 </div>
               </Link>
             ))}
           </div>
-        </div>
+        </section>
       </main>
     </>
   );

@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Fraunces, Inter } from "next/font/google";
 import "./globals.css";
+import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
 
 // Display serif: high-contrast, slightly "soft" — the premium voice of the brand.
 const fraunces = Fraunces({
@@ -18,6 +19,16 @@ const inter = Inter({
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://kaamkaro.ai";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover", // lets the bottom nav sit behind the iOS home indicator safely
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f8f5ee" },
+    { media: "(prefers-color-scheme: dark)", color: "#0e1109" },
+  ],
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -44,6 +55,66 @@ export const metadata: Metadata = {
     images: ["/og.png"],
   },
   robots: { index: true, follow: true },
+  manifest: "/manifest.webmanifest",
+  applicationName: "KaamKaro",
+  appleWebApp: { capable: true, title: "KaamKaro", statusBarStyle: "default" },
+  icons: {
+    icon: [
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
+  formatDetection: { telephone: false },
+};
+
+/**
+ * Structured data. Google reads this to build the sitelinks search box and to
+ * understand that KaamKaro is a local-services marketplace operating in PKR —
+ * not another global freelance board.
+ */
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${siteUrl}/#organization`,
+      name: "KaamKaro",
+      url: siteUrl,
+      logo: `${siteUrl}/icon-512.png`,
+      description:
+        "Pakistan ka pehla hybrid task marketplace — post a task for a human or an AI agent, with payment held in escrow until the work is verified.",
+      founded: "2026",
+      areaServed: { "@type": "Country", name: "Pakistan" },
+      sameAs: [] as string[],
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${siteUrl}/#website`,
+      url: siteUrl,
+      name: "KaamKaro",
+      inLanguage: "en-PK",
+      publisher: { "@id": `${siteUrl}/#organization` },
+      potentialAction: {
+        "@type": "SearchAction",
+        target: { "@type": "EntryPoint", urlTemplate: `${siteUrl}/tasks?q={search_term_string}` },
+        "query-input": "required name=search_term_string",
+      },
+    },
+    {
+      "@type": "Service",
+      name: "KaamKaro escrow task marketplace",
+      serviceType: "Local task marketplace with escrow and AI agents",
+      provider: { "@id": `${siteUrl}/#organization` },
+      areaServed: { "@type": "Country", name: "Pakistan" },
+      offers: {
+        "@type": "Offer",
+        priceCurrency: "PKR",
+        description:
+          "Post a task with a fixed budget in PKR. Funds are held in escrow and released only when the work is verified.",
+      },
+    },
+  ],
 };
 
 // Runs before paint so the page never flashes the wrong theme on load.
@@ -73,7 +144,12 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body className="min-h-full flex flex-col bg-paper text-ink" suppressHydrationWarning>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
         {children}
+        <ServiceWorkerRegistrar />
       </body>
     </html>
   );

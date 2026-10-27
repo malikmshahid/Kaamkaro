@@ -5,6 +5,12 @@ import { eq, and, count } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
 import { draftProposal } from "@/lib/aiCopilot";
 import { throttle, tooManyRequests } from "@/lib/rateLimit";
+import { z } from "zod";
+
+const copilotSchema = z.object({
+  taskId: z.string().trim().min(8, "Which task?").max(64),
+});
+
 
 /**
  * POST /api/ai/copilot/proposal { taskId }
@@ -21,10 +27,11 @@ export async function POST(req: NextRequest) {
     const aiLimit = await throttle("aiCopilot", session.userId);
     if (!aiLimit.allowed) return tooManyRequests(aiLimit);
 
-    const { taskId } = await req.json().catch(() => ({ taskId: "" }));
-    if (!taskId || typeof taskId !== "string") {
+    const parsed = copilotSchema.safeParse(await req.json().catch(() => ({})));
+    if (!parsed.success) {
       return NextResponse.json({ error: "Which task?" }, { status: 400 });
     }
+    const { taskId } = parsed.data;
 
     const taskRows = await db.select().from(tasks).where(eq(tasks.id, taskId)).limit(1);
     const task = taskRows[0];

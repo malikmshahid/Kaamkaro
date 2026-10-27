@@ -5,6 +5,16 @@ import { and, eq, or, gte } from "drizzle-orm";
 import { randomBytes, createHash, randomUUID } from "crypto";
 import { sendEmail, passwordResetEmailHtml } from "@/lib/email";
 import { throttle, clientIp, tooManyRequests } from "@/lib/rateLimit";
+import { z } from "zod";
+
+const forgotSchema = z.object({
+  identifier: z
+    .string()
+    .trim()
+    .min(3, "Please enter your phone number or email")
+    .max(254, "That looks too long"),
+});
+
 
 // Always the same answer, whether or not the account exists. Anything else
 // lets a stranger enumerate which phone numbers / emails are registered.
@@ -22,13 +32,14 @@ export async function POST(req: NextRequest) {
     const ipLimit = await throttle("forgotPassword", clientIp(req));
     if (!ipLimit.allowed) return tooManyRequests(ipLimit);
 
-    const { identifier } = await req.json().catch(() => ({ identifier: "" }));
-    if (!identifier || typeof identifier !== "string") {
+    const parsed = forgotSchema.safeParse(await req.json().catch(() => ({})));
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Please enter your phone number or email" },
+        { error: parsed.error.issues[0]?.message || "Please enter your phone number or email" },
         { status: 400 }
       );
     }
+    const identifier = parsed.data.identifier;
 
     const found = await db
       .select()

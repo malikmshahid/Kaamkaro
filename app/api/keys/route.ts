@@ -7,6 +7,7 @@ import { generateApiKey } from "@/lib/agentAuth";
 import { randomUUID } from "crypto";
 import { and } from "drizzle-orm";
 import { z } from "zod";
+import { guardRequest } from "@/lib/rateLimit";
 
 const MAX_KEYS_PER_USER = 10;
 const keySchema = z.object({
@@ -46,6 +47,8 @@ export async function GET() {
 // POST /api/keys — generate a new key. The raw key is returned ONCE.
 export async function POST(req: NextRequest) {
   try {
+    const limited = await guardRequest(req, "keyAction");
+    if (limited) return limited;
     const session = await getSessionUser();
     if (!session) return NextResponse.json({ error: "Please log in first" }, { status: 401 });
 

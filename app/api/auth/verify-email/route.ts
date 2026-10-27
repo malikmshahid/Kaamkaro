@@ -5,6 +5,18 @@ import { eq, and, gt } from "drizzle-orm";
 import { signToken, setSessionCookie } from "@/lib/auth";
 import { sendSignupVerificationOtp } from "@/lib/email";
 import crypto from "crypto";
+import { guardRequest } from "@/lib/rateLimit";
+import { z } from "zod";
+
+const signupVerifySchema = z.object({
+  userId: z.string().trim().min(8, "Missing verification details").max(64),
+  otp: z.string().trim().regex(/^\d{4,8}$/, "The code should be 4–8 digits"),
+});
+
+const resendSchema = z.object({
+  userId: z.string().trim().min(8, "Missing user id").max(64),
+});
+
 
 function sha256Hex(input: string) {
   return crypto.createHash("sha256").update(input).digest("hex");
@@ -15,13 +27,16 @@ const OTP_TTL_MINUTES = 10;
 // provided. On success, grants the session cookie (login only happens here).
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json().catch(() => null);
-    const userId = typeof body?.userId === "string" ? body.userId : "";
-    const otp = typeof body?.otp === "string" ? body.otp.trim() : "";
-
-    if (!userId || !otp) {
-      return NextResponse.json({ error: "Missing verification details" }, { status: 400 });
+    const limited = await guardRequest(req, "verifyEmail");
+    if (limited) return limited;
+    const parsed = signupVerifySchema.safeParse(await req.json().catch(() => null));
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message || "Missing verification details" },
+        { status: 400 }
+      );
     }
+    const { userId, otp } = parsed.data;
 
     const otpHash = sha256Hex(otp);
 
@@ -49,7 +64,7 @@ export async function POST(req: NextRequest) {
       .set({ emailVerified: true, emailOtpHash: null, emailOtpExpiresAt: null })
       .where(eq(users.id, userId));
 
-    const token = signToken({ userId: user.id, role: user.role });
+    const token = signToken({ userId: user.id, role: user.role, tokenVersion: user.tokenVersion });
     await setSessionCookie(token);
 
     return NextResponse.json({ success: true });
@@ -67,9 +82,13 @@ export async function POST(req: NextRequest) {
 // flag instead of a new file.
 export async function PUT(req: NextRequest) {
   try {
-    const body = await req.json().catch(() => null);
-    const userId = typeof body?.userId === "string" ? body.userId : "";
-    if (!userId) return NextResponse.json({ error: "Missing user id" }, { status: 400 });
+    const limited = await guardRequest(req, "verifyEmail");
+    if (limited) return limited;
+    const parsed = resendSchema.safeParse(await req.json().catch(() => null));
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Missing user id" }, { status: 400 });
+    }
+    const userId = parsed.data.userId;
 
     const [user] = await db
       .select()

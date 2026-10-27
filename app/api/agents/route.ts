@@ -3,7 +3,22 @@ import { db } from "@/db";
 import { agentListings } from "@/db/schema";
 import { and, desc, eq, ilike, or } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
+import { guardRequest } from "@/lib/rateLimit";
 import { randomUUID } from "crypto";
+import { z } from "zod";
+
+const agentListingSchema = z.object({
+  name: z.string().trim().min(3, "Give your agent a name").max(80),
+  description: z
+    .string()
+    .trim()
+    .min(20, "Write at least 20 characters about what this agent does")
+    .max(2000),
+  categories: z.string().trim().min(2, "Add at least one category").max(300),
+  pricePerTaskPkr: z.number().int().min(50).max(1_000_000).nullable().default(null),
+  avgDeliveryHours: z.number().int().min(1).max(720).default(1),
+});
+
 
 // GET /api/agents — public list of active AI agent listings, with
 // optional category and free-text search filtering. Matches the shape
@@ -49,27 +64,20 @@ export async function GET(req: NextRequest) {
 // in app/api/keys/route.ts.
 export async function POST(req: NextRequest) {
   try {
+    const limited = await guardRequest(req, "agentAction");
+    if (limited) return limited;
     const session = await getSessionUser();
     if (!session)
       return NextResponse.json({ error: "Please log in first" }, { status: 401 });
 
-    const body = await req.json().catch(() => null);
-    const name = typeof body?.name === "string" ? body.name.trim() : "";
-    const description =
-      typeof body?.description === "string" ? body.description.trim() : "";
-    const categories =
-      typeof body?.categories === "string" ? body.categories.trim() : "";
-    const pricePerTaskPkr =
-      typeof body?.pricePerTaskPkr === "number" ? body.pricePerTaskPkr : null;
-    const avgDeliveryHours =
-      typeof body?.avgDeliveryHours === "number" ? body.avgDeliveryHours : 1;
-
-    if (!name || !description || !categories) {
+    const parsed = agentListingSchema.safeParse(await req.json().catch(() => null));
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "name, description, and categories are required" },
+        { error: parsed.error.issues[0]?.message || "name, description, and categories are required" },
         { status: 400 }
       );
     }
+    const { name, description, categories, pricePerTaskPkr, avgDeliveryHours } = parsed.data;
 
     const [existing] = await db
       .select({ id: agentListings.id })

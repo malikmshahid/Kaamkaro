@@ -7,6 +7,17 @@ import { notify } from "@/lib/notify";
 import { throttle, tooManyRequests } from "@/lib/rateLimit";
 import { LIMITS } from "@/lib/constants";
 import { randomUUID } from "crypto";
+import { z } from "zod";
+
+// A chat message is a bounded string, full stop. The old code checked "is it a
+// string" and then truncated — this validates and bounds it in one place.
+const messageSchema = z.object({
+  body: z
+    .string()
+    .trim()
+    .min(1, "Message cannot be empty")
+    .max(LIMITS.chatMessage, `Keep it under ${LIMITS.chatMessage} characters`),
+});
 
 async function assertParticipant(taskId: string, userId: string) {
   const found = await db.select().from(tasks).where(eq(tasks.id, taskId)).limit(1);
@@ -78,13 +89,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const chatLimit = await throttle("chatMessage", session.userId);
     if (!chatLimit.allowed) return tooManyRequests(chatLimit);
 
-    const { body } = await req.json();
-    if (!body || typeof body !== "string" || body.trim().length === 0) {
-      return NextResponse.json({ error: "Message cannot be empty" }, { status: 400 });
+    const parsed = messageSchema.safeParse(await req.json().catch(() => null));
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message || "Message cannot be empty" },
+        { status: 400 }
+      );
     }
 
     const id = randomUUID();
-    const text = body.trim().slice(0, LIMITS.chatMessage);
+    const text = parsed.data.body;
     await db.insert(messages).values({ id, taskId, senderId: session.userId, body: text });
 
     const otherPartyId =

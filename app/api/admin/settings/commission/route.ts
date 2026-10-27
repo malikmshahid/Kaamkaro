@@ -4,6 +4,7 @@ import { platformConfig } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { requireAdmin } from "@/lib/adminAuth";
 import { z } from "zod";
+import { guardRequest } from "@/lib/rateLimit";
 
 const bodySchema = z.object({
   commissionRatePercent: z.number().min(0).max(50),
@@ -23,6 +24,8 @@ export async function GET() {
 // payments keep the rate that was in effect when they were created.
 export async function POST(req: NextRequest) {
   try {
+    const limited = await guardRequest(req, "adminAction");
+    if (limited) return limited;
     const admin = await requireAdmin();
     if (!admin) return NextResponse.json({ error: "Admin access required" }, { status: 403 });
 

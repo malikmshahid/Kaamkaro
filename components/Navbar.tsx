@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useUser } from "@/lib/useUser";
 import ThemeToggle from "@/components/ThemeToggle";
 import NotificationBell from "@/components/NotificationBell";
+import BottomNav from "@/components/BottomNav";
 
 export default function Navbar() {
   const { user, loading, setUser } = useUser();
@@ -88,6 +89,7 @@ export default function Navbar() {
   );
 
   return (
+    <>
     <header className="sticky top-0 z-40 border-b border-line/80 bg-paper/80 backdrop-blur-xl">
       <div className="gold-hairline opacity-60" aria-hidden="true" />
       <nav className="max-w-6xl mx-auto flex items-center justify-between px-4 sm:px-6 py-4">
@@ -129,5 +131,7 @@ export default function Navbar() {
         </div>
       )}
     </header>
+    {!loading && user && <BottomNav />}
+    </>
   );
 }

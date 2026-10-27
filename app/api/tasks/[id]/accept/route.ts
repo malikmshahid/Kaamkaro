@@ -4,19 +4,28 @@ import { tasks, applications } from "@/db/schema";
 import { eq, and, ne } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
 import { notify } from "@/lib/notify";
+import { z } from "zod";
+import { guardRequest } from "@/lib/rateLimit";
+
+const acceptSchema = z.object({
+  applicationId: z.string().trim().min(1, "Pick an application first").max(64),
+});
+
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const limited = await guardRequest(req, "taskAction");
+    if (limited) return limited;
     const session = await getSessionUser();
     if (!session) {
       return NextResponse.json({ error: "Please log in first" }, { status: 401 });
     }
     const { id: taskId } = await params;
-    const body = await req.json().catch(() => ({}));
-    const applicationId = typeof body?.applicationId === "string" ? body.applicationId : "";
-    if (!applicationId) {
+    const parsed = acceptSchema.safeParse(await req.json().catch(() => ({})));
+    if (!parsed.success) {
       return NextResponse.json({ error: "Pick an application first" }, { status: 400 });
     }
+    const { applicationId } = parsed.data;
 
     const found = await db.select().from(tasks).where(eq(tasks.id, taskId)).limit(1);
     const task = found[0];

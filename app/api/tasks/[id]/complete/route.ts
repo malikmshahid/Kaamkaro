@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { tasks, payments } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
+import { guardRequest } from "@/lib/rateLimit";
 import { getPaymentProvider } from "@/lib/payments";
 import { notify } from "@/lib/notify";
 import { logPaymentEvent } from "@/lib/payments/escrow";
@@ -10,6 +11,8 @@ import { logPaymentEvent } from "@/lib/payments/escrow";
 // POST /api/tasks/[id]/complete — client confirms work, escrow releases to provider
 export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const limited = await guardRequest(_req, "taskAction");
+    if (limited) return limited;
     const session = await getSessionUser();
     if (!session) {
       return NextResponse.json({ error: "Please log in first" }, { status: 401 });

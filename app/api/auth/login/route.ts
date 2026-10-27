@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Wrong phone/email or password" }, { status: 401 });
     }
 
-    const token = signToken({ userId: user.id, role: user.role });
+    const token = signToken({ userId: user.id, role: user.role, tokenVersion: user.tokenVersion });
     await setSessionCookie(token);
 
     return NextResponse.json({

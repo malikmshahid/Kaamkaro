@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { tools, tasks } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { authenticateAgent } from "@/lib/agentAuth";
-import { throttleAgent, tooManyRequests } from "@/lib/rateLimit";
+import { throttleAgent, tooManyRequests, guardRequest } from "@/lib/rateLimit";
 import { notify } from "@/lib/notify";
 import { randomUUID } from "crypto";
 
@@ -12,6 +12,8 @@ import { randomUUID } from "crypto";
 // can immediately call the existing /api/agent/tasks/[id] "pay" action.
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const limited = await guardRequest(req, "agentAction");
+    if (limited) return limited;
     const agent = await authenticateAgent(req);
     if (!agent) return NextResponse.json({ error: "Invalid or missing API key" }, { status: 401 });
     const { id: toolId } = await params;

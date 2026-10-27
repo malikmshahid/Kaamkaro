@@ -6,6 +6,7 @@ import { requireAdmin } from "@/lib/adminAuth";
 import { creditWallet } from "@/lib/payments/escrow";
 import { notify } from "@/lib/notify";
 import { z } from "zod";
+import { guardRequest } from "@/lib/rateLimit";
 
 /**
  * POST /api/admin/credits — put money into someone's withdrawable balance
@@ -34,6 +35,8 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
+    const limited = await guardRequest(req, "adminAction");
+    if (limited) return limited;
     const admin = await requireAdmin();
     if (!admin) return NextResponse.json({ error: "Admin access required" }, { status: 403 });
 

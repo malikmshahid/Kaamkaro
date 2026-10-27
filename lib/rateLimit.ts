@@ -25,6 +25,9 @@ export const RULES = {
   login: { limit: 10, windowSeconds: 15 * 60 },
   signup: { limit: 6, windowSeconds: 60 * 60 },
   forgotPassword: { limit: 5, windowSeconds: 60 * 60 },
+  // OTP guessing is the soft spot of an email-verified signup: 6 digits is
+  // only a million-wide space, so cap attempts per IP hard.
+  verifyEmail: { limit: 15, windowSeconds: 60 * 60 },
   createTask: { limit: 20, windowSeconds: 60 * 60 },
   applyToTask: { limit: 30, windowSeconds: 60 * 60 },
   createTool: { limit: 10, windowSeconds: 60 * 60 },
@@ -37,6 +40,15 @@ export const RULES = {
   review: { limit: 20, windowSeconds: 60 * 60 },
   payoutRequest: { limit: 10, windowSeconds: 24 * 60 * 60 },
   gatewayCallback: { limit: 60, windowSeconds: 60 * 60 },
+  // ---- one bucket per class of state-changing action ----------------------
+  taskAction: { limit: 60, windowSeconds: 60 * 60 }, // accept / complete / dispute / review
+  agentAction: { limit: 120, windowSeconds: 60 * 60 }, // agent API (bearer key)
+  adminAction: { limit: 120, windowSeconds: 60 * 60 },
+  conversationAction: { limit: 120, windowSeconds: 60 * 60 },
+  profileAction: { limit: 30, windowSeconds: 60 * 60 },
+  keyAction: { limit: 20, windowSeconds: 60 * 60 },
+  savedAction: { limit: 120, windowSeconds: 60 * 60 },
+  inboxAction: { limit: 240, windowSeconds: 60 * 60 },
 } satisfies Record<string, Rule>;
 
 export type RuleName = keyof typeof RULES;
@@ -115,4 +127,32 @@ export function tooManyRequests(result: RateLimitResult) {
       },
     }
   );
+}
+
+/**
+ * One-line guard for state-changing routes.
+ *
+ * Keys on client IP + the route's own path, so a single abuser cannot burn
+ * through the whole app's budget and one noisy endpoint does not lock a user
+ * out of another. Routes that already rate-limit by user id (login, signup,
+ * task creation…) keep doing that; this covers the long tail that had no
+ * throttle at all.
+ *
+ * Usage, as the first statement inside the handler's try block:
+ *
+ *   const limited = await guardRequest(req, "taskAction");
+ *   if (limited) return limited;
+ *
+ * `req` may be `_req` — pass `req` if the signature names it, otherwise pass
+ * the request argument you have. Never throws: a database hiccup fails open.
+ */
+export async function guardRequest(
+  req: Request,
+  ruleName: RuleName,
+  extra?: string
+): Promise<Response | null> {
+  const path = new URL(req.url).pathname;
+  const bucket = extra ? `${clientIp(req)}:${path}:${extra}` : `${clientIp(req)}:${path}`;
+  const result = await rateLimit(`${ruleName}:${bucket}`, RULES[ruleName]);
+  return result.allowed ? null : tooManyRequests(result);
 }

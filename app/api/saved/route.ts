@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { savedItems, tasks, tools } from "@/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
+import { guardRequest } from "@/lib/rateLimit";
 import { randomUUID } from "crypto";
 import { count } from "drizzle-orm";
 import { z } from "zod";
@@ -47,6 +48,8 @@ export async function GET() {
 // POST /api/saved — toggle save/unsave. Body: { itemType: "task"|"tool", itemId }
 export async function POST(req: NextRequest) {
   try {
+    const limited = await guardRequest(req, "savedAction");
+    if (limited) return limited;
     const session = await getSessionUser();
     if (!session) return NextResponse.json({ error: "Please log in first" }, { status: 401 });
 

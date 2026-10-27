@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { tasks, reviews, users, applications, agentListings } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
+import { guardRequest } from "@/lib/rateLimit";
 import { notify } from "@/lib/notify";
 import { randomUUID } from "crypto";
 import { z } from "zod";
@@ -15,6 +16,8 @@ const reviewSchema = z.object({
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const limited = await guardRequest(req, "taskAction");
+    if (limited) return limited;
     const session = await getSessionUser();
     if (!session) return NextResponse.json({ error: "Please log in first" }, { status: 401 });
     const { id: taskId } = await params;

@@ -3,9 +3,12 @@ import { db } from "@/db";
 import { notifications } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
+import { guardRequest } from "@/lib/rateLimit";
 
-export async function POST() {
+export async function POST(req: Request) {
   try {
+    const limited = await guardRequest(req, "inboxAction");
+    if (limited) return limited;
     const session = await getSessionUser();
     if (!session) return NextResponse.json({ error: "Please log in first" }, { status: 401 });
 

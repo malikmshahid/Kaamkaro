@@ -415,3 +415,15 @@ p {
     display: none;
   }
 }
+
+/* ---------------------------------------------------------------
+   Mobile bottom navigation (components/BottomNav.tsx)
+   Reserve room at the end of every page so the fixed bar never
+   covers the last row of content. Only on phones/tablets where the
+   bar is rendered (lg and below).
+   --------------------------------------------------------------- */
+@media (max-width: 1023px) {
+  body {
+    padding-bottom: calc(4.75rem + env(safe-area-inset-bottom));
+  }
+}
