@@ -42,6 +42,21 @@ type AdminTask = {
   createdAt: string;
 };
 
+type MediatorBrief = {
+  available: boolean;
+  reason?: string;
+  summary: string;
+  clientCase: string;
+  providerCase: string;
+  evidenceGaps: string[];
+  recommendation: "release_provider" | "refund_client" | "need_more_info";
+  confidence: number;
+  rationale: string;
+  fairnessNote: string;
+  messageCount: number;
+  model: string;
+};
+
 type Revenue = {
   commissionRatePercent: number;
   earnedByCurrency: { currency: string; total: number; count: number }[];
@@ -59,6 +74,8 @@ export default function AdminPage() {
   const [newRate, setNewRate] = useState("");
   const [savingRate, setSavingRate] = useState(false);
   const [forbidden, setForbidden] = useState(false);
+  const [briefs, setBriefs] = useState<Record<string, MediatorBrief>>({});
+  const [mediating, setMediating] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   async function loadAll() {
@@ -95,6 +112,41 @@ export default function AdminPage() {
     const data = await res.json();
     setRevenue(data);
     setNewRate(String(data.commissionRatePercent ?? ""));
+  }
+
+  async function handleMediate(taskId: string) {
+    setMediating(taskId);
+    try {
+      const res = await fetch("/api/admin/mediation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ taskId }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setBriefs((b) => ({
+          ...b,
+          [taskId]: {
+            available: false,
+            reason: data.error || "Mediator failed",
+            summary: "",
+            clientCase: "",
+            providerCase: "",
+            evidenceGaps: [],
+            recommendation: "need_more_info",
+            confidence: 0,
+            rationale: "",
+            fairnessNote: "",
+            messageCount: 0,
+            model: "none",
+          },
+        }));
+        return;
+      }
+      setBriefs((b) => ({ ...b, [taskId]: data.brief as MediatorBrief }));
+    } finally {
+      setMediating(null);
+    }
   }
 
   async function handleSaveRate(e: React.FormEvent) {
@@ -192,7 +244,7 @@ export default function AdminPage() {
                   : "border-transparent text-ink/50 hover:text-ink"
               }`}
             >
-              {t === "overview" ? "Overview" : t === "revenue" ? "💰 Revenue" : t === "disputes" ? `Disputes${stats && stats.disputedCount > 0 ? ` (${stats.disputedCount})` : ""}` : t === "users" ? "Users" : "All Tasks"}
+              {t === "overview" ? "Overview" : t === "revenue" ? "Revenue" : t === "disputes" ? `Disputes${stats && stats.disputedCount > 0 ? ` (${stats.disputedCount})` : ""}` : t === "users" ? "Users" : "All Tasks"}
             </button>
           ))}
         </div>
@@ -289,7 +341,10 @@ export default function AdminPage() {
               <p className="text-sm text-ink/50">No active disputes. 🎉</p>
             )}
             {disputes.map((t) => (
-              <div key={t.id} className="border border-red-200 bg-red-50/50 rounded-xl p-5">
+              <div
+                key={t.id}
+                className="rounded-xl border border-red-300/50 bg-red-50/60 p-5 dark:border-red-500/25 dark:bg-red-500/10"
+              >
                 <div className="flex items-start justify-between gap-4 mb-3">
                   <div>
                     <Link href={`/tasks/${t.id}`} className="font-semibold text-heading hover:underline">
@@ -300,26 +355,100 @@ export default function AdminPage() {
                     </p>
                   </div>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => handleResolve(t.id, "release_provider")}
-                    className="rounded-full bg-green-900 text-cream px-4 py-2 text-sm hover:bg-green-800"
+                    className="whitespace-nowrap rounded-full bg-green-700 px-4 py-2 text-[13px] font-semibold text-cream hover:bg-green-800"
                   >
-                    Release to Provider
+                    Release to provider
                   </button>
                   <button
                     onClick={() => handleResolve(t.id, "refund_client")}
-                    className="rounded-full border border-red-400 text-red-600 px-4 py-2 text-sm hover:bg-red-100"
+                    className="whitespace-nowrap rounded-full border border-red-400 px-4 py-2 text-[13px] font-semibold text-red-600 hover:bg-red-500/10 dark:text-red-300"
                   >
-                    Refund Client
+                    Refund client
                   </button>
                   <Link
                     href={`/tasks/${t.id}`}
-                    className="rounded-full border border-line px-4 py-2 text-sm hover:border-green-700"
+                    className="whitespace-nowrap rounded-full border border-line px-4 py-2 text-[13px] font-semibold text-ink/75 hover:border-green-700"
                   >
-                    View Full Details
+                    Full details
                   </Link>
+                  <button
+                    onClick={() => handleMediate(t.id)}
+                    disabled={mediating === t.id}
+                    className="whitespace-nowrap rounded-full bg-gold-500 px-4 py-2 text-[13px] font-semibold text-cream hover:bg-gold-600 disabled:opacity-50"
+                  >
+                    {mediating === t.id ? "Reading evidence…" : "✦ Mediate with AI"}
+                  </button>
                 </div>
+
+                {briefs[t.id] && (
+                  <div className="mt-4 rounded-xl border border-line bg-card p-4 text-sm">
+                    {!briefs[t.id].available ? (
+                      <p className="text-ink/60">
+                        <strong className="text-heading">Mediator unavailable.</strong>{" "}
+                        {briefs[t.id].reason}
+                      </p>
+                    ) : (
+                      <div className="space-y-3">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span
+                            className={`rounded-full px-2.5 py-1 text-[10.5px] font-bold uppercase tracking-[0.12em] ${
+                              briefs[t.id].recommendation === "release_provider"
+                                ? "bg-green-700/10 text-green-700"
+                                : briefs[t.id].recommendation === "refund_client"
+                                  ? "bg-red-500/10 text-red-600"
+                                  : "bg-gold-500/15 text-gold-600"
+                            }`}
+                          >
+                            {briefs[t.id].recommendation.replace(/_/g, " ")}
+                          </span>
+                          <span className="text-xs text-ink/50">
+                            confidence {Math.round(briefs[t.id].confidence * 100)}% ·{" "}
+                            {briefs[t.id].messageCount} messages read · {briefs[t.id].model}
+                          </span>
+                        </div>
+                        <p className="text-ink/80">{briefs[t.id].summary}</p>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <div className="rounded-lg border border-line bg-paper/50 p-3">
+                            <p className="mb-1 text-[10.5px] font-bold uppercase tracking-[0.12em] text-ink/45">
+                              Client says
+                            </p>
+                            <p className="text-[13px] text-ink/75">{briefs[t.id].clientCase}</p>
+                          </div>
+                          <div className="rounded-lg border border-line bg-paper/50 p-3">
+                            <p className="mb-1 text-[10.5px] font-bold uppercase tracking-[0.12em] text-ink/45">
+                              Provider says
+                            </p>
+                            <p className="text-[13px] text-ink/75">{briefs[t.id].providerCase}</p>
+                          </div>
+                        </div>
+                        {briefs[t.id].evidenceGaps.length > 0 && (
+                          <div>
+                            <p className="mb-1 text-[10.5px] font-bold uppercase tracking-[0.12em] text-ink/45">
+                              Missing evidence
+                            </p>
+                            <ul className="list-inside list-disc text-[13px] text-ink/70">
+                              {briefs[t.id].evidenceGaps.map((g) => (
+                                <li key={g}>{g}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        <p className="text-[13px] text-ink/75">
+                          <strong className="text-heading">Why:</strong> {briefs[t.id].rationale}
+                        </p>
+                        <p className="rounded-lg bg-gold-100/50 px-3 py-2 text-[12.5px] text-gold-600 dark:bg-gold-500/10 dark:text-gold-300">
+                          ⚖ {briefs[t.id].fairnessNote}
+                        </p>
+                        <p className="text-[11px] text-ink/40">
+                          Advisory only — the AI never moves money. You press the button.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
           </div>
