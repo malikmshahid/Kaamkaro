@@ -211,6 +211,14 @@ p {
   box-shadow: var(--shadow-lux);
 }
 
+/* Footgun guard: `.gold-hairline` sets height:1px because it is meant to be an
+   empty 1px divider div. Applied straight to a card it silently collapses the
+   whole card to a 1px line (this bit us twice). If both classes land on the
+   same element, the card wins and the hairline is simply not drawn. */
+.card-lux.gold-hairline {
+  height: auto;
+}
+
 /* Hover lift — geometric ease, no wobble */
 .lift {
   transition:

@@ -41,8 +41,20 @@ export default async function PayPage({
     return (
       <>
         <Navbar />
-        <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-16">
-          <p className="text-ink/60">This payment belongs to a different account.</p>
+        <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-16 sm:px-6">
+          <div className="card-lux rounded-2xl p-8 text-center">
+            <p className="font-display text-2xl text-heading">Not your payment</p>
+            <p className="mt-2 text-sm text-ink/60">
+              This checkout belongs to a different account. Open the task from your own dashboard
+              to pay for it.
+            </p>
+            <Link
+              href="/dashboard"
+              className="sheen mt-6 inline-block rounded-full bg-green-700 px-5 py-2.5 text-sm font-semibold text-cream"
+            >
+              Go to dashboard
+            </Link>
+          </div>
         </main>
       </>
     );
@@ -63,24 +75,30 @@ export default async function PayPage({
     return (
       <>
         <Navbar />
-        <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-14 sm:px-6">
-          <div className="mb-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold-500">
+        <main className="flex-1">
+        <section className="aurora grain relative isolate overflow-hidden border-b border-line">
+          <div className="relative mx-auto w-full max-w-3xl px-5 py-10 sm:px-6 sm:py-12">
+            <p className="inline-flex items-center gap-2.5 rounded-full border border-gold-500/35 bg-card/70 px-3.5 py-1.5 text-[10.5px] font-semibold uppercase tracking-[0.18em] text-gold-600 shadow-lux-sm backdrop-blur dark:text-gold-300">
+              <span className="pulse-dot inline-block h-1.5 w-1.5 rounded-full bg-gold-500" />
               Escrow payment
             </p>
-            <h1 className="mt-2 font-display text-3xl text-heading">
+            <h1 className="mt-4 font-display text-[1.9rem] font-medium leading-[1.06] tracking-[-0.02em] text-heading sm:text-[2.6rem]">
               {task ? task.title : "Task payment"}
             </h1>
-            <p className="mt-2 text-sm text-ink/60">
-              {payment.currency} {payment.amount.toLocaleString()} · held by KaamKaro until you
-              confirm the work
+            <p className="mt-3 font-display text-2xl text-heading">
+              {payment.currency} {payment.amount.toLocaleString()}
+            </p>
+            <p className="mt-1 text-sm text-ink/60">
+              Held by KaamKaro until you confirm the work — never paid out on the provider&apos;s word.
             </p>
           </div>
+        </section>
+        <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-6 sm:py-10">
           {cfg ? (
             <PaymentPoller paymentId={payment.id} taskId={payment.taskId} />
           ) : (
-            <div className="rounded-2xl border border-line bg-card p-6">
-              <p className="font-semibold text-heading">Payment gateway not connected yet</p>
+            <div className="card-lux rounded-2xl p-6">
+              <p className="font-display text-lg text-heading">Payment gateway not connected yet</p>
               <p className="mt-2 text-sm text-ink/65">
                 PayFast merchant credentials are not set on this deployment, so escrow payments
                 are being recorded without a checkout. Add{" "}
@@ -91,13 +109,14 @@ export default async function PayPage({
               </p>
               <Link
                 href={`/tasks/${payment.taskId}`}
-                className="mt-4 inline-block rounded-full bg-green-900 px-5 py-2.5 text-sm text-cream hover:bg-green-800"
+                className="mt-4 inline-block rounded-full border border-line bg-card px-5 py-2.5 text-sm font-semibold text-heading"
               >
                 Back to the task
               </Link>
             </div>
           )}
-        </main>
+        </div>
+      </main>
       </>
     );
   }
@@ -126,36 +145,76 @@ export default async function PayPage({
   return (
     <>
       <Navbar />
-      <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-14 sm:px-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold-500">
-          Step 2 of 2
-        </p>
-        <h1 className="mt-2 font-display text-3xl text-heading">
-          Pay {payment.currency} {payment.amount.toLocaleString()} into escrow
-        </h1>
-        <p className="mt-2 mb-8 text-sm text-ink/60">
-          {task?.title ? `For “${task.title}”. ` : ""}
-          KaamKaro holds the money and only releases it when you confirm the work is done.
-        </p>
-
-        {form ? (
-          <div className="rounded-2xl border border-line bg-card p-6">
-            <PayFastForm action={form.action} fields={form.fields} />
-          </div>
-        ) : (
-          <div className="rounded-2xl border border-gold-400/40 bg-gold-100/60 p-6 dark:bg-gold-500/10">
-            <p className="font-semibold text-heading">PayFast didn’t respond</p>
-            <p className="mt-2 text-sm text-ink/70">
-              We couldn’t get a checkout token just now. Nothing was charged — please try again.
+      <main className="flex-1">
+        <section className="aurora grain relative isolate overflow-hidden border-b border-line">
+          <div className="relative mx-auto w-full max-w-4xl px-5 py-10 sm:px-6 sm:py-12">
+            <p className="inline-flex items-center gap-2.5 rounded-full border border-gold-500/35 bg-card/70 px-3.5 py-1.5 text-[10.5px] font-semibold uppercase tracking-[0.18em] text-gold-600 shadow-lux-sm backdrop-blur dark:text-gold-300">
+              <span className="pulse-dot inline-block h-1.5 w-1.5 rounded-full bg-gold-500" />
+              Step 2 of 2 · escrow
             </p>
-            <Link
-              href={`/pay/${payment.id}`}
-              className="mt-4 inline-block rounded-full bg-green-900 px-5 py-2.5 text-sm text-cream hover:bg-green-800"
-            >
-              Try again
-            </Link>
+            <h1 className="mt-4 font-display text-[1.95rem] font-medium leading-[1.05] tracking-[-0.02em] text-heading sm:text-[2.7rem]">
+              Pay <span className="gold-text">{payment.currency} {payment.amount.toLocaleString()}</span>
+              <br className="hidden sm:block" /> into escrow.
+            </h1>
+            <p className="mt-3 max-w-xl text-sm leading-relaxed text-ink/65">
+              {task?.title ? `For “${task.title}”. ` : ""}
+              KaamKaro holds the money and releases it only when you confirm the work is done.
+            </p>
           </div>
-        )}
+        </section>
+
+        <div className="mx-auto grid w-full max-w-4xl gap-6 px-5 py-8 sm:px-6 sm:py-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
+          <div className="card-lux rounded-2xl p-5 sm:p-6">
+            {form ? (
+              <PayFastForm action={form.action} fields={form.fields} />
+            ) : (
+              <div className="rounded-xl border border-gold-400/40 bg-gold-100/60 p-5 dark:bg-gold-500/10">
+                <p className="font-display text-lg text-heading">PayFast didn&apos;t respond</p>
+                <p className="mt-2 text-sm text-ink/70">
+                  We couldn&apos;t get a checkout token just now. Nothing was charged — please try
+                  again.
+                </p>
+                <Link
+                  href={`/pay/${payment.id}`}
+                  className="sheen mt-4 inline-block rounded-full bg-green-700 px-5 py-2.5 text-sm font-semibold text-cream"
+                >
+                  Try again
+                </Link>
+              </div>
+            )}
+          </div>
+
+          <aside className="space-y-4">
+            <div className="card-lux relative overflow-hidden rounded-2xl p-5">
+              <div className="gold-hairline absolute inset-x-5 top-0 opacity-70" aria-hidden="true" />
+              <p className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-ink/45">
+                What happens next
+              </p>
+              <ol className="mt-3 space-y-3 text-[13px] text-ink/70">
+                {[
+                  [ "01", "You pay", "PayFast processes the card or wallet — we never see the number." ],
+                  [ "02", "We hold it", "Money sits in escrow. The provider cannot touch it yet." ],
+                  [ "03", "Work happens", "Chat, proof and AI verification all stay on the task." ],
+                  [ "04", "You release", "Only your confirmation (or an admin decision) pays out." ],
+                ].map(([n, title, body]) => (
+                  <li key={n} className="flex gap-3">
+                    <span className="tnum mt-0.5 font-display text-[13px] text-gold-600 dark:text-gold-300">
+                      {n}
+                    </span>
+                    <span>
+                      <span className="font-semibold text-heading">{title}.</span> {body}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+
+            <div className="rounded-2xl border border-line bg-card/70 p-4 text-[12px] leading-relaxed text-ink/55">
+              Card details are entered on PayFast&apos;s own page. If anything goes wrong, the
+              server-to-server callback — not your browser — decides whether the payment landed.
+            </div>
+          </aside>
+        </div>
       </main>
     </>
   );
