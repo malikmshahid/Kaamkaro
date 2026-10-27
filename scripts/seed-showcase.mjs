@@ -39,8 +39,24 @@ const TASKS = [
 ];
 
 // Which demo task indexes have already been "applied for" by demo providers,
-// so the board shows a believable mix of 0 / 1 / 2 applicants.
-const APPLICANTS = { 1: 2, 3: 1, 5: 2, 7: 1 };
+// so the board shows a believable mix of 0 / 1 / 2 proposals. Each entry carries
+// the proposal terms (price + delivery) the provider would have quoted.
+const APPLICANTS = {
+  1: [
+    { price: 5800, days: 4, message: "Do logo concepts bana ke bhej dunga, aap pasand wala choose karein. Streetwear ke liye bold wordmark best chalega." },
+    { price: 6500, days: 3, message: "I have designed for two clothing labels before. Wordmark plus a square social version, two revisions included." },
+  ],
+  3: [
+    { price: 14000, days: 6, message: "Next.js page bana kar bhej dunga, mobile par bhi perfect. Contact form ke liye aap ka email chahiye hoga." },
+  ],
+  5: [
+    { price: 1100, days: 1, message: "Shop ke bahar se signboard ki clear photo, andar ke do shots — GPS tag ke saath. Islamabad mein hoon." },
+    { price: 1200, days: 2, message: "Can do this tomorrow morning, light is better then. Will share full-resolution files." },
+  ],
+  7: [
+    { price: 2400, days: 3, message: "200 invoices Excel mein daal dunga — date, vendor, amount aur tax columns. End par preview bhej dunga." },
+  ],
+};
 
 async function clear() {
   const users = (await q(`select id from users where email = any($1)`, [[CLIENT_EMAIL, ...PROVIDERS]])).rows.map((r) => r.id);
@@ -97,22 +113,21 @@ async function seed() {
     ids.push(id);
   }
 
-  const messages = [
-    "Main ye kaam aaj hi kar sakta hoon — Lahore mein hoon, 30 minute door.",
-    "I have done similar work before. Can start immediately and share proof photos.",
-  ];
-  for (const [idx, count] of Object.entries(APPLICANTS)) {
-    for (let i = 0; i < count; i += 1) {
-      const taskId = ids[Number(idx)];
-      if (!taskId) continue;
+  let proposals = 0;
+  for (const [idx, entries] of Object.entries(APPLICANTS)) {
+    const taskId = ids[Number(idx)];
+    if (!taskId) continue;
+    for (let i = 0; i < entries.length; i += 1) {
+      const e = entries[i];
       await q(
-        `insert into applications (id, task_id, provider_id, message, status, created_at)
-         values ($1,$2,$3,$4,'pending', now() - (($5)::int || ' hours')::interval)`,
-        [randomUUID(), taskId, providerIds[i % providerIds.length], messages[i % messages.length], 2 + i]
+        `insert into applications (id, task_id, provider_id, message, proposed_amount, currency, delivery_days, ai_drafted, status, created_at)
+         values ($1,$2,$3,$4,$5,'PKR',$6,$7,'pending', now() - (($8)::int || ' hours')::interval)`,
+        [randomUUID(), taskId, providerIds[i % providerIds.length], e.message, e.price, e.days, i % 2 === 1, 2 + i]
       );
+      proposals += 1;
     }
   }
-  console.log(`seeded ${ids.length} demo tasks with ${Object.values(APPLICANTS).reduce((a, b) => a + b, 0)} demo applications`);
+  console.log(`seeded ${ids.length} demo tasks with ${proposals} demo proposals (prices + delivery included)`);
 }
 
 if (process.argv.includes("--clear")) await clear();

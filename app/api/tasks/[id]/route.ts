@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { tasks, applications, users, payments, reviews, agentListings } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
 
 // Fields that must never reach a stranger's browser: the private proof of
@@ -34,9 +34,23 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     if (!isParticipant && !isAdmin) {
       const publicTask: Record<string, unknown> = { ...task };
       for (const key of PRIVATE_TASK_FIELDS) delete publicTask[key];
+
+      // ...except their own proposal. A provider must be able to see what they
+      // sent (and that it was received) without seeing anyone else's.
+      let myApplication: Record<string, unknown> | null = null;
+      if (session) {
+        const mine = await db
+          .select()
+          .from(applications)
+          .where(and(eq(applications.taskId, id), eq(applications.providerId, session.userId)))
+          .limit(1);
+        myApplication = mine[0] ? { ...mine[0] } : null;
+      }
+
       return NextResponse.json({
         task: publicTask,
         applications: [],
+        myApplication,
         payment: null,
         reviews: await db
           .select({
@@ -57,6 +71,12 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
         applicantType: applications.applicantType,
         agentListingId: applications.agentListingId,
         message: applications.message,
+        proposedAmount: applications.proposedAmount,
+        currency: applications.currency,
+        deliveryDays: applications.deliveryDays,
+        portfolioUrl: applications.portfolioUrl,
+        aiDrafted: applications.aiDrafted,
+        createdAt: applications.createdAt,
         status: applications.status,
         providerName: users.name,
         providerRating: users.ratingAvg,

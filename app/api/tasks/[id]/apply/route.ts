@@ -7,6 +7,33 @@ import { notify } from "@/lib/notify";
 import { throttle, tooManyRequests } from "@/lib/rateLimit";
 import { LIMITS } from "@/lib/constants";
 import { randomUUID } from "crypto";
+import { z } from "zod";
+
+/**
+ * A proposal is four things: what you say, what you charge, how long you need,
+ * and proof you can do it. Every field is bounded — this is user input that
+ * other people will read.
+ */
+const applySchema = z.object({
+  message: z
+    .string()
+    .trim()
+    .min(20, "Write at least a couple of sentences so the client can judge you")
+    .max(LIMITS.applicationMessage, `Keep it under ${LIMITS.applicationMessage} characters`),
+  proposedAmount: z
+    .number()
+    .positive("Your price must be more than zero")
+    .max(5_000_000, "That amount looks too large — please double-check")
+    .optional(),
+  deliveryDays: z.number().int().min(1, "Delivery must be at least 1 day").max(365).optional(),
+  portfolioUrl: z
+    .string()
+    .trim()
+    .max(500)
+    .refine((v) => v === "" || /^https?:\/\/[^\s]+$/i.test(v), "Paste a full https:// link")
+    .optional(),
+  aiDrafted: z.boolean().optional(),
+});
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -19,7 +46,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const applyLimit = await throttle("applyToTask", session.userId);
     if (!applyLimit.allowed) return tooManyRequests(applyLimit);
 
-    const body = await req.json().catch(() => ({}));
+    const parsed = applySchema.safeParse(await req.json().catch(() => null));
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message || "Please check your proposal" },
+        { status: 400 }
+      );
+    }
+    const { message, proposedAmount, deliveryDays, portfolioUrl, aiDrafted } = parsed.data;
 
     const found = await db.select().from(tasks).where(eq(tasks.id, taskId)).limit(1);
     const task = found[0];
@@ -45,17 +79,26 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       id,
       taskId,
       providerId: session.userId,
-      message:
-        typeof body.message === "string"
-          ? body.message.trim().slice(0, LIMITS.applicationMessage) || null
-          : null,
+      message,
+      proposedAmount: proposedAmount ?? null,
+      currency: task.currency,
+      deliveryDays: deliveryDays ?? null,
+      portfolioUrl: portfolioUrl ? portfolioUrl : null,
+      aiDrafted: aiDrafted ?? false,
       status: "pending",
     });
 
+    // Tell the client something they can act on, not just "someone applied".
+    const terms = [
+      proposedAmount ? `${task.currency} ${proposedAmount.toLocaleString()}` : null,
+      deliveryDays ? `${deliveryDays} day${deliveryDays === 1 ? "" : "s"}` : null,
+    ].filter(Boolean);
     await notify(
       task.postedById,
       "application_received",
-      `Someone applied to your task "${task.title}"`,
+      terms.length
+        ? `New proposal on "${task.title}" — ${terms.join(" · ")}`
+        : `Someone applied to your task "${task.title}"`,
       taskId
     );
 

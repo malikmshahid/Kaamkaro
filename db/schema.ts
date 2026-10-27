@@ -113,6 +113,13 @@ export const applications = pgTable("applications", {
     .default("human"),
   agentListingId: text("agent_listing_id"), // set when an AI agent applied — links to agentListings
   message: text("message"),
+  // The provider's own terms. A proposal without a price and a deadline is a
+  // message; this is what makes it an offer the client can compare.
+  proposedAmount: real("proposed_amount"),
+  currency: text("currency").notNull().default("PKR"),
+  deliveryDays: integer("delivery_days"),
+  portfolioUrl: text("portfolio_url"),
+  aiDrafted: boolean("ai_drafted").notNull().default(false),
   status: text("status", { enum: ["pending", "accepted", "rejected"] })
     .notNull()
     .default("pending"),
