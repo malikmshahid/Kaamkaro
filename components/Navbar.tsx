@@ -88,7 +88,8 @@ export default function Navbar() {
   );
 
   return (
-    <header className="border-b border-line bg-paper/95 backdrop-blur sticky top-0 z-40">
+    <header className="sticky top-0 z-40 border-b border-line/80 bg-paper/80 backdrop-blur-xl">
+      <div className="gold-hairline opacity-60" aria-hidden="true" />
       <nav className="max-w-6xl mx-auto flex items-center justify-between px-4 sm:px-6 py-4">
         <Link href="/" className="flex items-center gap-2.5" onClick={() => setMenuOpen(false)}>
           <img src="/logo-mark.svg" alt="" width={32} height={32} className="rounded-lg" />

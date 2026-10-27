@@ -175,26 +175,20 @@ export default function ToolboxPage() {
       <Navbar />
       <main className="flex-1">
         {/* ------------------------------- HERO ------------------------------- */}
-        <section className="relative overflow-hidden border-b border-line">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background:
-                "radial-gradient(55% 60% at 90% 0%, rgba(200,150,62,0.18) 0%, rgba(200,150,62,0) 62%), radial-gradient(45% 55% at 2% 100%, rgba(18,58,38,0.10) 0%, rgba(18,58,38,0) 65%)",
-            }}
-          />
-          <div className="relative mx-auto w-full max-w-6xl px-5 pb-8 pt-10 sm:px-6 sm:pb-10 sm:pt-14">
+        <section className="aurora grain relative isolate overflow-hidden border-b border-line">
+          <div className="relative mx-auto w-full max-w-6xl px-5 pb-8 pt-11 sm:px-6 sm:pb-11 sm:pt-16">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="min-w-0">
-                <p className="inline-flex items-center gap-2 rounded-full border border-gold-500/40 bg-gold-100/50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-gold-500 dark:bg-gold-500/10">
-                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-gold-500" />
+                <p className="reveal inline-flex items-center gap-2.5 rounded-full border border-gold-500/35 bg-card/70 px-3.5 py-1.5 text-[10.5px] font-semibold uppercase tracking-[0.18em] text-gold-600 shadow-lux-sm backdrop-blur dark:text-gold-300">
+                  <span className="pulse-dot inline-block h-1.5 w-1.5 rounded-full bg-gold-500" />
                   The Toolbox · fixed price
                 </p>
-                <h1 className="mt-4 max-w-2xl font-display text-3xl leading-tight text-heading sm:text-5xl">
-                  Order it done. No bidding, no waiting.
+                <h1 className="reveal reveal-1 mt-5 max-w-3xl font-display text-[2.1rem] font-medium leading-[1.02] tracking-[-0.02em] text-heading sm:text-[3.4rem]">
+                  Order it done.
+                  <br />
+                  <span className="gold-text">No bidding</span>, no waiting.
                 </h1>
-                <p className="mt-3 max-w-xl text-sm leading-relaxed text-ink/65 sm:text-base">
+                <p className="reveal reveal-2 mt-4 max-w-xl text-sm leading-relaxed text-ink/65 sm:text-[15.5px]">
                   Ready-made services from Pakistani providers with a price and a deadline already
                   on the table. Tap once, the job is yours — payment stays in escrow until you
                   confirm the work.
@@ -202,7 +196,7 @@ export default function ToolboxPage() {
               </div>
               <Link
                 href="/tools/new"
-                className="shrink-0 rounded-full bg-gold-500 px-5 py-3 text-sm font-semibold text-cream transition-transform hover:-translate-y-0.5 hover:opacity-95"
+                className="sheen reveal reveal-2 shrink-0 rounded-full bg-gold-500 px-5 py-3 text-sm font-semibold text-cream shadow-[0_16px_34px_-22px_rgba(169,119,44,0.95)] ring-1 ring-inset ring-white/20 transition-transform hover:-translate-y-0.5"
               >
                 + List a service
               </Link>
@@ -222,14 +216,14 @@ export default function ToolboxPage() {
                   onChange={(e) => setQ(e.target.value)}
                   aria-label="Search services"
                   placeholder="Search services — 'logo', 'AC service', 'resume'…"
-                  className="w-full rounded-full border border-line bg-card py-3 pl-11 pr-4 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-green-700"
+                  className="w-full rounded-full border border-line bg-card py-3.5 pl-11 pr-4 text-sm shadow-lux-sm transition-shadow placeholder:text-ink/35 focus:border-green-800/40 focus:outline-none focus:ring-2 focus:ring-green-700/40"
                 />
               </div>
               <select
                 value={sort}
                 onChange={(e) => setSort(e.target.value)}
                 aria-label="Sort services by"
-                className="min-w-0 rounded-full border border-line bg-card px-4 py-3 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-green-700 sm:w-52"
+                className="min-w-0 rounded-full border border-line bg-card px-4 py-3.5 text-sm shadow-lux-sm transition-shadow focus:outline-none focus:ring-2 focus:ring-green-700/40 sm:w-52"
               >
                 {SORTS.map((s) => (
                   <option key={s.value} value={s.value}>
@@ -240,7 +234,7 @@ export default function ToolboxPage() {
             </div>
 
             {/* filter chips */}
-            <div className="-mx-5 mt-4 flex gap-2 overflow-x-auto px-5 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
+            <div className="no-bar fade-x -mx-5 mt-4 flex gap-2 overflow-x-auto px-5 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:[mask-image:none] sm:[-webkit-mask-image:none]">
               <button
                 onClick={() => setCategory("")}
                 className={`shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors ${
@@ -309,8 +303,8 @@ export default function ToolboxPage() {
         </section>
 
         {/* ------------------------------ STATS ------------------------------- */}
-        <section className="border-b border-line bg-card/40">
-          <div className="mx-auto grid w-full max-w-6xl grid-cols-2 gap-px px-5 sm:grid-cols-4 sm:px-6">
+        <section className="border-b border-line bg-card/60">
+          <div className="mx-auto grid w-full max-w-6xl grid-cols-2 divide-line px-5 py-2 sm:grid-cols-4 sm:divide-x sm:px-6">
             {[
               { label: "Services ready to order", value: stats ? stats.active.toLocaleString() : "—" },
               { label: "Providers selling", value: stats ? stats.providers.toLocaleString() : "—" },
@@ -329,9 +323,11 @@ export default function ToolboxPage() {
                   : "—",
               },
             ].map((s) => (
-              <div key={s.label} className="px-1 py-5 sm:px-4">
-                <p className="font-display text-xl text-heading sm:text-2xl">{s.value}</p>
-                <p className="mt-0.5 text-[11px] uppercase tracking-[0.12em] text-ink/45">{s.label}</p>
+              <div key={s.label} className="px-1 py-4 sm:px-6">
+                <p className="tnum font-display text-[1.4rem] leading-none text-heading sm:text-[1.7rem]">
+                  {s.value}
+                </p>
+                <p className="mt-1.5 text-[10px] uppercase tracking-[0.16em] text-ink/45">{s.label}</p>
               </div>
             ))}
           </div>
@@ -340,7 +336,7 @@ export default function ToolboxPage() {
         {/* ----------------------------- RESULTS ------------------------------ */}
         <section className="mx-auto w-full max-w-6xl px-5 py-8 sm:px-6 sm:py-10">
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-            <h2 className="flex items-center gap-2 font-display text-xl text-heading">
+            <h2 className="flex items-center gap-2 font-display text-[1.25rem] text-heading">
               {loading
                 ? "Opening the toolbox…"
                 : `${tools.length} service${tools.length === 1 ? "" : "s"} you can order`}
@@ -419,9 +415,14 @@ export default function ToolboxPage() {
               </div>
               <Link
                 href={`/tools/${spotlight.id}`}
-                className="group flex flex-col gap-4 rounded-2xl border border-green-900/25 bg-gradient-to-br from-green-950 to-green-800 p-5 text-cream transition-transform hover:-translate-y-0.5 sm:flex-row sm:items-center sm:justify-between sm:p-6"
+                className="group relative flex flex-col gap-4 overflow-hidden rounded-2xl bg-gradient-to-br from-green-950 via-green-900 to-green-800 p-5 text-cream shadow-[0_30px_70px_-40px_rgba(11,32,22,0.95)] ring-1 ring-inset ring-white/10 transition-all hover:-translate-y-0.5 sm:flex-row sm:items-center sm:justify-between sm:p-7"
               >
-                <div className="min-w-0">
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 opacity-60 [background:radial-gradient(60%_80%_at_88%_-10%,rgba(200,150,62,0.35),transparent_65%)]"
+                />
+                <span className="gold-hairline absolute inset-x-0 top-0 opacity-70" aria-hidden="true" />
+                <div className="relative min-w-0">
                   <div className="mb-2 flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-wide text-cream/60">
                     <span className="rounded-full bg-cream/15 px-2 py-0.5">
                       {categoryLabel(spotlight.category)}
@@ -431,7 +432,7 @@ export default function ToolboxPage() {
                       ⚡ {deliveryLabel(spotlight.deliveryDays)}
                     </span>
                   </div>
-                  <h3 className="break-words font-display text-2xl leading-snug [overflow-wrap:anywhere]">
+                  <h3 className="break-words font-display text-[1.6rem] leading-snug [overflow-wrap:anywhere]">
                     {spotlight.title}
                   </h3>
                   <p className="mt-2 line-clamp-2 max-w-xl text-sm text-cream/75">
@@ -446,9 +447,9 @@ export default function ToolboxPage() {
                     ) : null}
                   </div>
                 </div>
-                <div className="flex shrink-0 items-center gap-3 sm:flex-col sm:items-end">
+                <div className="relative flex shrink-0 items-center gap-3 sm:flex-col sm:items-end">
                   <div className="text-left sm:text-right">
-                    <p className="font-display text-2xl text-gold-400">
+                    <p className="tnum font-display text-[1.6rem] text-gold-300">
                       {formatMoney(spotlight.price, spotlight.currency)}
                     </p>
                     <p className="text-[11px] text-cream/60">fixed price · escrow</p>
@@ -474,8 +475,9 @@ export default function ToolboxPage() {
                   <Link
                     key={t.id}
                     href={`/tools/${t.id}`}
-                    className="group flex flex-col rounded-2xl border border-line bg-card p-5 transition-all hover:-translate-y-0.5 hover:border-gold-500/50 hover:shadow-[0_14px_36px_-26px_rgba(13,35,24,0.6)]"
+                    className="group relative flex flex-col overflow-hidden rounded-2xl border border-line bg-card p-5 shadow-lux-sm transition-all duration-300 hover:-translate-y-1 hover:border-gold-500/40 hover:shadow-lux-lg"
                   >
+                    <span className="gold-hairline absolute inset-x-6 top-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100" aria-hidden="true" />
                     <div className="mb-3 flex items-start justify-between gap-2">
                       <div className="flex min-w-0 flex-wrap items-center gap-1.5 text-[11px] uppercase tracking-wide">
                         <span className="rounded-full bg-green-950/5 px-2 py-0.5 font-semibold text-green-800 dark:bg-green-500/15 dark:text-green-300">
@@ -492,7 +494,7 @@ export default function ToolboxPage() {
                       </span>
                     </div>
 
-                    <h3 className="break-words font-display text-lg leading-snug text-heading [overflow-wrap:anywhere]">
+                    <h3 className="break-words font-display text-[1.12rem] leading-snug text-heading [overflow-wrap:anywhere]">
                       {t.title}
                     </h3>
                     <p className="mt-1.5 line-clamp-2 flex-1 text-sm text-ink/60">{t.description}</p>
@@ -520,7 +522,7 @@ export default function ToolboxPage() {
                         <Stars rating={t.providerRating} count={t.providerRatingCount} />
                       </div>
                       <div className="shrink-0 text-right">
-                        <p className="font-display text-lg text-green-800 dark:text-green-300">
+                        <p className="tnum font-display text-[1.22rem] text-green-800 dark:text-green-300">
                           {formatMoney(t.price, t.currency)}
                         </p>
                         <span className="mt-0.5 inline-block rounded-full border border-green-900/30 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-green-800 transition-colors group-hover:bg-green-900 group-hover:text-cream dark:text-green-300 dark:group-hover:text-cream">
@@ -536,16 +538,16 @@ export default function ToolboxPage() {
 
           {/* cross-sell */}
           {!loading && tools.length > 0 && (
-            <div className="mt-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-card/60 px-5 py-4">
-              <div>
-                <p className="font-semibold text-heading">Can&apos;t find the exact service?</p>
-                <p className="text-sm text-ink/60">
+            <div className="relative mt-8 flex flex-wrap items-center justify-between gap-4 overflow-hidden rounded-2xl border border-green-900/20 bg-gradient-to-r from-green-950/[0.06] via-card to-card px-5 py-5 dark:from-green-500/10 dark:via-card dark:to-card">
+              <div className="min-w-0">
+                <p className="font-display text-[1.05rem] text-heading">Can&apos;t find the exact service?</p>
+                <p className="mt-1 text-sm text-ink/60">
                   Post it as a task and let providers send priced proposals instead.
                 </p>
               </div>
               <Link
                 href="/tasks/new"
-                className="shrink-0 rounded-full bg-green-900 px-5 py-2.5 text-sm font-semibold text-cream hover:bg-green-800"
+                className="sheen shrink-0 rounded-full bg-green-900 px-5 py-2.5 text-sm font-semibold text-cream shadow-[0_14px_30px_-20px_rgba(11,32,22,0.9)] transition-transform hover:-translate-y-0.5 hover:bg-green-800"
               >
                 Post a task
               </Link>

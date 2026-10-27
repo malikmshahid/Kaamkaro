@@ -149,31 +149,23 @@ export default function FindWorkPage() {
       <Navbar />
       <main className="flex-1">
         {/* ------------------------------- HERO ------------------------------- */}
-        <section className="relative overflow-hidden border-b border-line">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background:
-                "radial-gradient(55% 60% at 88% 0%, rgba(200,150,62,0.16) 0%, rgba(200,150,62,0) 60%), radial-gradient(45% 55% at 4% 100%, rgba(18,58,38,0.10) 0%, rgba(18,58,38,0) 65%)",
-            }}
-          />
-          <div className="relative mx-auto w-full max-w-6xl px-5 pb-8 pt-10 sm:px-6 sm:pb-10 sm:pt-14">
-            <p className="inline-flex items-center gap-2 rounded-full border border-gold-500/40 bg-gold-100/50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-gold-500 dark:bg-gold-500/10">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-gold-500" />
+        <section className="aurora grain relative isolate overflow-hidden border-b border-line">
+          <div className="relative mx-auto w-full max-w-6xl px-5 pb-8 pt-11 sm:px-6 sm:pb-11 sm:pt-16">
+            <p className="reveal inline-flex items-center gap-2.5 rounded-full border border-gold-500/35 bg-card/70 px-3.5 py-1.5 text-[10.5px] font-semibold uppercase tracking-[0.18em] text-gold-600 shadow-lux-sm backdrop-blur dark:text-gold-300">
+              <span className="pulse-dot inline-block h-1.5 w-1.5 rounded-full bg-gold-500" />
               Find work · Pakistan
             </p>
-            <h1 className="mt-4 max-w-2xl font-display text-3xl leading-tight text-heading sm:text-5xl">
-              Work that actually fits you.
+            <h1 className="reveal reveal-1 mt-5 max-w-3xl font-display text-[2.1rem] font-medium leading-[1.02] tracking-[-0.02em] text-heading sm:text-[3.4rem]">
+              Work that actually <span className="gold-text">fits you</span>.
             </h1>
-            <p className="mt-3 max-w-xl text-sm leading-relaxed text-ink/65 sm:text-base">
+            <p className="reveal reveal-2 mt-4 max-w-xl text-sm leading-relaxed text-ink/65 sm:text-[15.5px]">
               Every task here is escrow-backed — the money is already held before you start, so you
               never chase a client for payment. Sorted by how well it matches your skills, city and
               rate.
             </p>
             <Link
               href="/why-kaamkaro"
-              className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-green-800 hover:underline dark:text-green-300"
+              className="reveal reveal-2 mt-3 inline-flex items-center gap-1.5 border-b border-green-800/25 pb-0.5 text-xs font-semibold text-green-800 transition-colors hover:border-green-800 dark:border-green-300/30 dark:text-green-300"
             >
               Why KaamKaro is different from other platforms →
             </Link>
@@ -192,14 +184,14 @@ export default function FindWorkPage() {
                   onChange={(e) => setQ(e.target.value)}
                   placeholder="Search work — 'delivery', 'logo', 'AC service'…"
                   aria-label="Search open work"
-                  className="w-full rounded-full border border-line bg-card py-3 pl-11 pr-4 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-green-700"
+                  className="w-full rounded-full border border-line bg-card py-3.5 pl-11 pr-4 text-sm shadow-lux-sm transition-shadow placeholder:text-ink/35 focus:border-green-800/40 focus:outline-none focus:ring-2 focus:ring-green-700/40"
                 />
               </div>
               <select
                 value={sort}
                 aria-label="Sort work by"
                 onChange={(e) => setSort(e.target.value)}
-                className="min-w-0 rounded-full border border-line bg-card px-4 py-3 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-green-700 sm:w-48"
+                className="min-w-0 rounded-full border border-line bg-card px-4 py-3.5 text-sm shadow-lux-sm transition-shadow focus:outline-none focus:ring-2 focus:ring-green-700/40 sm:w-48"
               >
                 {SORTS.map((s) => (
                   <option key={s.value} value={s.value}>
@@ -210,7 +202,7 @@ export default function FindWorkPage() {
             </div>
 
             {/* filters */}
-            <div className="-mx-5 mt-4 flex gap-2 overflow-x-auto px-5 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
+            <div className="no-bar fade-x -mx-5 mt-4 flex gap-2 overflow-x-auto px-5 pb-1 sm:mx-0 sm:[mask-image:none] sm:[-webkit-mask-image:none] sm:flex-wrap sm:px-0">
               <button
                 onClick={() => setCategory("")}
                 className={`shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors ${
@@ -266,8 +258,8 @@ export default function FindWorkPage() {
         </section>
 
         {/* ------------------------------ STATS ------------------------------- */}
-        <section className="border-b border-line bg-card/40">
-          <div className="mx-auto grid w-full max-w-6xl grid-cols-2 gap-px overflow-hidden px-5 sm:grid-cols-4 sm:px-6">
+        <section className="border-b border-line bg-card/60">
+          <div className="mx-auto grid w-full max-w-6xl grid-cols-2 divide-line px-5 py-2 sm:grid-cols-4 sm:divide-x sm:px-6">
             {[
               { label: "Open tasks", value: stats ? stats.open.toLocaleString() : "—" },
               { label: "New in 24h", value: stats ? stats.newToday.toLocaleString() : "—" },
@@ -284,9 +276,11 @@ export default function FindWorkPage() {
                   : "—",
               },
             ].map((s) => (
-              <div key={s.label} className="px-1 py-5 sm:px-4">
-                <p className="font-display text-xl text-heading sm:text-2xl">{s.value}</p>
-                <p className="mt-0.5 text-[11px] uppercase tracking-[0.12em] text-ink/45">{s.label}</p>
+              <div key={s.label} className="px-1 py-4 sm:px-6">
+                <p className="tnum font-display text-[1.4rem] leading-none text-heading sm:text-[1.7rem]">
+                  {s.value}
+                </p>
+                <p className="mt-1.5 text-[10px] uppercase tracking-[0.16em] text-ink/45">{s.label}</p>
               </div>
             ))}
           </div>
@@ -392,9 +386,14 @@ export default function FindWorkPage() {
               </div>
               <Link
                 href={`/tasks/${top.id}`}
-                className="group block overflow-hidden rounded-2xl border border-green-900/25 bg-gradient-to-br from-green-950 to-green-800 p-5 text-cream shadow-[0_18px_50px_-30px_rgba(13,35,24,0.8)] transition-transform hover:-translate-y-0.5 sm:p-6"
+                className="group relative block overflow-hidden rounded-2xl bg-gradient-to-br from-green-950 via-green-900 to-green-800 p-5 text-cream shadow-[0_30px_70px_-40px_rgba(11,32,22,0.95)] ring-1 ring-inset ring-white/10 transition-all hover:-translate-y-0.5 hover:shadow-[0_40px_90px_-50px_rgba(11,32,22,1)] sm:p-7"
               >
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 opacity-[0.55] [background:radial-gradient(60%_80%_at_88%_-10%,rgba(200,150,62,0.35),transparent_65%)]"
+                />
+                <span className="gold-hairline absolute inset-x-0 top-0 opacity-70" aria-hidden="true" />
+                <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0 sm:flex-1">
                     <div className="mb-2 flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-wide text-cream/60">
                       <span className="rounded-full bg-cream/15 px-2 py-0.5">{categoryLabel(top.category)}</span>
@@ -407,29 +406,29 @@ export default function FindWorkPage() {
                         </span>
                       )}
                     </div>
-                    <h3 className="break-words font-display text-2xl leading-snug [overflow-wrap:anywhere]">
+                    <h3 className="break-words font-display text-[1.6rem] leading-snug [overflow-wrap:anywhere]">
                       {top.title}
                     </h3>
                     <p className="mt-2 line-clamp-2 text-sm text-cream/75">{top.description}</p>
                     <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-                      <span className="font-display text-2xl text-gold-400">
+                      <span className="tnum font-display text-[1.6rem] text-gold-300">
                         {formatMoney(top.budget, top.currency)}
                       </span>
                       <span className="text-cream/60">held in escrow before you start</span>
                     </div>
                   </div>
                   <div className="flex flex-row items-center gap-2 sm:flex-col sm:items-end">
-                    <div className="rounded-xl bg-cream/10 px-3 py-2 text-center">
-                      <p className="font-display text-2xl text-cream">{top.matchScore}<span className="text-sm text-cream/60">%</span></p>
+                    <div className="rounded-xl bg-cream/10 px-3.5 py-2 text-center ring-1 ring-inset ring-white/10 backdrop-blur">
+                      <p className="tnum font-display text-2xl text-cream">{top.matchScore}<span className="text-sm text-cream/60">%</span></p>
                       <p className="text-[10px] uppercase tracking-wide text-cream/60">match</p>
                     </div>
-                    <span className="rounded-full bg-cream px-4 py-2 text-xs font-semibold text-green-900">
+                    <span className="rounded-full bg-cream px-4 py-2 text-xs font-semibold text-green-900 shadow-[0_10px_24px_-16px_rgba(0,0,0,0.9)] transition-colors group-hover:bg-gold-100">
                       View &amp; apply →
                     </span>
                   </div>
                 </div>
                 {top.matchReasons.length > 0 && (
-                  <div className="mt-4 flex flex-wrap gap-1.5 border-t border-cream/15 pt-3">
+                  <div className="relative mt-4 flex flex-wrap gap-1.5 border-t border-cream/15 pt-3">
                     {top.matchReasons.map((r) => (
                       <span key={r} className="rounded-full bg-cream/10 px-2.5 py-1 text-[11px] text-cream/80">
                         ✓ {r}
@@ -444,7 +443,7 @@ export default function FindWorkPage() {
           {/* Card grid */}
           {!loading && rest.length > 0 && (
             <div
-              className={`grid gap-4 transition-opacity duration-200 md:grid-cols-2 ${
+              className={`grid grid-cols-1 gap-4 transition-opacity duration-200 md:grid-cols-2 ${
                 refreshing ? "opacity-60" : ""
               }`}
             >
@@ -455,8 +454,9 @@ export default function FindWorkPage() {
                   <Link
                     key={t.id}
                     href={`/tasks/${t.id}`}
-                    className="group flex flex-col rounded-2xl border border-line bg-card p-5 transition-all hover:-translate-y-0.5 hover:border-green-800/40 hover:shadow-[0_14px_36px_-26px_rgba(13,35,24,0.6)]"
+                    className="group relative flex flex-col overflow-hidden rounded-2xl border border-line bg-card p-5 shadow-lux-sm transition-all duration-300 hover:-translate-y-1 hover:border-gold-500/40 hover:shadow-lux-lg"
                   >
+                    <span className="gold-hairline absolute inset-x-6 top-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100" aria-hidden="true" />
                     <div className="mb-3 flex items-start justify-between gap-3">
                       <div className="flex min-w-0 flex-wrap items-center gap-1.5 text-[11px] uppercase tracking-wide">
                         <span className="rounded-full bg-green-950/5 px-2 py-0.5 font-semibold text-green-800 dark:bg-green-500/15 dark:text-green-300">
@@ -481,7 +481,7 @@ export default function FindWorkPage() {
                       </div>
                     </div>
 
-                    <h3 className="break-words font-display text-lg leading-snug text-heading [overflow-wrap:anywhere]">
+                    <h3 className="break-words font-display text-[1.12rem] leading-snug text-heading [overflow-wrap:anywhere]">
                       {t.title}
                     </h3>
                     <p className="mt-1.5 line-clamp-2 text-sm text-ink/60">{t.description}</p>
@@ -506,7 +506,7 @@ export default function FindWorkPage() {
 
                     <div className="mt-4 flex items-end justify-between gap-3 border-t border-line pt-3">
                       <div>
-                        <p className="font-display text-xl text-green-800 dark:text-green-300">
+                        <p className="tnum font-display text-[1.3rem] text-green-800 dark:text-green-300">
                           {formatMoney(t.budget, t.currency)}
                         </p>
                         <p className="mt-0.5 flex items-center gap-1 text-[11px] text-ink/45">
@@ -539,16 +539,16 @@ export default function FindWorkPage() {
 
           {/* cross-sell */}
           {!loading && tasks.length > 0 && (
-            <div className="mt-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-card/60 px-5 py-4">
-              <div>
-                <p className="font-semibold text-heading">Not seeing your kind of work?</p>
-                <p className="text-sm text-ink/60">
+            <div className="relative mt-8 flex flex-wrap items-center justify-between gap-4 overflow-hidden rounded-2xl border border-gold-500/25 bg-gradient-to-r from-gold-100/70 via-card to-card px-5 py-5 dark:from-gold-500/10 dark:via-card dark:to-card">
+              <div className="min-w-0">
+                <p className="font-display text-[1.05rem] text-heading">Not seeing your kind of work?</p>
+                <p className="mt-1 text-sm text-ink/60">
                   List a fixed-price service in the Toolbox — clients order it directly, no bidding.
                 </p>
               </div>
               <Link
                 href="/tools/new"
-                className="shrink-0 rounded-full bg-gold-500 px-5 py-2.5 text-sm font-semibold text-cream hover:opacity-90"
+                className="sheen shrink-0 rounded-full bg-gold-500 px-5 py-2.5 text-sm font-semibold text-cream shadow-[0_14px_30px_-20px_rgba(169,119,44,0.9)] transition-transform hover:-translate-y-0.5"
               >
                 List a service
               </Link>

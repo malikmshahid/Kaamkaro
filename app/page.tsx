@@ -270,62 +270,56 @@ export default async function Home() {
       <Navbar />
       <main className="flex-1">
         {/* ------------------------------- HERO ------------------------------- */}
-        <section className="relative overflow-hidden border-b border-line">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background:
-                "radial-gradient(60% 70% at 82% 8%, rgba(200,150,62,0.16) 0%, rgba(200,150,62,0) 60%), radial-gradient(50% 60% at 8% 90%, rgba(18,58,38,0.10) 0%, rgba(18,58,38,0) 65%)",
-            }}
-          />
+        <section className="aurora grain relative isolate overflow-hidden border-b border-line">
           <div className="relative mx-auto grid w-full max-w-6xl items-center gap-14 px-5 pb-16 pt-14 sm:px-6 md:grid-cols-[1.05fr_0.95fr] md:pb-24 md:pt-20">
             <div>
-              <span className="inline-flex items-center gap-2 rounded-full border border-gold-500/40 bg-gold-100/50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-gold-500 dark:bg-gold-500/10">
+              <span className="reveal inline-flex items-center gap-2.5 rounded-full border border-gold-500/35 bg-card/70 px-3.5 py-1.5 text-[10.5px] font-semibold uppercase tracking-[0.18em] text-gold-600 shadow-lux-sm backdrop-blur dark:text-gold-300">
                 <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gold-500 opacity-70" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-gold-500" />
+                  <span className="pulse-dot relative inline-flex h-1.5 w-1.5 rounded-full bg-gold-500" />
                 </span>
                 Escrow protected · PKR first
               </span>
 
-              <h1 className="mt-6 font-display text-[2.6rem] leading-[1.04] tracking-tight text-heading sm:text-6xl">
+              <h1 className="reveal reveal-1 mt-7 font-display text-[2.75rem] font-medium leading-[0.98] tracking-[-0.02em] text-heading sm:text-[4.25rem]">
                 Post the work.
                 <br />
-                <span className="text-green-800 dark:text-gold-400">Pakistan</span> gets it done.
+                <span className="gold-text">Pakistan</span> gets it done.
               </h1>
 
-              <p className="mt-6 max-w-xl text-[17px] leading-relaxed text-ink/70">
+              <p className="reveal reveal-2 mt-7 max-w-xl text-[17px] leading-[1.7] text-ink/70">
                 A real marketplace for local work: post a task, or order a
                 ready-made service from a verified provider. The budget is
                 locked in escrow until you confirm the job is done — and every
                 delivery gets an AI check before it reaches you.
               </p>
 
-              <div className="mt-8 flex flex-wrap items-center gap-3">
+              <div className="reveal reveal-3 mt-9 flex flex-wrap items-center gap-3">
                 <Link
                   href="/tasks/new"
-                  className="inline-flex items-center gap-2 rounded-full bg-green-900 px-6 py-3 text-cream shadow-sm transition-colors hover:bg-green-800"
+                  className="sheen group inline-flex items-center gap-2 rounded-full bg-green-900 px-7 py-3.5 text-sm font-semibold text-cream shadow-[0_16px_34px_-20px_rgba(11,32,22,0.85)] ring-1 ring-inset ring-white/10 transition-all hover:-translate-y-0.5 hover:bg-green-800"
                 >
                   Post a task — free
                   <IconArrow />
                 </Link>
                 <Link
                   href="/tasks"
-                  className="rounded-full border border-green-900/30 px-6 py-3 text-green-900 transition-colors hover:border-green-900 hover:bg-green-950/5 dark:text-heading dark:hover:bg-white/5"
+                  className="glass inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-sm font-semibold text-heading transition-all hover:-translate-y-0.5 hover:bg-card"
                 >
                   Browse open tasks
                 </Link>
               </div>
 
-              <p className="mt-4 text-sm text-ink/50">
+              <p className="reveal reveal-3 mt-4 text-sm text-ink/50">
                 or{" "}
-                <Link href="/tools" className="font-semibold text-gold-500 underline-offset-4 hover:underline">
+                <Link
+                  href="/tools"
+                  className="font-semibold text-gold-600 underline decoration-gold-500/40 decoration-1 underline-offset-4 transition-colors hover:text-gold-500 dark:text-gold-400"
+                >
                   order a ready-made service from the Toolbox
                 </Link>
               </p>
 
-              <ul className="mt-8 grid gap-2 text-sm text-ink/60 sm:grid-cols-2">
+              <ul className="reveal reveal-4 mt-9 grid gap-x-4 gap-y-2.5 text-sm text-ink/60 sm:grid-cols-2">
                 {[
                   "No signup fee, no monthly plan",
                   "Payment released only when you confirm",
@@ -333,9 +327,9 @@ export default async function Home() {
                   "Works for AI agents too (API keys)",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2">
-                    <span className="mt-[3px] text-green-700">
-                      <svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true">
-                        <path d="m3 8.5 3 3 7-7" {...stroke} strokeWidth={2} />
+                    <span className="mt-[3px] flex h-[17px] w-[17px] shrink-0 items-center justify-center rounded-full bg-green-900/8 text-green-700 dark:bg-green-500/15 dark:text-green-300">
+                      <svg width="11" height="11" viewBox="0 0 16 16" aria-hidden="true">
+                        <path d="m3 8.5 3 3 7-7" {...stroke} strokeWidth={2.4} />
                       </svg>
                     </span>
                     {item}
@@ -345,17 +339,22 @@ export default async function Home() {
             </div>
 
             {/* Live product mock — real numbers, not decoration */}
-            <div className="relative">
+            <div className="reveal reveal-3 relative">
               <div
                 aria-hidden="true"
-                className="absolute -inset-4 rounded-[28px] border border-line/60 bg-card/40"
+                className="absolute -inset-3 -z-10 rounded-[2rem] border border-line/70 bg-card/30"
               />
-              <div className="relative rounded-2xl border border-line bg-card p-5 shadow-[0_18px_50px_-24px_rgba(13,35,24,0.45)]">
+              <div
+                aria-hidden="true"
+                className="absolute -inset-8 -z-10 rounded-[2.5rem] bg-[radial-gradient(60%_60%_at_70%_20%,rgba(200,150,62,0.18),transparent_70%)] blur-2xl"
+              />
+              <div className="card-lux relative overflow-hidden p-5">
+                <div className="gold-hairline absolute inset-x-5 top-0" aria-hidden="true" />
                 <div className="flex items-center justify-between">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink/40">
+                  <p className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-ink/40">
                     {stats.recentTasks.length > 0 ? "Open right now" : "What a task looks like"}
                   </p>
-                  <span className="rounded-full bg-green-950/5 px-2 py-0.5 text-[11px] font-semibold text-green-800">
+                  <span className="rounded-full bg-green-950/[0.06] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-green-800 dark:bg-green-500/15 dark:text-green-300">
                     {stats.openTasks > 0
                       ? `${stats.openTasks} live`
                       : "Preview"}
@@ -395,13 +394,13 @@ export default async function Home() {
                     <Link
                       key={task.id}
                       href={task.id.startsWith("demo") ? "/tasks" : `/tasks/${task.id}`}
-                      className="block rounded-xl border border-line bg-paper/60 p-3.5 transition-colors hover:border-green-800/40 hover:bg-paper"
+                      className="group block rounded-xl border border-line/80 bg-surface-2/60 p-3.5 transition-all hover:-translate-y-0.5 hover:border-gold-500/40 hover:bg-card hover:shadow-lux-sm"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <p className="text-sm font-semibold leading-snug text-heading">
                           {task.title}
                         </p>
-                        <span className="shrink-0 text-sm font-semibold text-green-800">
+                        <span className="tnum shrink-0 font-display text-[15px] font-semibold text-green-800 dark:text-green-300">
                           {formatMoney(task.budget, task.currency)}
                         </span>
                       </div>
@@ -413,7 +412,7 @@ export default async function Home() {
                   ))}
                 </div>
 
-                <div className="mt-4 flex items-center gap-2 rounded-xl bg-green-950 px-3.5 py-3 text-cream">
+                <div className="mt-4 flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-green-950 to-green-900 px-3.5 py-3 text-cream ring-1 ring-inset ring-white/10">
                   <span className="text-gold-400">
                     <IconShield />
                   </span>
@@ -437,15 +436,15 @@ export default async function Home() {
         {/* Real numbers only. A brand-new marketplace showing "0 · 0 · 0 · 0"
             looks broken, so when there's no activity yet we show the four
             promises instead — same height, never a lie. */}
-        <section className="border-b border-line bg-card/50">
-          <div className="mx-auto grid w-full max-w-6xl grid-cols-2 gap-6 px-5 py-8 sm:px-6 md:grid-cols-4">
+        <section className="relative border-b border-line bg-card/60">
+          <div className="mx-auto grid w-full max-w-6xl grid-cols-2 divide-line px-5 py-9 sm:px-6 md:grid-cols-4 md:divide-x">
             {stats.openTasks + stats.toolbox + stats.cities > 0
               ? numbers.map((n) => (
-                  <div key={n.label}>
-                    <p className="font-display text-3xl text-heading">
+                  <div key={n.label} className="px-1 py-2 md:px-6 md:py-0">
+                    <p className="tnum font-display text-[2rem] leading-none text-heading">
                       {n.value.toLocaleString()}
                     </p>
-                    <p className="mt-1 text-xs uppercase tracking-[0.12em] text-ink/45">
+                    <p className="mt-2 text-[10.5px] uppercase tracking-[0.16em] text-ink/45">
                       {n.label}
                     </p>
                   </div>
@@ -456,8 +455,10 @@ export default async function Home() {
                   { icon: <IconWallet />, label: "PKR first, no fee to post" },
                   { icon: <IconAgent />, label: "Open to AI agents" },
                 ].map((item) => (
-                  <div key={item.label} className="flex items-center gap-3">
-                    <span className="rounded-lg bg-green-950/5 p-2 text-green-800">{item.icon}</span>
+                  <div key={item.label} className="flex items-center gap-3 px-1 py-2 md:px-6 md:py-0">
+                    <span className="rounded-xl bg-green-950/[0.06] p-2 text-green-800 dark:bg-green-500/15 dark:text-green-300">
+                      {item.icon}
+                    </span>
                     <p className="text-sm font-medium text-heading">{item.label}</p>
                   </div>
                 ))}
@@ -466,39 +467,42 @@ export default async function Home() {
 
         {/* ----------------------------- CATEGORIES ---------------------------- */}
         <section className="border-b border-line">
-          <div className="mx-auto w-full max-w-6xl px-5 py-14 sm:px-6 md:py-16">
+          <div className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-6 md:py-20">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold-500">
+                <p className="text-[10.5px] font-semibold uppercase tracking-[0.2em] text-gold-600 dark:text-gold-400">
                   What gets done here
                 </p>
-                <h2 className="mt-2 font-display text-3xl text-heading sm:text-4xl">
+                <h2 className="mt-2.5 font-display text-[1.9rem] leading-tight text-heading sm:text-[2.6rem]">
                   Seven kinds of work, one place
                 </h2>
               </div>
               <Link
                 href="/tasks"
-                className="inline-flex items-center gap-2 text-sm font-semibold text-green-800 hover:underline"
+                className="group inline-flex items-center gap-1.5 border-b border-green-800/25 pb-0.5 text-sm font-semibold text-green-800 transition-colors hover:border-green-800 dark:text-green-300 dark:border-green-300/30"
               >
-                See everything <IconArrow />
+                See everything
+                <span className="transition-transform group-hover:translate-x-0.5">
+                  <IconArrow />
+                </span>
               </Link>
             </div>
 
-            <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            <div className="mt-9 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
               {CATEGORIES.map((cat) => (
                 <Link
                   key={cat.value}
                   href={`/tasks?category=${cat.value}`}
-                  className="group flex items-center gap-3 rounded-xl border border-line bg-card px-4 py-4 transition-all hover:-translate-y-0.5 hover:border-green-800/40 hover:shadow-sm"
+                  className="lift group flex items-center gap-3 rounded-2xl border border-line bg-card px-4 py-4 shadow-lux-sm"
                 >
-                  <span className="rounded-lg bg-green-950/5 p-2 text-green-800 transition-colors group-hover:bg-green-900 group-hover:text-cream">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-green-950/[0.07] to-green-950/[0.02] text-green-800 ring-1 ring-inset ring-green-900/10 transition-all duration-300 group-hover:from-green-900 group-hover:to-green-800 group-hover:text-cream group-hover:ring-green-900 dark:from-green-500/15 dark:to-green-500/5 dark:text-green-300">
                     {CATEGORY_ICONS[cat.value]}
                   </span>
-                  <span>
-                    <span className="block text-sm font-semibold text-heading">
+                  <span className="min-w-0">
+                    <span className="block truncate text-[13.5px] font-semibold text-heading">
                       {cat.label}
                     </span>
-                    <span className="block text-[11px] text-ink/40">
+                    <span className="mt-0.5 block text-[11px] text-ink/40">
                       {stats.categoryCounts[cat.value]
                         ? `${stats.categoryCounts[cat.value]} open`
                         : "Open for tasks"}
@@ -511,16 +515,16 @@ export default async function Home() {
         </section>
 
         {/* ---------------------------- HOW IT WORKS --------------------------- */}
-        <section className="border-b border-line bg-card/50">
-          <div className="mx-auto w-full max-w-6xl px-5 py-14 sm:px-6 md:py-16">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold-500">
+        <section className="relative border-b border-line bg-surface-2/40">
+          <div className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-6 md:py-20">
+            <p className="text-[10.5px] font-semibold uppercase tracking-[0.2em] text-gold-600 dark:text-gold-400">
               Three steps, no guesswork
             </p>
-            <h2 className="mt-2 max-w-2xl font-display text-3xl text-heading sm:text-4xl">
+            <h2 className="mt-2.5 max-w-2xl font-display text-[1.9rem] leading-tight text-heading sm:text-[2.6rem]">
               From “I need this done” to paid — without chasing anyone
             </h2>
 
-            <div className="mt-10 grid gap-6 md:grid-cols-3">
+            <div className="mt-11 grid grid-cols-1 gap-5 md:grid-cols-3">
               {[
                 {
                   step: "01",
@@ -541,14 +545,23 @@ export default async function Home() {
                   icon: <IconWallet />,
                 },
               ].map((item) => (
-                <div key={item.step} className="relative rounded-2xl border border-line bg-card p-6">
-                  <span className="absolute right-5 top-4 font-display text-4xl text-line">
+                <div
+                  key={item.step}
+                  className="lift relative overflow-hidden rounded-2xl border border-line bg-card p-6 shadow-lux-sm"
+                >
+                  <span className="gold-hairline absolute inset-x-6 top-0" aria-hidden="true" />
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -right-1 -top-3 font-display text-[5.5rem] leading-none text-heading/[0.045] dark:text-white/[0.05]"
+                  >
                     {item.step}
                   </span>
-                  <span className="inline-flex rounded-xl bg-green-950/5 p-2.5 text-green-800">
+                  <span className="inline-flex rounded-xl bg-green-950/[0.06] p-2.5 text-green-800 ring-1 ring-inset ring-green-900/10 dark:bg-green-500/15 dark:text-green-300">
                     {item.icon}
                   </span>
-                  <h3 className="mt-4 font-display text-xl text-heading">{item.title}</h3>
+                  <h3 className="mt-4 font-display text-[1.15rem] leading-snug text-heading">
+                    {item.title}
+                  </h3>
                   <p className="mt-2 text-sm leading-relaxed text-ink/65">{item.body}</p>
                 </div>
               ))}
@@ -558,22 +571,22 @@ export default async function Home() {
 
         {/* ------------------------------ AI EDGE ------------------------------ */}
         <section className="border-b border-line">
-          <div className="mx-auto w-full max-w-6xl px-5 py-14 sm:px-6 md:py-16">
+          <div className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-6 md:py-20">
             <div className="grid gap-10 md:grid-cols-[0.85fr_1.15fr] md:items-start">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold-500">
+                <p className="text-[10.5px] font-semibold uppercase tracking-[0.2em] text-gold-600 dark:text-gold-400">
                   The unfair advantage
                 </p>
-                <h2 className="mt-2 font-display text-3xl text-heading sm:text-4xl">
+                <h2 className="mt-2.5 font-display text-[1.9rem] leading-tight text-heading sm:text-[2.6rem]">
                   AI that does the boring half of the job
                 </h2>
-                <p className="mt-4 text-ink/65 leading-relaxed">
+                <p className="mt-4 leading-relaxed text-ink/65">
                   Not a chatbot bolted onto a form. Four places where AI quietly
                   removes the friction that makes normal marketplaces annoying.
                 </p>
                 <Link
                   href="/signup"
-                  className="mt-6 inline-flex items-center gap-2 rounded-full bg-green-900 px-5 py-2.5 text-sm text-cream transition-colors hover:bg-green-800"
+                  className="sheen mt-6 inline-flex items-center gap-2 rounded-full bg-green-900 px-5 py-2.5 text-sm font-semibold text-cream shadow-lux-sm ring-1 ring-inset ring-white/10 transition-all hover:-translate-y-0.5 hover:bg-green-800"
                 >
                   Try it free <IconArrow />
                 </Link>
@@ -605,28 +618,36 @@ export default async function Home() {
                 ].map((card) => (
                   <div
                     key={card.title}
-                    className={`rounded-2xl border p-5 transition-shadow hover:shadow-sm ${
+                    className={`group relative overflow-hidden rounded-2xl p-5 transition-all duration-300 hover:-translate-y-0.5 ${
                       card.highlight
-                        ? "border-green-800/30 bg-green-950 text-cream"
-                        : "border-line bg-card"
+                        ? "bg-gradient-to-br from-green-950 to-green-900 text-cream shadow-[0_24px_50px_-32px_rgba(11,32,22,0.9)] ring-1 ring-inset ring-white/10"
+                        : "border border-line bg-card shadow-lux-sm hover:shadow-lux"
                     }`}
                   >
+                    {card.highlight && (
+                      <span
+                        aria-hidden="true"
+                        className="grid-veil pointer-events-none absolute inset-0 opacity-60"
+                      />
+                    )}
                     <span
-                      className={`inline-flex rounded-lg p-2 ${
-                        card.highlight ? "bg-cream/10 text-gold-400" : "bg-green-950/5 text-green-800"
+                      className={`relative inline-flex rounded-lg p-2 ${
+                        card.highlight
+                          ? "bg-cream/10 text-gold-400 ring-1 ring-inset ring-gold-400/20"
+                          : "bg-green-950/[0.06] text-green-800 dark:bg-green-500/15 dark:text-green-300"
                       }`}
                     >
                       {card.icon}
                     </span>
                     <h3
-                      className={`mt-3 font-display text-lg ${
+                      className={`relative mt-3 font-display text-[1.1rem] leading-snug ${
                         card.highlight ? "text-cream" : "text-heading"
                       }`}
                     >
                       {card.title}
                     </h3>
                     <p
-                      className={`mt-1.5 text-sm leading-relaxed ${
+                      className={`relative mt-1.5 text-sm leading-relaxed ${
                         card.highlight ? "text-cream/70" : "text-ink/65"
                       }`}
                     >
@@ -640,17 +661,26 @@ export default async function Home() {
         </section>
 
         {/* ------------------------------- ESCROW ------------------------------ */}
-        <section className="bg-green-950 text-cream">
-          <div className="mx-auto w-full max-w-6xl px-5 py-14 sm:px-6 md:py-16">
-            <div className="grid gap-10 md:grid-cols-[1fr_1fr] md:items-center">
+        <section className="grain relative isolate overflow-hidden bg-green-950 text-cream">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 -z-10"
+            style={{
+              background:
+                "radial-gradient(60% 80% at 82% -10%, rgba(200,150,62,0.28) 0%, rgba(200,150,62,0) 62%), radial-gradient(50% 60% at 0% 110%, rgba(60,154,103,0.16) 0%, rgba(60,154,103,0) 70%)",
+            }}
+          />
+          <div className="gold-hairline absolute inset-x-0 top-0 opacity-60" aria-hidden="true" />
+          <div className="relative mx-auto w-full max-w-6xl px-5 py-16 sm:px-6 md:py-24">
+            <div className="grid gap-12 md:grid-cols-[1fr_1fr] md:items-center">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold-400">
+                <p className="text-[10.5px] font-semibold uppercase tracking-[0.2em] text-gold-400">
                   Trust, made mechanical
                 </p>
-                <h2 className="mt-2 font-display text-3xl sm:text-4xl">
+                <h2 className="mt-2.5 font-display text-[1.9rem] leading-tight sm:text-[2.6rem]">
                   Nobody has to trust a stranger
                 </h2>
-                <p className="mt-4 max-w-lg text-cream/65 leading-relaxed">
+                <p className="mt-4 max-w-lg leading-relaxed text-cream/65">
                   Every task runs through the same three checks — whether the
                   client is a person in Karachi or an AI agent in a data centre.
                 </p>
@@ -671,11 +701,11 @@ export default async function Home() {
                     },
                   ].map((item, i) => (
                     <div key={item.title} className="flex gap-4">
-                      <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-cream/10 text-[11px] font-semibold text-gold-400">
+                      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cream/[0.07] text-[11px] font-semibold text-gold-300 ring-1 ring-inset ring-gold-400/25">
                         {i + 1}
                       </span>
                       <div>
-                        <p className="font-medium">{item.title}</p>
+                        <p className="font-medium text-cream">{item.title}</p>
                         <p className="mt-1 text-sm leading-relaxed text-cream/60">{item.body}</p>
                       </div>
                     </div>
@@ -684,8 +714,9 @@ export default async function Home() {
               </div>
 
               {/* money-flow diagram */}
-              <div className="rounded-2xl border border-cream/15 bg-cream/[0.04] p-6">
-                <p className="text-xs uppercase tracking-[0.14em] text-cream/40">
+              <div className="relative overflow-hidden rounded-[1.4rem] border border-cream/12 bg-cream/[0.045] p-6 shadow-[0_40px_80px_-50px_rgba(0,0,0,0.9)] backdrop-blur-sm">
+                <div className="grid-veil pointer-events-none absolute inset-0 opacity-70" aria-hidden="true" />
+                <p className="relative text-[10.5px] uppercase tracking-[0.18em] text-cream/40">
                   Where the money sits
                 </p>
                 <div className="mt-5 space-y-3">
@@ -696,10 +727,10 @@ export default async function Home() {
                   ].map((row) => (
                     <div
                       key={row.label}
-                      className={`flex items-center justify-between rounded-xl border px-4 py-3 ${
+                      className={`relative flex flex-wrap items-center justify-between gap-2 rounded-xl border px-4 py-3.5 transition-colors ${
                         row.tone === "active"
-                          ? "border-gold-400/50 bg-gold-400/10"
-                          : "border-cream/15"
+                          ? "border-gold-400/45 bg-gradient-to-r from-gold-400/[0.16] to-gold-400/[0.06] shadow-[0_10px_30px_-22px_rgba(217,172,95,0.9)]"
+                          : "border-cream/12 bg-cream/[0.02]"
                       }`}
                     >
                       <span className="text-sm font-medium">{row.label}</span>
@@ -707,7 +738,7 @@ export default async function Home() {
                     </div>
                   ))}
                 </div>
-                <p className="mt-5 text-[11px] leading-relaxed text-cream/40">
+                <p className="relative mt-5 text-[11px] leading-relaxed text-cream/40">
                   Card and wallet payouts are being rolled out; escrow logic is
                   already live on every task.
                 </p>
@@ -718,13 +749,13 @@ export default async function Home() {
 
         {/* ------------------------------ MARKETPLACE -------------------------- */}
         <section className="border-b border-line">
-          <div className="mx-auto w-full max-w-6xl px-5 py-14 sm:px-6 md:py-16">
+          <div className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-6 md:py-20">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold-500">
+                <p className="text-[10.5px] font-semibold uppercase tracking-[0.2em] text-gold-600 dark:text-gold-400">
                   Live on the platform
                 </p>
-                <h2 className="mt-2 font-display text-3xl text-heading sm:text-4xl">
+                <h2 className="mt-2.5 font-display text-[1.9rem] leading-tight text-heading sm:text-[2.6rem]">
                   Fresh tasks &amp; ready-made services
                 </h2>
               </div>
@@ -739,11 +770,11 @@ export default async function Home() {
               </div>
             </div>
 
-            <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
-              <div className="min-w-0 rounded-2xl border border-line bg-card p-5">
-                <div className="mb-4 flex items-center justify-between">
-                  <p className="text-sm font-semibold text-heading">Open tasks</p>
-                  <span className="text-[11px] uppercase tracking-wide text-ink/40">
+            <div className="mt-9 grid grid-cols-1 gap-5 md:grid-cols-2">
+              <div className="card-lux min-w-0 p-5">
+                <div className="mb-4 flex items-center justify-between border-b border-line/70 pb-3">
+                  <p className="font-display text-[1.05rem] text-heading">Open tasks</p>
+                  <span className="rounded-full bg-green-950/[0.06] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-green-800 dark:bg-green-500/15 dark:text-green-300">
                     {stats.openTasks} live
                   </span>
                 </div>
@@ -765,7 +796,7 @@ export default async function Home() {
                       <li key={t.id}>
                         <Link
                           href={`/tasks/${t.id}`}
-                          className="flex items-center justify-between gap-3 rounded-xl border border-line px-4 py-3 transition-colors hover:border-green-800/40 hover:bg-paper/60"
+                          className="flex items-center justify-between gap-3 rounded-xl border border-transparent px-3 py-3 transition-all hover:border-line hover:bg-surface-2/60"
                         >
                           <span className="min-w-0">
                             <span className="block truncate text-sm font-medium text-heading">
@@ -776,7 +807,7 @@ export default async function Home() {
                               {t.city ? ` · ${t.city}` : ""}
                             </span>
                           </span>
-                          <span className="shrink-0 text-sm font-semibold text-green-800">
+                          <span className="tnum shrink-0 font-display text-[15px] font-semibold text-green-800 dark:text-green-300">
                             {formatMoney(t.budget, t.currency)}
                           </span>
                         </Link>
@@ -786,10 +817,10 @@ export default async function Home() {
                 )}
               </div>
 
-              <div className="min-w-0 rounded-2xl border border-line bg-card p-5">
-                <div className="mb-4 flex items-center justify-between">
-                  <p className="text-sm font-semibold text-heading">The Toolbox</p>
-                  <span className="text-[11px] uppercase tracking-wide text-ink/40">
+              <div className="card-lux min-w-0 p-5">
+                <div className="mb-4 flex items-center justify-between border-b border-line/70 pb-3">
+                  <p className="font-display text-[1.05rem] text-heading">The Toolbox</p>
+                  <span className="rounded-full bg-gold-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-gold-600 dark:bg-gold-500/15 dark:text-gold-300">
                     {stats.toolbox} services
                   </span>
                 </div>
@@ -812,7 +843,7 @@ export default async function Home() {
                       <li key={t.id}>
                         <Link
                           href={`/tools/${t.id}`}
-                          className="flex items-center justify-between gap-3 rounded-xl border border-line px-4 py-3 transition-colors hover:border-gold-500/50 hover:bg-paper/60"
+                          className="flex items-center justify-between gap-3 rounded-xl border border-transparent px-3 py-3 transition-all hover:border-line hover:bg-surface-2/60"
                         >
                           <span className="min-w-0">
                             <span className="block truncate text-sm font-medium text-heading">
@@ -822,7 +853,7 @@ export default async function Home() {
                               {categoryLabel(t.category)} · {t.deliveryDays} day delivery
                             </span>
                           </span>
-                          <span className="shrink-0 text-sm font-semibold text-green-800">
+                          <span className="tnum shrink-0 font-display text-[15px] font-semibold text-green-800 dark:text-green-300">
                             {formatMoney(t.price, t.currency)}
                           </span>
                         </Link>
@@ -836,34 +867,38 @@ export default async function Home() {
         </section>
 
         {/* ------------------------------ FOR AGENTS --------------------------- */}
-        <section className="border-b border-line bg-card/50">
-          <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-8 px-5 py-14 sm:px-6 md:grid-cols-2 md:items-center md:py-16">
+        <section className="border-b border-line bg-surface-2/40">
+          <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-10 px-5 py-16 sm:px-6 md:grid-cols-2 md:items-center md:py-20">
             <div className="min-w-0">
-              <span className="inline-flex items-center gap-2 rounded-full border border-line bg-card px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-green-800">
+              <span className="inline-flex items-center gap-2 rounded-full border border-line bg-card px-3 py-1.5 text-[10.5px] font-semibold uppercase tracking-[0.16em] text-green-800 shadow-lux-sm dark:text-green-300">
                 <IconAgent /> For developers
               </span>
-              <h2 className="mt-4 font-display text-3xl text-heading sm:text-4xl">
+              <h2 className="mt-4 font-display text-[1.9rem] leading-tight text-heading sm:text-[2.6rem]">
                 Let your AI agent hire a real person
               </h2>
-              <p className="mt-4 text-ink/65 leading-relaxed">
+              <p className="mt-4 leading-relaxed text-ink/65">
                 Generate an API key, then post and track tasks programmatically.
                 An agent can order a courier, verify a shopfront with a photo, or
                 get a document typed — with the same escrow protection humans get.
               </p>
               <Link
                 href="/settings"
-                className="mt-6 inline-flex items-center gap-2 rounded-full border border-green-900/30 px-5 py-2.5 text-sm font-semibold text-green-800 transition-colors hover:bg-green-950/5 dark:text-heading"
+                className="mt-6 inline-flex items-center gap-2 rounded-full border border-green-900/25 bg-card px-5 py-2.5 text-sm font-semibold text-green-800 shadow-lux-sm transition-all hover:-translate-y-0.5 hover:border-green-900/50 dark:text-green-300"
               >
                 Get an API key <IconArrow />
               </Link>
             </div>
-            <div className="min-w-0 overflow-hidden rounded-2xl border border-line bg-green-950 p-5 text-cream shadow-sm">
-              <div className="mb-3 flex gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-cream/20" />
-                <span className="h-2.5 w-2.5 rounded-full bg-cream/20" />
-                <span className="h-2.5 w-2.5 rounded-full bg-cream/20" />
+            <div className="relative min-w-0 overflow-hidden rounded-[1.4rem] bg-gradient-to-br from-green-950 to-green-900 p-5 text-cream shadow-[0_40px_80px_-50px_rgba(11,32,22,0.95)] ring-1 ring-inset ring-white/10">
+              <div className="grid-veil pointer-events-none absolute inset-0 opacity-60" aria-hidden="true" />
+              <div className="relative mb-3 flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-[#e0615a]/70" />
+                <span className="h-2.5 w-2.5 rounded-full bg-gold-400/70" />
+                <span className="h-2.5 w-2.5 rounded-full bg-green-500/70" />
+                <span className="ml-2 text-[10px] uppercase tracking-[0.16em] text-cream/35">
+                  agent terminal
+                </span>
               </div>
-              <pre className="overflow-x-auto text-[12.5px] leading-relaxed text-cream/85">
+              <pre className="relative overflow-x-auto text-[12.5px] leading-relaxed text-cream/85">
 {`curl -X POST https://kaamkaro.ai/api/agent/tasks \\
   -H "Authorization: Bearer $KAAMKARO_KEY" \\
   -H "Content-Type: application/json" \\
@@ -875,7 +910,7 @@ export default async function Home() {
     "city": "Islamabad"
   }'`}
               </pre>
-              <p className="mt-3 text-[11px] text-cream/40">
+              <p className="relative mt-3 text-[11px] text-cream/40">
                 Escrow, AI proof check and payouts run automatically.
               </p>
             </div>
@@ -884,14 +919,14 @@ export default async function Home() {
 
         {/* --------------------------------- FAQ ------------------------------- */}
         <section className="border-b border-line">
-          <div className="mx-auto w-full max-w-4xl px-5 py-14 sm:px-6 md:py-16">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold-500">
+          <div className="mx-auto w-full max-w-4xl px-5 py-16 sm:px-6 md:py-20">
+            <p className="text-[10.5px] font-semibold uppercase tracking-[0.2em] text-gold-600 dark:text-gold-400">
               Straight answers
             </p>
-            <h2 className="mt-2 font-display text-3xl text-heading sm:text-4xl">
+            <h2 className="mt-2.5 font-display text-[1.9rem] leading-tight text-heading sm:text-[2.6rem]">
               Questions people actually ask
             </h2>
-            <div className="mt-8 divide-y divide-line border-y border-line">
+            <div className="mt-9 divide-y divide-line/80 border-y border-line/80">
               {[
                 {
                   q: "When exactly does the provider get paid?",
@@ -914,16 +949,16 @@ export default async function Home() {
                   a: "Yes — the platform is PKR-first but supports other currencies, so overseas clients can post work for Pakistani providers.",
                 },
               ].map((item) => (
-                <details key={item.q} className="group py-4">
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-[15px] font-semibold text-heading">
+                <details key={item.q} className="group py-4.5 transition-colors hover:bg-surface-2/40">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-1 text-[15px] font-semibold text-heading">
                     {item.q}
-                    <span className="text-gold-500 transition-transform group-open:rotate-45">
+                    <span className="shrink-0 rounded-full border border-line p-1 text-gold-500 transition-transform group-open:rotate-45 group-open:border-gold-500/50">
                       <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
                         <path d="M8 3v10M3 8h10" {...stroke} strokeWidth={1.8} />
                       </svg>
                     </span>
                   </summary>
-                  <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink/65">{item.a}</p>
+                  <p className="mt-3 max-w-2xl px-1 text-sm leading-relaxed text-ink/65">{item.a}</p>
                 </details>
               ))}
             </div>
@@ -931,35 +966,39 @@ export default async function Home() {
         </section>
 
         {/* ------------------------------ FINAL CTA ---------------------------- */}
-        <section className="relative overflow-hidden bg-green-900 text-cream">
+        <section className="grain relative isolate overflow-hidden bg-green-900 text-cream">
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0"
+            className="pointer-events-none absolute inset-0 -z-10"
             style={{
               background:
-                "radial-gradient(50% 90% at 50% 0%, rgba(217,172,95,0.22) 0%, rgba(217,172,95,0) 70%)",
+                "radial-gradient(58% 95% at 50% -12%, rgba(217,172,95,0.34) 0%, rgba(217,172,95,0) 68%), radial-gradient(40% 60% at 100% 100%, rgba(60,154,103,0.22) 0%, rgba(60,154,103,0) 70%)",
             }}
           />
-          <div className="relative mx-auto w-full max-w-4xl px-5 py-16 text-center sm:px-6 md:py-20">
-            <h2 className="font-display text-3xl leading-tight sm:text-5xl">
+          <div className="gold-hairline absolute inset-x-0 top-0 opacity-70" aria-hidden="true" />
+          <div className="relative mx-auto w-full max-w-4xl px-5 py-20 text-center sm:px-6 md:py-28">
+            <p className="text-[10.5px] font-semibold uppercase tracking-[0.22em] text-gold-300">
+              Start in two minutes
+            </p>
+            <h2 className="mt-4 font-display text-[2.1rem] leading-[1.05] tracking-[-0.015em] sm:text-[3.4rem]">
               Post the work.
               <br />
               Get it done today.
             </h2>
-            <p className="mx-auto mt-4 max-w-xl text-cream/70">
+            <p className="mx-auto mt-5 max-w-xl leading-relaxed text-cream/70">
               Free to post. Escrow protected. AI-checked. Built in Pakistan, for
               Pakistan.
             </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <div className="mt-9 flex flex-wrap justify-center gap-3">
               <Link
                 href="/signup"
-                className="rounded-full bg-cream px-7 py-3 font-semibold text-green-900 transition-colors hover:bg-gold-100"
+                className="sheen rounded-full bg-cream px-7 py-3.5 text-sm font-semibold text-green-900 shadow-[0_18px_40px_-24px_rgba(0,0,0,0.9)] transition-all hover:-translate-y-0.5 hover:bg-gold-100"
               >
                 Create a free account
               </Link>
               <Link
                 href="/tasks"
-                className="rounded-full border border-cream/40 px-7 py-3 text-cream transition-colors hover:bg-cream/10"
+                className="rounded-full border border-cream/30 px-7 py-3.5 text-sm font-semibold text-cream backdrop-blur transition-all hover:-translate-y-0.5 hover:border-cream/60 hover:bg-cream/10"
               >
                 Browse tasks first
               </Link>
@@ -970,7 +1009,8 @@ export default async function Home() {
 
       {/* --------------------------------- FOOTER -------------------------------- */}
       <footer className="border-t border-line bg-paper">
-        <div className="mx-auto grid w-full max-w-6xl gap-8 px-5 py-12 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
+        <div className="gold-hairline opacity-50" aria-hidden="true" />
+        <div className="mx-auto grid w-full max-w-6xl gap-8 px-5 py-14 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
           <div>
             <p className="font-display text-xl text-heading">KaamKaro</p>
             <p className="mt-3 max-w-xs text-sm leading-relaxed text-ink/60">

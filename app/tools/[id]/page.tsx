@@ -155,17 +155,12 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
     <>
       <Navbar />
       <main className="flex-1">
-        <section className="relative overflow-hidden border-b border-line">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background:
-                "radial-gradient(50% 60% at 92% 0%, rgba(200,150,62,0.16) 0%, rgba(200,150,62,0) 62%), radial-gradient(45% 60% at 0% 100%, rgba(18,58,38,0.09) 0%, rgba(18,58,38,0) 65%)",
-            }}
-          />
-          <div className="relative mx-auto w-full max-w-6xl px-5 pb-6 pt-8 sm:px-6 sm:pt-10">
-            <Link href="/tools" className="text-xs text-ink/50 hover:text-green-700">
+        <section className="aurora grain relative isolate overflow-hidden border-b border-line">
+          <div className="relative mx-auto w-full max-w-6xl px-5 pb-7 pt-9 sm:px-6 sm:pt-12">
+            <Link
+              href="/tools"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-ink/50 transition-colors hover:text-green-700"
+            >
               ← The Toolbox
             </Link>
             <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.12em]">
@@ -180,11 +175,11 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
                 🔒 escrow protected
               </span>
             </div>
-            <h1 className="mt-3 max-w-3xl break-words font-display text-2xl leading-tight text-heading [overflow-wrap:anywhere] sm:text-4xl">
+            <h1 className="mt-3.5 max-w-3xl break-words font-display text-[1.75rem] font-medium leading-[1.08] tracking-[-0.015em] text-heading [overflow-wrap:anywhere] sm:text-[2.7rem]">
               {tool.title}
             </h1>
             <div className="mt-4 flex flex-wrap items-center gap-3">
-              <span className="rounded-xl bg-green-900 px-3.5 py-2 font-display text-xl text-cream">
+              <span className="tnum rounded-xl bg-gradient-to-br from-green-900 to-green-950 px-4 py-2 font-display text-[1.35rem] text-cream shadow-[0_16px_34px_-22px_rgba(11,32,22,0.9)] ring-1 ring-inset ring-white/10">
                 {formatMoney(tool.price, tool.currency)}
               </span>
               <span className="rounded-full border border-line bg-card px-3 py-1.5 text-xs font-semibold text-ink/65">
@@ -201,8 +196,9 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
 
         <div className="mx-auto grid w-full max-w-6xl items-start gap-6 px-5 py-7 sm:px-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-8">
           <div className="min-w-0 space-y-6">
-            <div className="rounded-2xl border border-line bg-card p-5 sm:p-6">
-              <h2 className="mb-2 text-[11px] uppercase tracking-[0.14em] text-ink/45">
+            <div className="card-lux relative overflow-hidden p-5 sm:p-6">
+              <div className="gold-hairline absolute inset-x-6 top-0 opacity-70" aria-hidden="true" />
+              <h2 className="mb-2 text-[10.5px] uppercase tracking-[0.18em] text-ink/45">
                 What you get
               </h2>
               <p className="whitespace-pre-wrap break-words leading-relaxed text-ink/75 [overflow-wrap:anywhere]">
@@ -210,8 +206,9 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
               </p>
             </div>
 
-            <div className="rounded-2xl border border-line bg-card p-5 sm:p-6">
-              <h2 className="mb-3 text-[11px] uppercase tracking-[0.14em] text-ink/45">
+            <div className="card-lux relative overflow-hidden p-5 sm:p-6">
+              <div className="gold-hairline absolute inset-x-6 top-0 opacity-70" aria-hidden="true" />
+              <h2 className="mb-3 text-[10.5px] uppercase tracking-[0.18em] text-ink/45">
                 How ordering works
               </h2>
               <ol className="space-y-3">
@@ -222,7 +219,7 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
                   "You confirm, and the payment is released. Disagree and you can open a dispute.",
                 ].map((step, i) => (
                   <li key={i} className="flex items-start gap-3">
-                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-green-900 text-[10px] font-semibold text-cream">
+                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-green-900 to-green-800 text-[10px] font-semibold text-cream ring-1 ring-inset ring-white/10">
                       {i + 1}
                     </span>
                     <span className="text-sm leading-relaxed text-ink/70">{step}</span>
@@ -231,8 +228,9 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
               </ol>
             </div>
 
-            <div className="rounded-2xl border border-line bg-card p-5 sm:p-6">
-              <h2 className="mb-3 text-[11px] uppercase tracking-[0.14em] text-ink/45">
+            <div className="card-lux relative overflow-hidden p-5 sm:p-6">
+              <div className="gold-hairline absolute inset-x-6 top-0 opacity-70" aria-hidden="true" />
+              <h2 className="mb-3 text-[10.5px] uppercase tracking-[0.18em] text-ink/45">
                 What we need from you
               </h2>
               <ul className="grid gap-3 sm:grid-cols-3">
@@ -251,9 +249,10 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
           </div>
 
           <aside className="min-w-0 space-y-4 lg:sticky lg:top-20 lg:self-start">
-            <div className="rounded-2xl border border-line bg-card p-4">
+            <div className="card-lux relative overflow-hidden p-4">
+              <div className="gold-hairline absolute inset-x-4 top-0 opacity-70" aria-hidden="true" />
               <div className="flex items-center justify-between gap-2">
-                <p className="font-display text-2xl text-heading">
+                <p className="tnum font-display text-[1.6rem] text-heading">
                   {formatMoney(tool.price, tool.currency)}
                 </p>
                 <span className="rounded-full bg-gold-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-gold-500 dark:bg-gold-500/15">

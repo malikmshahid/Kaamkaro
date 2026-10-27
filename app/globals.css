@@ -6,25 +6,48 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  /* Brand colors — fixed, same in both themes (buttons, accents) */
-  --color-green-950: #0d2318;
+  /* ---- Brand: deep jade + antique gold on warm parchment ------------------ */
+  --color-green-950: #0b2016;
   --color-green-900: #123a26;
   --color-green-800: #1c5236;
   --color-green-700: #256b46;
+  --color-green-600: #2f8354;
+  --color-green-500: #3c9a67;
+
+  --color-gold-600: #a9772c;
   --color-gold-500: #c8963e;
   --color-gold-400: #d9ac5f;
-  --color-gold-100: #f3e6cc;
-  --color-cream: #f7f4ec;
+  --color-gold-300: #e7c890;
+  --color-gold-200: #f1e0c1;
+  --color-gold-100: #f6ecda;
 
-  /* Theme-aware colors — these flip between light and dark below */
+  --color-cream: #f8f5ee;
+  --color-sand: #efe7d6;
+
+  /* ---- Theme-aware surfaces ---------------------------------------------- */
   --color-ink: #16241c;
-  --color-paper: #f7f4ec;
-  --color-heading: #0d2318;
-  --color-line: #dcd4bf;
-  --color-card: #ffffff;
+  --color-paper: #f8f5ee;
+  --color-heading: #0b2016;
+  --color-line: #e2dac8;
+  --color-card: #fffefb;
+  --color-hair: rgba(11, 32, 22, 0.08);
+  --color-surface-2: #f2ecdf;
 
-  --font-display: "Fraunces", "Georgia", serif;
-  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+  /* ---- Type -------------------------------------------------------------- */
+  --font-display: var(--font-fraunces), "Fraunces", "Georgia", serif;
+  --font-body: var(--font-inter), "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* ---- Elevation --------------------------------------------------------- */
+  --shadow-lux-sm: 0 1px 2px rgba(11, 32, 22, 0.05), 0 10px 24px -20px rgba(11, 32, 22, 0.45);
+  --shadow-lux:
+    0 1px 2px rgba(11, 32, 22, 0.05), 0 18px 40px -30px rgba(11, 32, 22, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  --shadow-lux-lg:
+    0 2px 4px rgba(11, 32, 22, 0.04), 0 34px 70px -46px rgba(11, 32, 22, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65);
+
+  /* ---- Radii ------------------------------------------------------------- */
+  --radius-xl2: 1.25rem;
 }
 
 :root {
@@ -34,18 +57,361 @@
 .dark {
   color-scheme: dark;
   --color-ink: #e9e6dc;
-  --color-paper: #12140f;
-  --color-heading: #eef3ea;
-  --color-line: #33362c;
-  --color-card: #1b1e17;
+  --color-paper: #0e1109;
+  --color-heading: #f2f5ed;
+  --color-line: #2f3327;
+  --color-card: #171b12;
+  --color-hair: rgba(255, 255, 255, 0.09);
+  --color-surface-2: #14180f;
+  --shadow-lux-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 24px -20px rgba(0, 0, 0, 0.9);
+  --shadow-lux:
+    0 1px 2px rgba(0, 0, 0, 0.35), 0 18px 40px -30px rgba(0, 0, 0, 0.9),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --shadow-lux-lg:
+    0 2px 4px rgba(0, 0, 0, 0.35), 0 34px 70px -46px rgba(0, 0, 0, 0.95),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* ------------------------------------------------------------------------- *
+ * Base
+ * ------------------------------------------------------------------------- */
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 body {
   background: var(--color-paper);
   color: var(--color-ink);
   font-family: var(--font-body);
+  font-feature-settings: "cv05" 1, "ss01" 1;
   transition: background-color 0.15s ease, color 0.15s ease;
   /* A 200-character unbroken task title (or a pasted URL) must never make the
      page wider than the phone screen. */
   overflow-wrap: break-word;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--color-gold-500) 32%, transparent);
+  color: var(--color-heading);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-green-700);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.dark :focus-visible {
+  outline-color: var(--color-gold-400);
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+/* Sleek scrollbars (desktop only; mobile uses native overlay bars) */
+@media (min-width: 1024px) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, var(--color-line) 90%, transparent) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: color-mix(in oklab, var(--color-line) 90%, transparent);
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in oklab, var(--color-gold-500) 55%, var(--color-line));
+    background-clip: content-box;
+  }
+}
+
+/* ------------------------------------------------------------------------- *
+ * Premium surface utilities
+ * ------------------------------------------------------------------------- */
+
+/* Layered aurora: warm gold light from above-right, jade mist from below-left.
+   Sits inside `.aurora` (position: relative; isolation: isolate). */
+.aurora::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(58% 62% at 88% -8%, rgba(200, 150, 62, 0.26) 0%, rgba(200, 150, 62, 0) 62%),
+    radial-gradient(46% 56% at 2% 104%, rgba(18, 58, 38, 0.16) 0%, rgba(18, 58, 38, 0) 68%),
+    radial-gradient(40% 40% at 52% 8%, rgba(217, 172, 95, 0.1) 0%, rgba(217, 172, 95, 0) 70%);
+}
+
+.dark .aurora::before {
+  background:
+    radial-gradient(58% 62% at 88% -8%, rgba(200, 150, 62, 0.2) 0%, rgba(200, 150, 62, 0) 62%),
+    radial-gradient(46% 56% at 2% 104%, rgba(60, 154, 103, 0.16) 0%, rgba(60, 154, 103, 0) 68%);
+}
+
+/* Fine film grain — kills the flat, "CSS-gradient" look on big surfaces. */
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.42'/%3E%3C/svg%3E");
+}
+
+/* Frosted panel */
+.glass {
+  background: color-mix(in oklab, var(--color-card) 74%, transparent);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid color-mix(in oklab, var(--color-line) 72%, transparent);
+}
+
+/* Hairlines */
+.gold-hairline {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--color-gold-500) 70%, transparent),
+    transparent
+  );
+  border: 0;
+}
+
+.hair-ring {
+  box-shadow: inset 0 0 0 1px var(--color-hair);
+}
+
+/* Card, elevated */
+.card-lux {
+  border-radius: 1.25rem;
+  border: 1px solid var(--color-line);
+  background: var(--color-card);
+  box-shadow: var(--shadow-lux);
+}
+
+/* Hover lift — geometric ease, no wobble */
+.lift {
+  transition:
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.3s ease,
+    background-color 0.3s ease;
+  will-change: transform;
+}
+
+.lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lux-lg);
+}
+
+@media (hover: none) {
+  .lift:hover {
+    transform: none;
+    box-shadow: var(--shadow-lux);
+  }
+}
+
+/* Diagonal light sweep on hover (buttons, feature cards) */
+.sheen {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.sheen::after {
+  content: "";
+  position: absolute;
+  top: -20%;
+  left: -70%;
+  width: 45%;
+  height: 140%;
+  pointer-events: none;
+  transform: skewX(-18deg);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.34) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transition: left 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sheen:hover::after,
+.sheen:focus-visible::after {
+  left: 130%;
+}
+
+/* Gold gradient text — used sparingly, never on body copy */
+.gold-text {
+  background: linear-gradient(96deg, #9c6a20 0%, #c8963e 34%, #a2701f 62%, #c8963e 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.dark .gold-text {
+  background: linear-gradient(96deg, #e7c890 0%, #f6ecda 38%, #d9ac5f 70%, #e7c890 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Numbers line up down a column */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Edge-faded horizontal scroller (filter chips) */
+.fade-x {
+  mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 22px), transparent 100%);
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 14px,
+    #000 calc(100% - 22px),
+    transparent 100%
+  );
+}
+
+.no-bar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-bar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Subtle technical grid, for dark feature panels */
+.grid-veil {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 46px 46px;
+  mask-image: radial-gradient(70% 70% at 50% 40%, #000 0%, transparent 100%);
+  -webkit-mask-image: radial-gradient(70% 70% at 50% 40%, #000 0%, transparent 100%);
+}
+
+/* ------------------------------------------------------------------------- *
+ * Motion
+ * ------------------------------------------------------------------------- */
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.reveal {
+  animation: reveal-up 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.reveal-1 {
+  animation-delay: 0.06s;
+}
+.reveal-2 {
+  animation-delay: 0.13s;
+}
+.reveal-3 {
+  animation-delay: 0.2s;
+}
+.reveal-4 {
+  animation-delay: 0.28s;
+}
+.reveal-5 {
+  animation-delay: 0.36s;
+}
+
+@keyframes float-soft {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-9px);
+  }
+}
+
+.float-soft {
+  animation: float-soft 9s ease-in-out infinite;
+}
+
+@keyframes marquee-x {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-x 42s linear infinite;
+}
+
+.marquee-mask {
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+@keyframes ring-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-gold-500) 55%, transparent);
+  }
+  70% {
+    box-shadow: 0 0 0 7px rgba(200, 150, 62, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(200, 150, 62, 0);
+  }
+}
+
+.pulse-dot {
+  animation: ring-pulse 2.6s ease-out infinite;
+}
+
+/* Respect the OS setting: no looping or entrance motion */
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .float-soft,
+  .marquee-track,
+  .pulse-dot {
+    animation: none !important;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+  .sheen::after {
+    display: none;
+  }
 }
