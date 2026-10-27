@@ -171,6 +171,12 @@ export default function FindWorkPage() {
               never chase a client for payment. Sorted by how well it matches your skills, city and
               rate.
             </p>
+            <Link
+              href="/why-kaamkaro"
+              className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-green-800 hover:underline dark:text-green-300"
+            >
+              Why KaamKaro is different from other platforms →
+            </Link>
 
             {/* search */}
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">

@@ -981,6 +981,7 @@ export default async function Home() {
           <div>
             <p className="mb-3 text-sm font-medium text-heading">Platform</p>
             <ul className="space-y-2 text-sm text-ink/60">
+              <li><Link href="/why-kaamkaro" className="hover:text-green-700">Why KaamKaro</Link></li>
               <li><Link href="/tasks" className="hover:text-green-700">Find work</Link></li>
               <li><Link href="/tools" className="hover:text-green-700">The Toolbox</Link></li>
               <li><Link href="/tasks/new" className="hover:text-green-700">Post a task</Link></li>
