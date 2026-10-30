@@ -26,6 +26,8 @@ type WorkTask = {
   applicantCount: number;
   matchScore: number | null;
   matchReasons: string[];
+  clientKaamScore: number;
+  clientGrade: { label: string; tone: "elite" | "trusted" | "building" | "new" };
 };
 
 type Payload = {
@@ -41,6 +43,7 @@ const SORTS = [
   { value: "budget", label: "Highest budget" },
   { value: "ending", label: "Ending soon" },
   { value: "competition", label: "Least competition" },
+  { value: "trust", label: "Best clients" },
 ] as const;
 
 function timeLeft(expiresAt: string | null): string | null {
@@ -509,12 +512,23 @@ export default function FindWorkPage() {
                         <p className="tnum font-display text-[1.3rem] text-green-800 dark:text-green-300">
                           {formatMoney(t.budget, t.currency)}
                         </p>
-                        <p className="mt-0.5 flex items-center gap-1 text-[11px] text-ink/45">
+                        <p className="mt-0.5 flex flex-wrap items-center gap-1 text-[11px] text-ink/45">
                           {t.clientName || "Client"}
                           {t.clientVerified && <span title="ID verified">✔</span>}
                           {t.clientRating && t.clientRatingCount ? (
                             <span>· {Number(t.clientRating).toFixed(1)}★</span>
                           ) : null}
+                          <span
+                            title={`KaamScore ${t.clientKaamScore} — ${t.clientGrade?.label || "New"}. Built from completed work, ratings, ID checks and account age.`}
+                            className={
+                              t.clientGrade?.tone === "elite" || t.clientGrade?.tone === "trusted"
+                                ? "ml-0.5 inline-flex shrink-0 items-center gap-1 rounded-full bg-green-950/5 px-1.5 py-0.5 font-semibold text-green-800 dark:bg-green-500/15 dark:text-green-300"
+                                : "ml-0.5 inline-flex shrink-0 items-center gap-1 rounded-full bg-gold-100 px-1.5 py-0.5 font-semibold text-gold-500 dark:bg-gold-500/15 dark:text-gold-300"
+                            }
+                          >
+                            <span className="tnum">{t.clientKaamScore}</span>
+                            <span className="font-medium opacity-70">{t.clientGrade?.label || "New"}</span>
+                          </span>
                         </p>
                       </div>
                       <span className="shrink-0 rounded-full border border-green-900/30 px-3.5 py-1.5 text-xs font-semibold text-green-800 transition-colors group-hover:bg-green-900 group-hover:text-cream dark:text-green-300 dark:group-hover:text-cream">

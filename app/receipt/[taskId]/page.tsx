@@ -28,6 +28,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       result.receipt.task.amount,
       result.receipt.task.currency
     )}, delivered and released through KaamKaro escrow.`,
+    twitter: {
+      card: "summary_large_image",
+      title: `Work receipt ${result.receipt.receiptId}`,
+      description: `${result.receipt.task.title} — ${formatMoney(
+        result.receipt.task.amount,
+        result.receipt.task.currency
+      )}, verified and released.`,
+    },
     robots: { index: true, follow: true },
   };
 }

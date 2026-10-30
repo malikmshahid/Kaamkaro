@@ -14,7 +14,10 @@
   --color-green-600: #2f8354;
   --color-green-500: #3c9a67;
 
-  --color-gold-600: #a9772c;
+  /* #a9772c on parchment is only 3.6:1 — too light for the 10-11px uppercase
+     labels this token is used for (they sit on tinted gold chips too, which are
+     darker again). #7d5213 measures ~5:1 on those chips and still reads gold. */
+  --color-gold-600: #7d5213;
   --color-gold-500: #c8963e;
   --color-gold-400: #d9ac5f;
   --color-gold-300: #e7c890;
@@ -273,7 +276,9 @@ p {
 
 /* Gold gradient text — used sparingly, never on body copy */
 .gold-text {
-  background: linear-gradient(96deg, #9c6a20 0%, #c8963e 34%, #a2701f 62%, #c8963e 100%);
+  /* Light mode: keep the metal feel but stay above 3:1 on parchment.
+     (#c8963e as text was 2.4:1 — the "signup heading looks washed out" bug.) */
+  background: linear-gradient(96deg, #7d5213 0%, #9c6a20 34%, #8a5c17 62%, #9c6a20 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;

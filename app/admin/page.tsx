@@ -268,17 +268,17 @@ export default function AdminPage() {
       <main className="flex-1">
         {/* ------------------------------- HERO ------------------------------- */}
         <section className="aurora grain relative isolate overflow-hidden border-b border-line">
-          <div className="relative mx-auto w-full max-w-6xl px-5 pb-8 pt-11 sm:px-6 sm:pb-10 sm:pt-14">
+          <div className="relative mx-auto w-full max-w-6xl px-4 pb-5 pt-7 sm:px-6 sm:pb-10 sm:pt-14">
             <div className="flex flex-wrap items-start justify-between gap-5">
               <div className="min-w-0">
                 <p className="reveal inline-flex items-center gap-2.5 rounded-full border border-gold-500/35 bg-card/70 px-3.5 py-1.5 text-[10.5px] font-semibold uppercase tracking-[0.18em] text-gold-600 shadow-lux-sm backdrop-blur dark:text-gold-300">
                   <span className="pulse-dot inline-block h-1.5 w-1.5 rounded-full bg-gold-500" />
                   Admin · operations
                 </p>
-                <h1 className="reveal reveal-1 mt-5 max-w-3xl font-display text-[2.05rem] font-medium leading-[1.03] tracking-[-0.02em] text-heading sm:text-[3rem]">
+                <h1 className="reveal reveal-1 mt-3 max-w-3xl font-display text-[1.9rem] font-medium leading-[1.03] tracking-[-0.02em] text-heading sm:mt-5 sm:text-[3rem]">
                   The <span className="gold-text">control room</span>.
                 </h1>
-                <p className="reveal reveal-2 mt-3 max-w-xl text-sm leading-relaxed text-ink/65 sm:text-[15px]">
+                <p className="reveal reveal-2 mt-2 max-w-xl text-[13px] leading-relaxed text-ink/65 sm:mt-3 sm:text-[15px]">
                   Every rupee on this page is held in escrow until a human — you — decides. Read
                   the evidence, make the call, and the receipt writes itself.
                 </p>
@@ -298,13 +298,13 @@ export default function AdminPage() {
           </div>
         </section>
 
-        <div className="mx-auto w-full max-w-6xl px-5 pb-16 pt-6 sm:px-6 sm:pt-8">
+        <div className="mx-auto w-full max-w-6xl px-4 pb-16 pt-4 sm:px-6 sm:pt-8">
           <Tabs
             items={tabItems}
             value={tab}
             onChange={setTab}
             ariaLabel="Admin sections"
-            className="mb-6"
+            className="mb-4 sm:mb-6"
           />
 
           {loading && (

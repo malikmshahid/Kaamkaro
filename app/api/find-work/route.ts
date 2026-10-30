@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { tasks, users, applications } from "@/db/schema";
 import { eq, and, or, ilike, sql, gte, desc } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
+import { kaamScore } from "@/lib/kaamScore";
 
 /**
  * GET /api/find-work — the provider side of the marketplace.
@@ -18,7 +19,7 @@ import { getSessionUser } from "@/lib/auth";
  * most 120 rows, so no unbounded scans.
  */
 
-const SORTS = ["match", "newest", "budget", "ending", "competition"] as const;
+const SORTS = ["match", "newest", "budget", "ending", "competition", "trust"] as const;
 type Sort = (typeof SORTS)[number];
 
 function tokens(text: string): string[] {
@@ -149,6 +150,11 @@ export async function GET(req: NextRequest) {
         clientVerified: users.cnicVerified,
         clientRating: users.ratingAvg,
         clientRatingCount: users.ratingCount,
+        clientSince: users.createdAt,
+        clientCompleted: sql<number>`(
+          select count(*)::int from ${tasks} t2
+          where t2.posted_by_id = ${tasks.postedById} and t2.status = 'completed'
+        )`,
         applicantCount: sql<number>`(
           select count(*)::int from ${applications}
           where ${applications.taskId} = ${tasks.id} and ${applications.status} <> 'rejected'
@@ -160,12 +166,34 @@ export async function GET(req: NextRequest) {
       .orderBy(desc(tasks.createdAt))
       .limit(120);
 
+    // Client trust, scored with the same explainable KaamScore providers carry.
+    // A job from a client who actually pays and closes work is worth more than
+    // an identical job from an account made yesterday — and until now nothing in
+    // the feed said so.
     const enriched = rows.map((t: (typeof rows)[number]) => {
+      const trust = kaamScore({
+        completedTasks: Number(t.clientCompleted || 0),
+        ratingAvg: Number(t.clientRating || 0),
+        ratingCount: Number(t.clientRatingCount || 0),
+        verified: Boolean(t.clientVerified),
+        memberSinceDays: t.clientSince
+          ? Math.floor((Date.now() - new Date(t.clientSince).getTime()) / 864e5)
+          : 0,
+      });
       const { score, reasons } = scoreTask(
         { ...t, createdAt: new Date(t.createdAt) },
         viewer
       );
-      return { ...t, matchScore: viewer ? score : null, matchReasons: viewer ? reasons : [] };
+      if (reasons.length < 3 && trust.score >= 40) {
+        reasons.push(`Client KaamScore ${trust.score} · ${trust.grade.label}`);
+      }
+      return {
+        ...t,
+        clientKaamScore: trust.score,
+        clientGrade: trust.grade,
+        matchScore: viewer ? score : null,
+        matchReasons: viewer ? reasons : [],
+      };
     });
 
     type Enriched = (typeof enriched)[number];
@@ -182,9 +210,20 @@ export async function GET(req: NextRequest) {
           return a.applicantCount - b.applicantCount;
         case "newest":
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        case "trust":
+          // Best clients first: highest KaamScore, then fewer applicants.
+          return (
+            b.clientKaamScore - a.clientKaamScore ||
+            a.applicantCount - b.applicantCount
+          );
         case "match":
         default:
-          return (b.matchScore ?? 0) - (a.matchScore ?? 0);
+          // A good client is part of a good match: trust nudges the ranking by
+          // up to 15 points without ever burying a strong skill match.
+          return (
+            (b.matchScore ?? 0) + b.clientKaamScore * 0.15 -
+            ((a.matchScore ?? 0) + a.clientKaamScore * 0.15)
+          );
       }
     });
 

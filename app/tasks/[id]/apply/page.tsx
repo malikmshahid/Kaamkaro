@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import { useUser } from "@/lib/useUser";
 import { formatMoney } from "@/lib/currency";
 import { categoryLabel } from "@/lib/constants";
+import PriceFairness from "@/components/PriceFairness";
 
 type Task = {
   id: string;
@@ -678,6 +679,17 @@ export default function ApplyPage({
                 {priceHint && (
                   <p className="mt-2 text-xs text-ink/50">{priceHint}</p>
                 )}
+
+                {/* What this kind of work actually pays here — same meter the
+                    client saw when posting, so both sides quote against the
+                    same numbers instead of guessing. */}
+                <PriceFairness
+                  category={task.category}
+                  city={task.city}
+                  amount={amountNum > 0 ? amountNum : budget}
+                  audience="provider"
+                  className="mt-4"
+                />
 
                 <label className="mt-6 block text-sm font-medium text-ink/70">
                   Delivery time

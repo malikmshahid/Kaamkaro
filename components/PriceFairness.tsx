@@ -37,12 +37,15 @@ export default function PriceFairness({
   city,
   amount,
   variant = "verdict",
+  audience = "client",
   className = "",
 }: {
   category?: string | null;
   city?: string | null;
   amount?: number | null;
   variant?: "verdict" | "browse";
+  /** Who is reading the verdict: the person paying, or the person quoting. */
+  audience?: "client" | "provider";
   className?: string;
 }) {
   const [data, setData] = useState<Insight | null>(null);
@@ -109,25 +112,46 @@ export default function PriceFairness({
       verdict = {
         label: "Below the market",
         tone: "low",
-        note: `Most work like this lands between ${formatMoney(low, currency)} and ${formatMoney(
-          high,
-          currency
-        )}. A low budget is allowed — it just gets fewer proposals.`,
+        note:
+          audience === "provider"
+            ? `You are quoting under what this work usually pays (${formatMoney(
+                low,
+                currency
+              )}–${formatMoney(high, currency)}). It wins attention — just check your margin.`
+            : `Most work like this lands between ${formatMoney(low, currency)} and ${formatMoney(
+                high,
+                currency
+              )}. A low budget is allowed — it just gets fewer proposals.`,
       };
     } else if (amount > high) {
       verdict = {
         label: "Above the market",
         tone: "high",
-        note: `You are paying more than the typical ${formatMoney(median, currency)}. Providers will move fast.`,
+        note:
+          audience === "provider"
+            ? `You are asking above the typical ${formatMoney(
+                median,
+                currency
+              )}. Clients will ask why — lead with proof and a clear scope.`
+            : `You are paying more than the typical ${formatMoney(
+                median,
+                currency
+              )}. Providers will move fast.`,
       };
     } else {
       verdict = {
         label: "Fair range",
         tone: "fair",
-        note: `Right in the middle of what this work actually pays (median ${formatMoney(
-          median,
-          currency
-        )}).`,
+        note:
+          audience === "provider"
+            ? `Right in the middle of what this work actually pays here (median ${formatMoney(
+                median,
+                currency
+              )}). Strong position — this is the price clients expect.`
+            : `Right in the middle of what this work actually pays (median ${formatMoney(
+                median,
+                currency
+              )}).`,
       };
     }
   }

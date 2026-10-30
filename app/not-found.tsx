@@ -6,7 +6,7 @@ export default function NotFound() {
     <>
       <Navbar />
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-24 text-center">
-        <p className="text-gold-500 font-display text-6xl mb-4">404</p>
+        <p className="mb-4 font-display text-6xl text-gold-600 dark:text-gold-300">404</p>
         <h1 className="font-display text-3xl text-heading mb-3">
           This page wandered off
         </h1>
