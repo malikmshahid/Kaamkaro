@@ -10,6 +10,44 @@ export default function LoginPage() {
   const [form, setForm] = useState({ identifier: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [challenge, setChallenge] = useState<string | null>(null);
+  const [code, setCode] = useState("");
+  const [notice, setNotice] = useState("");
+
+  function finishLogin() {
+    // Honour ?next=/messages style redirects, but only for same-site paths
+    // (never an absolute URL — that would be an open redirect).
+    const nextParam = new URLSearchParams(window.location.search).get("next") || "";
+    const safeNext = nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : "";
+    router.push(safeNext || "/dashboard");
+    router.refresh();
+  }
+
+  async function handleTwoFactor(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/2fa/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ challenge, code }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Could not verify that code");
+        return;
+      }
+      if (data.usedBackupCode) {
+        setNotice(`Recovery code used — ${data.backupCodesLeft} left.`);
+      }
+      finishLogin();
+    } catch {
+      setError("Could not connect to the server");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -26,12 +64,13 @@ export default function LoginPage() {
         setError(data.error || "Could not log in");
         return;
       }
-      // Honour ?next=/messages style redirects, but only for same-site paths
-      // (never an absolute URL — that would be an open redirect).
-      const nextParam = new URLSearchParams(window.location.search).get("next") || "";
-      const safeNext = nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : "";
-      router.push(safeNext || "/dashboard");
-      router.refresh();
+      // Password accepted, but this account has a second factor: no session
+      // exists yet. Swap the form for the code step.
+      if (data.twoFactor) {
+        setChallenge(data.challenge);
+        return;
+      }
+      finishLogin();
     } catch {
       setError("Could not connect to the server");
     } finally {
@@ -84,6 +123,65 @@ export default function LoginPage() {
               <h1 className="font-display text-[1.7rem] leading-tight text-heading">Welcome back</h1>
               <p className="mt-1.5 text-sm text-ink/60">Log in to pick up where you left off.</p>
 
+              {challenge ? (
+                <form onSubmit={handleTwoFactor} className="mt-6 space-y-4">
+                  <div className="rounded-xl border border-gold-500/35 bg-gold-100/40 px-4 py-3 text-[12.5px] leading-relaxed text-ink/70 dark:bg-gold-500/10">
+                    Two-factor is on for this account. Enter the current 6-digit code from your
+                    authenticator app — or one of your recovery codes.
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="totp"
+                      className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-ink/50"
+                    >
+                      Authentication code
+                    </label>
+                    <input
+                      id="totp"
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      autoFocus
+                      className="tnum w-full rounded-xl border border-line bg-card px-4 py-3 text-center font-display text-[1.35rem] tracking-[0.35em] shadow-lux-sm outline-none transition focus:border-gold-500/60 focus:ring-2 focus:ring-gold-500/20"
+                      placeholder="000000"
+                      value={code}
+                      onChange={(e) => setCode(e.target.value)}
+                      maxLength={16}
+                      required
+                    />
+                  </div>
+
+                  {error && (
+                    <p role="alert" className="rounded-xl border border-red-300/60 bg-red-50 px-4 py-2.5 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300">
+                      {error}
+                    </p>
+                  )}
+                  {notice && (
+                    <p className="rounded-xl border border-green-700/25 bg-green-700/5 px-4 py-2.5 text-sm text-green-800 dark:text-green-300">
+                      {notice}
+                    </p>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={loading || code.trim().length < 4}
+                    className="sheen w-full rounded-full bg-green-900 px-6 py-3.5 text-sm font-semibold text-cream shadow-[0_16px_34px_-22px_rgba(11,32,22,0.9)] ring-1 ring-inset ring-white/10 transition-all hover:-translate-y-0.5 hover:bg-green-800 disabled:translate-y-0 disabled:opacity-50"
+                  >
+                    {loading ? "Checking…" : "Verify & log in"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setChallenge(null);
+                      setCode("");
+                      setError("");
+                      setNotice("");
+                    }}
+                    className="w-full text-center text-xs font-semibold text-ink/50 underline"
+                  >
+                    Use a different account
+                  </button>
+                </form>
+              ) : (
               <form onSubmit={handleSubmit} className="mt-6 space-y-4">
                 <div>
                   <label htmlFor="identifier" className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-ink/50">
@@ -131,6 +229,7 @@ export default function LoginPage() {
                   {loading ? "Logging in…" : "Log in"}
                 </button>
               </form>
+              )}
 
               <div className="my-5 gold-hairline opacity-60" aria-hidden="true" />
 

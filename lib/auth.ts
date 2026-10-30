@@ -144,3 +144,35 @@ export async function clearSessionCookie() {
     maxAge: 0,
   });
 }
+
+/**
+ * A "second factor" challenge is a short-lived signed ticket proving *password
+ * already passed* — nothing more. It cannot be used as a session (different
+ * issuer, 5 minute life, and it is never set as a cookie).
+ */
+export function signTwoFactorChallenge(payload: { userId: string; role: string }) {
+  return jwt.sign(
+    { userId: payload.userId, role: payload.role, iss: "kaamkaro-2fa", purpose: "2fa" },
+    getSecret(),
+    { algorithm: "HS256", expiresIn: "5m" }
+  );
+}
+
+export function verifyTwoFactorChallenge(
+  token: string
+): { userId: string; role: string } | null {
+  try {
+    const decoded = jwt.verify(token, getSecret(), {
+      algorithms: ["HS256"],
+      issuer: "kaamkaro-2fa",
+      maxAge: "5m",
+    });
+    if (typeof decoded === "string" || !decoded || typeof decoded.userId !== "string") {
+      return null;
+    }
+    if (decoded.purpose !== "2fa") return null;
+    return { userId: decoded.userId, role: String(decoded.role ?? "client") };
+  } catch {
+    return null;
+  }
+}

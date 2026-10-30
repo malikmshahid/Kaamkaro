@@ -56,6 +56,17 @@ export const users = pgTable("users", {
   // (password reset, "log out everywhere"). Tokens carry the value they were
   // signed with; a mismatch means the cookie is stale, not just old.
   tokenVersion: integer("token_version").notNull().default(0),
+  // TOTP two-factor. `totpSecret` is set as soon as enrollment starts (so the
+  // QR can be re-shown), but login only demands a code once `totpEnabledAt`
+  // is stamped — i.e. after the user proved they can generate one.
+  totpSecret: text("totp_secret"),
+  totpEnabledAt: timestamp("totp_enabled_at", { withTimezone: true }),
+  // SHA-256 hashes of single-use recovery codes; the plaintext is shown once.
+  totpBackupCodes: text("totp_backup_codes").array().default(sql`'{}'::text[]`),
+  // Last TOTP time-step that was accepted. A code stays mathematically valid for
+  // its whole 30s window, so without this an intercepted code could be replayed
+  // once. One column kills that.
+  totpLastStep: integer("totp_last_step"),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
 });
 

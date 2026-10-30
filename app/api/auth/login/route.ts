@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq, or } from "drizzle-orm";
-import { verifyPassword, signToken, setSessionCookie } from "@/lib/auth";
+import {
+  verifyPassword,
+  signToken,
+  setSessionCookie,
+  signTwoFactorChallenge,
+} from "@/lib/auth";
 import { throttle, clientIp, tooManyRequests } from "@/lib/rateLimit";
 import { z } from "zod";
 
@@ -44,6 +49,16 @@ export async function POST(req: NextRequest) {
     const valid = await verifyPassword(password, user?.passwordHash || DUMMY_HASH);
     if (!user || !valid) {
       return NextResponse.json({ error: "Wrong phone/email or password" }, { status: 401 });
+    }
+
+    // Password is correct, but if the account has a second factor we stop here:
+    // no cookie is set until a live code (or a recovery code) arrives at
+    // /api/auth/2fa/verify. The challenge is a 5-minute signed ticket, not a session.
+    if (user.totpEnabledAt) {
+      return NextResponse.json({
+        twoFactor: true,
+        challenge: signTwoFactorChallenge({ userId: user.id, role: user.role }),
+      });
     }
 
     const token = signToken({ userId: user.id, role: user.role, tokenVersion: user.tokenVersion });

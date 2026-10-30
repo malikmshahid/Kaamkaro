@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import TwoFactorCard from "@/components/TwoFactorCard";
 import { useUser } from "@/lib/useUser";
 
 type ApiKey = {
@@ -174,6 +175,16 @@ export default function SettingsPage() {
               {error}
             </p>
           )}
+
+          {/* Security sits above the keys on every screen: on a phone the agent
+              key form is long, and the second-factor card must not be a full
+              scroll away. */}
+          <div className="mb-10">
+            <h2 className="mb-3 font-display text-xl text-heading">Security</h2>
+            <TwoFactorCard />
+          </div>
+
+          <h2 className="mb-3 font-display text-xl text-heading">Agent API keys</h2>
 
           <form onSubmit={handleCreate} className="mb-10 flex flex-col gap-3 sm:flex-row">
             <input

@@ -28,6 +28,9 @@ export const RULES = {
   // OTP guessing is the soft spot of an email-verified signup: 6 digits is
   // only a million-wide space, so cap attempts per IP hard.
   verifyEmail: { limit: 15, windowSeconds: 60 * 60 },
+  // A 6-digit TOTP code is only a million-wide space; enrolment, disabling and
+  // the login second step all share this tight bucket.
+  totpAttempt: { limit: 10, windowSeconds: 15 * 60 },
   createTask: { limit: 20, windowSeconds: 60 * 60 },
   applyToTask: { limit: 30, windowSeconds: 60 * 60 },
   createTool: { limit: 10, windowSeconds: 60 * 60 },
