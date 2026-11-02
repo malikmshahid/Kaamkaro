@@ -6,19 +6,38 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 
 export const SITE_CONTENT_DEFAULTS = {
-  heroEyebrow: "Escrow protected · PKR first",
+  heroEyebrow: "Clear scope · PKR first",
   heroLineOne: "Post the work.",
   heroAccent: "Pakistan",
   heroLineTwo: "gets it done.",
   heroSubheading:
-    "A real marketplace for local work: post a task, or order a ready-made service from a verified provider. The budget is locked in escrow until you confirm the job is done — and every delivery gets an AI check before it reaches you.",
+    "A marketplace for local work: share what you need, compare real provider proposals and review the work against a clear brief. Optional AI assistance helps reduce the guesswork; people stay in control.",
+  howItWorksEyebrow: "Three steps, no guesswork",
+  howItWorksTitle: "Clear scope to reviewed work, with less chasing",
+  howItWorksSteps: [
+    { title: "Describe it, or start with AI", body: "Share one rough idea in English, Urdu or Roman Urdu. Optional AI drafting helps make a clearer brief—you review every detail before it goes live." },
+    { title: "Compare proposals with reasons", body: "Review provider proposals, relevant skills and available trust signals. Choose only when the scope and terms make sense to you." },
+    { title: "Review the submitted work", body: "Check proof against agreed deliverables. AI can assist when enabled, but you remain in control of review and completion." },
+  ],
+  aiSectionEyebrow: "A useful edge, not a black box",
+  aiSectionTitle: "AI that takes friction out of the work",
+  aiSectionBody: "Optional assistance can clarify a brief, help draft a proposal and surface proof-review signals. Every suggestion stays editable, and people make the final decision.",
+  trustSectionEyebrow: "Clear terms, people in control",
+  trustSectionTitle: "Know the task terms before work starts",
+  trustSectionBody: "Review scope and any payment methods shown in the task before committing. AI signals are advisory; people review and confirm.",
+  trustChecks: [
+    { title: "Scope and terms in the task", body: "Review the brief, budget and any payment details shown before you agree to start." },
+    { title: "Proof linked to the work", body: "Submitted files and notes sit alongside the agreed deliverables for review." },
+    { title: "Identity signals you can inspect", body: "Verification badges are visible signals, not a guarantee of outcome." },
+  ],
+  footerDescription: "A marketplace for real work in Pakistan—clear briefs, useful AI assistance and people in control from start to finish.",
   primaryCta: "Post a task — free",
   secondaryCta: "Browse open tasks",
   supportEmail: "support@kaamkaro.ai",
   trustPoints: [
     "No signup fee, no monthly plan",
-    "Payment released only when you confirm",
-    "AI-checked proof on every delivery",
+    "Review the work before marking it complete",
+    "AI proof assistance when enabled; people decide",
     "Works for AI agents too (API keys)",
   ],
   categorySectionEyebrow: "What gets done here",
@@ -27,16 +46,22 @@ export const SITE_CONTENT_DEFAULTS = {
   faqTitle: "Questions people actually ask",
   closingEyebrow: "Start in two minutes",
   closingTitle: "Post the work. Get it done today.",
-  closingBody: "Free to post. Escrow protected. AI-checked. Built in Pakistan, for Pakistan.",
+  closingBody: "Free to post. Clear expectations, optional AI assistance and human review. Built in Pakistan, for Pakistan.",
   closingPrimaryCta: "Create a free account",
   closingSecondaryCta: "Browse tasks first",
   faqs: [
-    { question: "When exactly does the provider get paid?", answer: "The moment you press confirm. The client's budget is held by KaamKaro from the time a provider is assigned, so the money is already guaranteed — it simply moves to the provider after your approval." },
-    { question: "What if the work is wrong or fake?", answer: "Don't confirm. Open a dispute and an admin reviews the proof, the chat and the AI verdict, then decides whether to release or refund. Submissions that match an earlier task byte-for-byte are flagged automatically." },
-    { question: "What does KaamKaro charge?", answer: "Posting is free. A flat commission is deducted from the provider's payout on completed tasks, and it is shown in full before work begins — no hidden bidding credits, no connects." },
-    { question: "Do I need a bank account?", answer: "No. You can sign up with just a phone number. Wallet and card payouts are being rolled out; until then payouts are recorded in the app and settled by the team." },
+    { question: "When is a task marked complete?", answer: "After you review the submitted work and explicitly confirm completion. Payment and payout availability depend on the methods enabled for that task; check the terms shown in the product before starting." },
+    { question: "What if the work is wrong or fake?", answer: "Do not confirm completion. Open a dispute so the available proof and conversation can be reviewed under the platform's dispute process. AI signals are advisory; a human makes the review decision." },
+    { question: "What does KaamKaro charge?", answer: "Posting is free. Any applicable platform fee is shown in the task flow before you commit; there are no bidding credits or connects." },
+    { question: "Do I need a bank account to browse?", answer: "No account is needed to browse public listings. Account and payment requirements, when relevant, are shown in the actual task flow." },
     { question: "Can I hire from outside Pakistan?", answer: "Yes — the platform is PKR-first but supports other currencies, so overseas clients can post work for Pakistani providers." },
   ],
+};
+
+export const AI_FEATURE_DEFAULTS = {
+  taskCopilotEnabled: true,
+  proposalCopilotEnabled: true,
+  proofAssistEnabled: true,
 };
 
 export const MARKETPLACE_DEFAULTS = {
@@ -56,6 +81,17 @@ export const siteContentSchema = z.object({
   heroAccent: plainText(40),
   heroLineTwo: plainText(60),
   heroSubheading: plainText(420),
+  howItWorksEyebrow: plainText(60),
+  howItWorksTitle: plainText(120),
+  howItWorksSteps: z.array(z.object({ title: plainText(80), body: plainText(340) }).strict()).length(3),
+  aiSectionEyebrow: plainText(60),
+  aiSectionTitle: plainText(120),
+  aiSectionBody: plainText(300),
+  trustSectionEyebrow: plainText(60),
+  trustSectionTitle: plainText(120),
+  trustSectionBody: plainText(260),
+  trustChecks: z.array(z.object({ title: plainText(90), body: plainText(260) }).strict()).length(3),
+  footerDescription: plainText(240),
   primaryCta: plainText(44),
   secondaryCta: plainText(44),
   supportEmail: z.string().trim().email().max(120),
@@ -94,9 +130,16 @@ export const marketplaceSettingsSchema = z.object({
   }
 });
 
+export const aiFeaturesSchema = z.object({
+  taskCopilotEnabled: z.boolean(),
+  proposalCopilotEnabled: z.boolean(),
+  proofAssistEnabled: z.boolean(),
+}).strict();
+
 export type SiteContent = z.infer<typeof siteContentSchema>;
 export type MarketplaceSettings = z.infer<typeof marketplaceSettingsSchema>;
-export type PlatformSettings = { siteContent: SiteContent; marketplace: MarketplaceSettings };
+export type AiFeatures = z.infer<typeof aiFeaturesSchema>;
+export type PlatformSettings = { siteContent: SiteContent; marketplace: MarketplaceSettings; aiFeatures: AiFeatures };
 
 function mergeValid<T extends Record<string, unknown>>(schema: z.ZodType<T>, defaults: T, stored: unknown): T {
   const candidate = stored && typeof stored === "object" && !Array.isArray(stored)
@@ -108,11 +151,12 @@ function mergeValid<T extends Record<string, unknown>>(schema: z.ZodType<T>, def
 
 export async function getPlatformSettings(): Promise<PlatformSettings> {
   try {
-    const [row] = await db.select({ siteContent: platformConfig.siteContent, marketplaceSettings: platformConfig.marketplaceSettings })
+    const [row] = await db.select({ siteContent: platformConfig.siteContent, marketplaceSettings: platformConfig.marketplaceSettings, aiFeatures: platformConfig.aiFeatures })
       .from(platformConfig).where(eq(platformConfig.id, "default")).limit(1);
     return {
       siteContent: mergeValid(siteContentSchema, { ...SITE_CONTENT_DEFAULTS }, row?.siteContent),
       marketplace: mergeValid(marketplaceSettingsSchema, { ...MARKETPLACE_DEFAULTS, enabledCategories: [...MARKETPLACE_DEFAULTS.enabledCategories] }, row?.marketplaceSettings),
+      aiFeatures: mergeValid(aiFeaturesSchema, { ...AI_FEATURE_DEFAULTS }, row?.aiFeatures),
     };
   } catch {
     // A missing/momentarily unavailable settings row never takes down task
@@ -120,6 +164,7 @@ export async function getPlatformSettings(): Promise<PlatformSettings> {
     return {
       siteContent: { ...SITE_CONTENT_DEFAULTS },
       marketplace: { ...MARKETPLACE_DEFAULTS, enabledCategories: [...MARKETPLACE_DEFAULTS.enabledCategories] },
+      aiFeatures: { ...AI_FEATURE_DEFAULTS },
     };
   }
 }
@@ -129,6 +174,7 @@ export function publicSettingsPayload(settings: PlatformSettings) {
   return {
     siteContent: settings.siteContent,
     marketplace: settings.marketplace,
+    aiFeatures: settings.aiFeatures,
     categoryLabels,
     categories: CATEGORIES.filter((category) => settings.marketplace.enabledCategories.includes(category.value))
       .map((category) => ({ ...category, label: categoryLabels[category.value] || category.label })),

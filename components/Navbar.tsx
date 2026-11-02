@@ -23,6 +23,9 @@ export default function Navbar() {
 
   const navLinks = (
     <>
+      <Link href="/demo" onClick={() => setMenuOpen(false)} className="font-semibold text-gold-700 hover:text-gold-500 dark:text-gold-300">
+        Try the demo
+      </Link>
       <Link href="/tasks" onClick={() => setMenuOpen(false)} className="hover:text-green-700">
         Find Work
       </Link>

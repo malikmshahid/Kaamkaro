@@ -323,6 +323,12 @@ export default async function Home() {
                   order a ready-made service from the Toolbox
                 </Link>
               </p>
+              <p className="reveal reveal-3 mt-2 text-sm text-ink/50">
+                Want to see the flow first?{" "}
+                <Link href="/demo" className="font-semibold text-green-800 underline decoration-green-800/30 underline-offset-4 hover:text-green-700 dark:text-green-300">
+                  Try the 45-second interactive demo
+                </Link>
+              </p>
 
               <ul className="reveal reveal-4 mt-9 grid gap-x-4 gap-y-2.5 text-sm text-ink/60 sm:grid-cols-2">
                 {content.trustPoints.map((item) => (
@@ -417,8 +423,8 @@ export default async function Home() {
                     <IconShield />
                   </span>
                   <p className="text-xs leading-snug">
-                    <span className="font-semibold">Escrow on by default.</span>{" "}
-                    Money sits with the platform until the client taps confirm.
+                    <span className="font-semibold">Check terms before you start.</span>{" "}
+                    Payment status and available methods appear in the task flow.
                   </p>
                 </div>
               </div>
@@ -450,9 +456,9 @@ export default async function Home() {
                   </div>
                 ))
               : [
-                  { icon: <IconShield />, label: "Escrow on every task" },
-                  { icon: <IconCamera />, label: "AI-checked proof" },
-                  { icon: <IconWallet />, label: "PKR first, no fee to post" },
+                  { icon: <IconShield />, label: "Clear scope before work" },
+                  { icon: <IconCamera />, label: "AI proof assistance when enabled" },
+                  { icon: <IconWallet />, label: "PKR-first marketplace" },
                   { icon: <IconAgent />, label: "Open to AI agents" },
                 ].map((item) => (
                   <div key={item.label} className="flex items-center gap-3 px-1 py-2 md:px-6 md:py-0">
@@ -518,53 +524,26 @@ export default async function Home() {
         <section className="relative border-b border-line bg-surface-2/40">
           <div className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-6 md:py-20">
             <p className="text-[10.5px] font-semibold uppercase tracking-[0.2em] text-gold-600 dark:text-gold-400">
-              Three steps, no guesswork
+              {content.howItWorksEyebrow}
             </p>
             <h2 className="mt-2.5 max-w-2xl font-display text-[1.9rem] leading-tight text-heading sm:text-[2.6rem]">
-              From “I need this done” to paid — without chasing anyone
+              {content.howItWorksTitle}
             </h2>
 
             <div className="mt-11 grid grid-cols-1 gap-5 md:grid-cols-3">
-              {[
-                {
-                  step: "01",
-                  title: "Describe it, or let AI write it",
-                  body: "Type one rough line in Urdu or English. The AI copilot turns it into a proper brief with a fair PKR budget — you approve before it goes live.",
-                  icon: <IconSparkle />,
-                },
-                {
-                  step: "02",
-                  title: "Pick your provider",
-                  body: "Verified providers apply with a proposal. Read them, check ratings and ID badges, and assign the one you trust. Money moves into escrow at that moment.",
-                  icon: <IconPin />,
-                },
-                {
-                  step: "03",
-                  title: "Confirm, then pay",
-                  body: "Work arrives with photos or files attached. You review the AI proof check, confirm completion, and escrow pays out instantly.",
-                  icon: <IconWallet />,
-                },
-              ].map((item) => (
-                <div
-                  key={item.step}
-                  className="lift relative overflow-hidden rounded-2xl border border-line bg-card p-6 shadow-lux-sm"
-                >
-                  <span className="gold-hairline absolute inset-x-6 top-0" aria-hidden="true" />
-                  <span
-                    aria-hidden="true"
-                    className="pointer-events-none absolute -right-1 -top-3 font-display text-[5.5rem] leading-none text-heading/[0.045] dark:text-white/[0.05]"
-                  >
-                    {item.step}
-                  </span>
-                  <span className="inline-flex rounded-xl bg-green-950/[0.06] p-2.5 text-green-800 ring-1 ring-inset ring-green-900/10 dark:bg-green-500/15 dark:text-green-300">
-                    {item.icon}
-                  </span>
-                  <h3 className="mt-4 font-display text-[1.15rem] leading-snug text-heading">
-                    {item.title}
-                  </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-ink/65">{item.body}</p>
-                </div>
-              ))}
+              {content.howItWorksSteps.map((item, index) => {
+                const stepNumber = String(index + 1).padStart(2, "0");
+                const icon = index === 0 ? <IconSparkle /> : index === 1 ? <IconPin /> : <IconWallet />;
+                return (
+                  <div key={stepNumber} className="lift relative overflow-hidden rounded-2xl border border-line bg-card p-6 shadow-lux-sm">
+                    <span className="gold-hairline absolute inset-x-6 top-0" aria-hidden="true" />
+                    <span aria-hidden="true" className="pointer-events-none absolute -right-1 -top-3 font-display text-[5.5rem] leading-none text-heading/[0.045] dark:text-white/[0.05]">{stepNumber}</span>
+                    <span className="inline-flex rounded-xl bg-green-950/[0.06] p-2.5 text-green-800 ring-1 ring-inset ring-green-900/10 dark:bg-green-500/15 dark:text-green-300">{icon}</span>
+                    <h3 className="mt-4 font-display text-[1.15rem] leading-snug text-heading">{item.title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-ink/65">{item.body}</p>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -575,14 +554,13 @@ export default async function Home() {
             <div className="grid gap-10 md:grid-cols-[0.85fr_1.15fr] md:items-start">
               <div>
                 <p className="text-[10.5px] font-semibold uppercase tracking-[0.2em] text-gold-600 dark:text-gold-400">
-                  The unfair advantage
+                  {content.aiSectionEyebrow}
                 </p>
                 <h2 className="mt-2.5 font-display text-[1.9rem] leading-tight text-heading sm:text-[2.6rem]">
-                  AI that does the boring half of the job
+                  {content.aiSectionTitle}
                 </h2>
                 <p className="mt-4 leading-relaxed text-ink/65">
-                  Not a chatbot bolted onto a form. Four places where AI quietly
-                  removes the friction that makes normal marketplaces annoying.
+                  {content.aiSectionBody}
                 </p>
                 <Link
                   href="/signup"
@@ -675,31 +653,17 @@ export default async function Home() {
             <div className="grid gap-12 md:grid-cols-[1fr_1fr] md:items-center">
               <div>
                 <p className="text-[10.5px] font-semibold uppercase tracking-[0.2em] text-gold-400">
-                  Trust, made mechanical
+                  {content.trustSectionEyebrow}
                 </p>
                 <h2 className="mt-2.5 font-display text-[1.9rem] leading-tight sm:text-[2.6rem]">
-                  Nobody has to trust a stranger
+                  {content.trustSectionTitle}
                 </h2>
                 <p className="mt-4 max-w-lg leading-relaxed text-cream/65">
-                  Every task runs through the same three checks — whether the
-                  client is a person in Karachi or an AI agent in a data centre.
+                  {content.trustSectionBody}
                 </p>
 
                 <div className="mt-8 space-y-4">
-                  {[
-                    {
-                      title: "Budget locked before work starts",
-                      body: "Escrow is funded the moment a provider is assigned. Neither side can walk away with the money mid-job.",
-                    },
-                    {
-                      title: "Proof required, for both sides",
-                      body: "The provider uploads photos, PDFs or a link. The client sees exactly what was delivered before releasing a rupee.",
-                    },
-                    {
-                      title: "ID verification badge",
-                      body: "Providers who verify their identity stand out — and get picked first.",
-                    },
-                  ].map((item, i) => (
+                  {content.trustChecks.map((item, i) => (
                     <div key={item.title} className="flex gap-4">
                       <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cream/[0.07] text-[11px] font-semibold text-gold-300 ring-1 ring-inset ring-gold-400/25">
                         {i + 1}
@@ -713,17 +677,17 @@ export default async function Home() {
                 </div>
               </div>
 
-              {/* money-flow diagram */}
+              {/* illustrative task-terms flow; it does not indicate a payment transaction */}
               <div className="relative overflow-hidden rounded-[1.4rem] border border-cream/12 bg-cream/[0.045] p-6 shadow-[0_40px_80px_-50px_rgba(0,0,0,0.9)] backdrop-blur-sm">
                 <div className="grid-veil pointer-events-none absolute inset-0 opacity-70" aria-hidden="true" />
                 <p className="relative text-[10.5px] uppercase tracking-[0.18em] text-cream/40">
-                  Where the money sits
+                  The task, step by step
                 </p>
                 <div className="mt-5 space-y-3">
                   {[
-                    { label: "Client pays", detail: "JazzCash · Easypaisa · bank", tone: "muted" },
-                    { label: "KaamKaro escrow holds it", detail: "Until the job is confirmed", tone: "active" },
-                    { label: "Provider gets paid", detail: "Minus a flat platform fee", tone: "muted" },
+                    { label: "Scope is agreed", detail: "Deliverables · deadline · budget", tone: "muted" },
+                    { label: "Work is submitted", detail: "Files · notes · proof", tone: "active" },
+                    { label: "Client reviews", detail: "Confirm · ask · dispute", tone: "muted" },
                   ].map((row) => (
                     <div
                       key={row.label}
@@ -739,8 +703,7 @@ export default async function Home() {
                   ))}
                 </div>
                 <p className="relative mt-5 text-[11px] leading-relaxed text-cream/40">
-                  Card and wallet payouts are being rolled out; escrow logic is
-                  already live on every task.
+                  Payment status and available methods can vary. Review the exact task terms before you commit; this illustration does not imply funds have moved.
                 </p>
               </div>
             </div>
@@ -878,8 +841,8 @@ export default async function Home() {
               </h2>
               <p className="mt-4 leading-relaxed text-ink/65">
                 Generate an API key, then post and track tasks programmatically.
-                An agent can order a courier, verify a shopfront with a photo, or
-                get a document typed — with the same escrow protection humans get.
+                An agent can request a courier, verify a shopfront with a photo, or
+                get a document typed—with the same clear task scope and review steps as human clients.
               </p>
               <Link
                 href="/settings"
@@ -911,7 +874,7 @@ export default async function Home() {
   }'`}
               </pre>
               <p className="relative mt-3 text-[11px] text-cream/40">
-                Escrow, AI proof check and payouts run automatically.
+                Agents can post and track tasks. Payment methods are shown only when enabled; AI proof checks are advisory.
               </p>
             </div>
           </div>
@@ -990,14 +953,14 @@ export default async function Home() {
           <div>
             <p className="font-display text-xl text-heading">KaamKaro</p>
             <p className="mt-3 max-w-xs text-sm leading-relaxed text-ink/60">
-              A marketplace for real work in Pakistan — escrow protected,
-              AI-checked, and open to humans and AI agents alike.
+              {content.footerDescription}
             </p>
           </div>
           <div>
             <p className="mb-3 text-sm font-medium text-heading">Platform</p>
             <ul className="space-y-2 text-sm text-ink/60">
               <li><Link href="/why-kaamkaro" className="hover:text-green-700">Why KaamKaro</Link></li>
+              <li><Link href="/demo" className="hover:text-green-700">Try the interactive demo</Link></li>
               <li><Link href="/tasks" className="hover:text-green-700">Find work</Link></li>
               <li><Link href="/tools" className="hover:text-green-700">The Toolbox</Link></li>
               <li><Link href="/tasks/new" className="hover:text-green-700">Post a task</Link></li>

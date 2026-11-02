@@ -12,6 +12,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/tasks`, priority: 0.9, changeFrequency: "hourly" },
     { url: `${base}/tools`, priority: 0.9, changeFrequency: "daily" },
     { url: `${base}/why-kaamkaro`, priority: 0.8, changeFrequency: "monthly" },
+    { url: `${base}/demo`, priority: 0.8, changeFrequency: "monthly" },
     { url: `${base}/signup`, priority: 0.7 },
     { url: `${base}/login`, priority: 0.5 },
     { url: `${base}/terms`, priority: 0.3 },

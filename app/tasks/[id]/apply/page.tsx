@@ -572,14 +572,14 @@ export default function ApplyPage({
                       and when.
                     </p>
                   </div>
-                  <button
+                  {platformSettings.aiFeatures.proposalCopilotEnabled ? <button
                     type="button"
                     onClick={draftWithAi}
                     disabled={drafting}
                     className="shrink-0 rounded-full border border-green-800/30 px-3.5 py-2 text-xs font-semibold text-green-800 transition-colors hover:bg-green-950/5 disabled:opacity-50 dark:text-green-300"
                   >
                     {drafting ? "Drafting…" : "✨ Draft with AI"}
-                  </button>
+                  </button> : <span className="text-xs text-ink/40">AI drafting is paused · write your own pitch</span>}
                 </div>
 
                 <textarea

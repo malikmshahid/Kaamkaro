@@ -316,6 +316,7 @@ export const platformConfig = pgTable("platform_config", {
   commissionRatePercent: real("commission_rate_percent").notNull().default(10),
   siteContent: jsonb("site_content").$type<Record<string, unknown>>().notNull().default(sql`'{}'::jsonb`),
   marketplaceSettings: jsonb("marketplace_settings").$type<Record<string, unknown>>().notNull().default(sql`'{}'::jsonb`),
+  aiFeatures: jsonb("ai_features").$type<Record<string, unknown>>().notNull().default(sql`'{}'::jsonb`),
   updatedAt: timestamp("updated_at").notNull().default(sql`now()`),
   updatedBy: text("updated_by"),
 });

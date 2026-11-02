@@ -3,6 +3,7 @@ import { getSessionUser } from "@/lib/auth";
 import { draftTaskFromIdea } from "@/lib/aiCopilot";
 import { z } from "zod";
 import { throttle, tooManyRequests } from "@/lib/rateLimit";
+import { getPlatformSettings } from "@/lib/platformSettings";
 
 const bodySchema = z.object({
   idea: z.string().min(4, "Tell us a bit more about what you need").max(1000),
@@ -15,6 +16,10 @@ export async function POST(req: NextRequest) {
     const user = await getSessionUser();
     if (!user) {
       return NextResponse.json({ error: "Please log in first" }, { status: 401 });
+    }
+
+    if (!(await getPlatformSettings()).aiFeatures.taskCopilotEnabled) {
+      return NextResponse.json({ error: "Task-writing AI is temporarily paused. You can still fill in the task manually." }, { status: 503 });
     }
 
     // AI calls cost real money — 20 drafts per account per hour.

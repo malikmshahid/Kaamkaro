@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { tasks, users, reviews } from "@/db/schema";
+import { tasks, users } from "@/db/schema";
 import { eq, and, count } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
 import { draftProposal } from "@/lib/aiCopilot";
 import { throttle, tooManyRequests } from "@/lib/rateLimit";
 import { z } from "zod";
+import { getPlatformSettings } from "@/lib/platformSettings";
 
 const copilotSchema = z.object({
   taskId: z.string().trim().min(8, "Which task?").max(64),
@@ -23,6 +24,10 @@ export async function POST(req: NextRequest) {
   try {
     const session = await getSessionUser();
     if (!session) return NextResponse.json({ error: "Please log in first" }, { status: 401 });
+
+    if (!(await getPlatformSettings()).aiFeatures.proposalCopilotEnabled) {
+      return NextResponse.json({ error: "Proposal-writing AI is temporarily paused. Please write your proposal manually." }, { status: 503 });
+    }
 
     const aiLimit = await throttle("aiCopilot", session.userId);
     if (!aiLimit.allowed) return tooManyRequests(aiLimit);

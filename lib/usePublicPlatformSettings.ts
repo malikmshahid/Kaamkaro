@@ -16,6 +16,11 @@ export type PublicPlatformSettings = {
     secondaryCta: string;
     supportEmail: string;
   };
+  aiFeatures: {
+    taskCopilotEnabled: boolean;
+    proposalCopilotEnabled: boolean;
+    proofAssistEnabled: boolean;
+  };
   marketplace: {
     minTaskBudget: number;
     maxTaskBudget: number;
@@ -31,15 +36,16 @@ export type PublicPlatformSettings = {
 
 const FALLBACK: PublicPlatformSettings = {
   siteContent: {
-    heroEyebrow: "Escrow protected · PKR first",
+    heroEyebrow: "Clear scope · PKR first",
     heroLineOne: "Post the work.",
     heroAccent: "Pakistan",
     heroLineTwo: "gets it done.",
-    heroSubheading: "A real marketplace for local work: post a task, or order a ready-made service from a verified provider. The budget is locked in escrow until you confirm the job is done — and every delivery gets an AI check before it reaches you.",
+    heroSubheading: "A marketplace for local work: share what you need, compare real provider proposals and review the work against a clear brief. Optional AI assistance helps reduce the guesswork; people stay in control.",
     primaryCta: "Post a task — free",
     secondaryCta: "Browse open tasks",
     supportEmail: "support@kaamkaro.ai",
   },
+  aiFeatures: { taskCopilotEnabled: true, proposalCopilotEnabled: true, proofAssistEnabled: true },
   marketplace: {
     minTaskBudget: 100,
     maxTaskBudget: 5_000_000,
@@ -70,6 +76,7 @@ export function usePublicPlatformSettings() {
           ...value,
           siteContent: { ...FALLBACK.siteContent, ...value.siteContent },
           marketplace: { ...FALLBACK.marketplace, ...value.marketplace },
+          aiFeatures: { ...FALLBACK.aiFeatures, ...value.aiFeatures },
           categories: value.categories,
           categoryLabels: { ...FALLBACK.categoryLabels, ...(value.categoryLabels || {}) },
         });

@@ -9,12 +9,15 @@ import { requireAdmin } from "@/lib/adminAuth";
 import { guardRequest } from "@/lib/rateLimit";
 import {
   getPlatformSettings,
+  aiFeaturesSchema,
   marketplaceSettingsSchema,
   siteContentSchema,
 } from "@/lib/platformSettings";
 
+export const dynamic = "force-dynamic";
+
 const updateSchema = z.object({
-  section: z.enum(["siteContent", "marketplace"]),
+  section: z.enum(["siteContent", "marketplace", "aiFeatures"]),
   value: z.unknown(),
 }).strict();
 
@@ -48,7 +51,11 @@ export async function PUT(req: NextRequest) {
     if (!parsedBody.success) return NextResponse.json({ error: "Choose a valid settings section." }, { status: 400 });
 
     const { section } = parsedBody.data;
-    const schema = section === "siteContent" ? siteContentSchema : marketplaceSettingsSchema;
+    const schema = section === "siteContent"
+      ? siteContentSchema
+      : section === "marketplace"
+        ? marketplaceSettingsSchema
+        : aiFeaturesSchema;
     const parsedValue = schema.safeParse(parsedBody.data.value);
     if (!parsedValue.success) {
       return NextResponse.json({ error: parsedValue.error.issues[0]?.message || "Settings are invalid." }, { status: 400 });
@@ -56,12 +63,20 @@ export async function PUT(req: NextRequest) {
 
     const [current] = await db.select().from(platformConfig).where(eq(platformConfig.id, "default")).limit(1);
     const settings = await getPlatformSettings();
-    const beforeValue = section === "siteContent" ? settings.siteContent : settings.marketplace;
+    const beforeValue = section === "siteContent"
+      ? settings.siteContent
+      : section === "marketplace"
+        ? settings.marketplace
+        : settings.aiFeatures;
     const afterValue = parsedValue.data as Record<string, unknown>;
 
     if (current) {
       await db.update(platformConfig).set({
-        ...(section === "siteContent" ? { siteContent: afterValue } : { marketplaceSettings: afterValue }),
+        ...(section === "siteContent"
+          ? { siteContent: afterValue }
+          : section === "marketplace"
+            ? { marketplaceSettings: afterValue }
+            : { aiFeatures: afterValue }),
         updatedAt: new Date(), updatedBy: admin.id,
       }).where(eq(platformConfig.id, "default"));
     } else {
@@ -69,6 +84,7 @@ export async function PUT(req: NextRequest) {
         id: "default", commissionRatePercent: 10,
         siteContent: section === "siteContent" ? afterValue : {},
         marketplaceSettings: section === "marketplace" ? afterValue : {},
+        aiFeatures: section === "aiFeatures" ? afterValue : {},
         updatedBy: admin.id,
       });
     }

@@ -134,7 +134,7 @@ export default function NewTaskPage() {
               The more detail you give, the better your match will be.
             </p>
 
-        <div className="card-lux relative mt-8 overflow-hidden p-5 sm:p-6">
+        {platformSettings.aiFeatures.taskCopilotEnabled && <div className="card-lux relative mt-8 overflow-hidden p-5 sm:p-6">
           <div className="gold-hairline absolute inset-x-5 top-0" aria-hidden="true" />
           <div className="mb-2 flex items-center gap-2">
             <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-green-950/[0.06] text-green-800 dark:bg-green-500/15 dark:text-green-300">
@@ -170,7 +170,7 @@ export default function NewTaskPage() {
               {copilotLoading ? "Drafting..." : "Draft with AI"}
             </button>
           </form>
-        </div>
+        </div>}
 
         {copilotReasoning && (
           <p className="mb-4 rounded-xl border border-gold-500/25 bg-gold-100/40 px-4 py-2.5 text-sm text-ink/70 dark:bg-gold-500/10">
@@ -184,7 +184,7 @@ export default function NewTaskPage() {
             onClick={() => setShowManualForm(true)}
             className="mb-6 block text-sm font-medium text-ink/50 underline decoration-line underline-offset-4 transition-colors hover:text-green-800"
           >
-            Skip AI, fill the form manually
+            {platformSettings.aiFeatures.taskCopilotEnabled ? "Skip AI, fill the form manually" : "Fill in the task details"}
           </button>
         )}
 

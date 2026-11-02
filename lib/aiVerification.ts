@@ -7,11 +7,13 @@
  * client always presses the "confirm complete" button themselves. It's just
  * an extra signal to help spot fraud or mismatches quickly.
  *
- * Uses Groq (OpenAI-compatible chat completions API) with Llama 4 Scout, a
+ * Uses Groq (OpenAI-compatible chat completions API) with a
  * natively multimodal model. Requires the GROQ_API_KEY env var. If it's not
  * set, verification is skipped gracefully (the client is told to check
  * manually).
  */
+
+import { getPlatformSettings } from "@/lib/platformSettings";
 
 export type VerificationResult = {
   status: "pass" | "review_needed" | "fail" | "error";
@@ -40,6 +42,15 @@ export async function verifyTaskProof(
   taskDescription: string,
   proofUrl: string | null
 ): Promise<VerificationResult> {
+  const { aiFeatures } = await getPlatformSettings();
+  if (!aiFeatures.proofAssistEnabled) {
+    return {
+      status: "review_needed",
+      confidence: 0,
+      notes: "AI proof assistance is paused by the platform. Please review the submitted work manually.",
+    };
+  }
+
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     return {
