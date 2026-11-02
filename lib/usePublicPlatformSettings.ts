@@ -67,7 +67,7 @@ export function usePublicPlatformSettings() {
   const [settings, setSettings] = useState(FALLBACK);
   useEffect(() => {
     const controller = new AbortController();
-    fetch("/api/public/settings", { signal: controller.signal, cache: "no-store" })
+    fetch("/api/public/settings", { signal: controller.signal })
       .then((r) => (r.ok ? r.json() : null))
       .then((value) => {
         if (!value?.marketplace || !Array.isArray(value.categories)) return;

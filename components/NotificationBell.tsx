@@ -17,19 +17,69 @@ export default function NotificationBell() {
   const [items, setItems] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
+  const hasLoadedRef = useRef(false);
+  const loadingRef = useRef<Promise<number | null> | null>(null);
+  const lastLoadedAtRef = useRef(0);
 
-  async function load() {
-    const res = await fetch("/api/notifications");
-    if (!res.ok) return;
-    const data = await res.json();
-    setItems(data.notifications || []);
-    setUnreadCount(data.unreadCount || 0);
+  function load(): Promise<number | null> {
+    if (loadingRef.current) return loadingRef.current;
+    const request = (async () => {
+      try {
+        const res = await fetch("/api/notifications");
+        if (!res.ok) return null;
+        const data = await res.json();
+        const count = Number(data.unreadCount) || 0;
+        setItems(data.notifications || []);
+        setUnreadCount(count);
+        hasLoadedRef.current = true;
+        lastLoadedAtRef.current = Date.now();
+        return count;
+      } catch {
+        return null;
+      } finally {
+        loadingRef.current = null;
+      }
+    })();
+    loadingRef.current = request;
+    return request;
   }
 
   useEffect(() => {
-    load();
-    const interval = setInterval(load, 15000);
-    return () => clearInterval(interval);
+    let idleHandle: number | undefined;
+    let fallbackTimer: number | undefined;
+    const startLowPriorityLoad = () => {
+      if (document.visibilityState === "visible") void load();
+    };
+    const onVisibilityChange = () => {
+      if (
+        document.visibilityState === "visible" &&
+        Date.now() - lastLoadedAtRef.current > 30_000
+      ) {
+        void load();
+      }
+    };
+
+    // Keep notification traffic out of the page's critical first paint.
+    const idleWindow = window as unknown as {
+      requestIdleCallback?: (callback: () => void, options: { timeout: number }) => number;
+      cancelIdleCallback?: (handle: number) => void;
+    };
+    if (typeof idleWindow.requestIdleCallback === "function") {
+      idleHandle = idleWindow.requestIdleCallback(startLowPriorityLoad, { timeout: 2000 });
+    } else {
+      fallbackTimer = window.setTimeout(startLowPriorityLoad, 900);
+    }
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === "visible") void load();
+    }, 60_000);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    return () => {
+      if (idleHandle !== undefined) idleWindow.cancelIdleCallback?.(idleHandle);
+      if (fallbackTimer !== undefined) window.clearTimeout(fallbackTimer);
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
   }, []);
 
   useEffect(() => {
@@ -41,8 +91,12 @@ export default function NotificationBell() {
   }, []);
 
   async function handleOpen() {
-    setOpen((v) => !v);
-    if (unreadCount > 0) {
+    const opening = !open;
+    setOpen(opening);
+    if (!opening) return;
+
+    const count = hasLoadedRef.current ? unreadCount : (await load()) ?? 0;
+    if (count > 0) {
       await fetch("/api/notifications/read-all", { method: "POST" });
       setUnreadCount(0);
       setItems((prev) => prev.map((n) => ({ ...n, read: true })));

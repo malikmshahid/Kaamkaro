@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
@@ -94,8 +94,10 @@ export async function PUT(req: NextRequest) {
       beforeValue: beforeValue as Record<string, unknown>, afterValue,
     });
 
-    // Keep high-traffic public pages consistent with the newly saved values.
-    for (const path of ["/", "/tasks", "/tasks/new", "/tools", "/tools/new"]) revalidatePath(path);
+    // Bust the short-lived shared settings cache immediately after the write,
+    // then refresh the high-traffic pages that render those settings.
+    revalidateTag("platform-settings", { expire: 0 });
+    for (const path of ["/", "/tasks", "/tasks/new", "/tools", "/tools/new", "/api/public/settings"]) revalidatePath(path);
     return NextResponse.json({ success: true, section, savedAt: new Date().toISOString() });
   } catch (error) {
     console.error("PUT /api/admin/settings failed:", error);

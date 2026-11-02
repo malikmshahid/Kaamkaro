@@ -16,15 +16,28 @@ export type SafeUser = {
   ratingCount: number;
 };
 
+let inFlightUserRequest: Promise<SafeUser | null> | null = null;
+
+function fetchCurrentUser(): Promise<SafeUser | null> {
+  if (!inFlightUserRequest) {
+    inFlightUserRequest = fetch("/api/auth/me", { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => (data?.user ?? null) as SafeUser | null)
+      .catch(() => null)
+      .finally(() => {
+        inFlightUserRequest = null;
+      });
+  }
+  return inFlightUserRequest;
+}
+
 export function useUser() {
   const [user, setUser] = useState<SafeUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/auth/me")
-      .then((r) => r.json())
-      .then((data) => setUser(data.user))
-      .catch(() => setUser(null))
+    fetchCurrentUser()
+      .then(setUser)
       .finally(() => setLoading(false));
   }, []);
 

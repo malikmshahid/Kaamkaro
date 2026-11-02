@@ -7,6 +7,6 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const payload = publicSettingsPayload(await getPlatformSettings());
   return NextResponse.json(payload, {
-    headers: { "Cache-Control": "private, no-store, max-age=0" },
+    headers: { "Cache-Control": "public, max-age=0, s-maxage=60, stale-while-revalidate=300" },
   });
 }

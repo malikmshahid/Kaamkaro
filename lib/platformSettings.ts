@@ -3,6 +3,7 @@ import { platformConfig } from "@/db/schema";
 import { CATEGORIES } from "@/lib/constants";
 import { CURRENCIES } from "@/lib/currency";
 import { eq } from "drizzle-orm";
+import { unstable_cache } from "next/cache";
 import { z } from "zod";
 
 export const SITE_CONTENT_DEFAULTS = {
@@ -149,10 +150,26 @@ function mergeValid<T extends Record<string, unknown>>(schema: z.ZodType<T>, def
   return parsed.success ? parsed.data : defaults;
 }
 
+const readStoredPlatformSettings = unstable_cache(
+  async () => {
+    const [row] = await db
+      .select({
+        siteContent: platformConfig.siteContent,
+        marketplaceSettings: platformConfig.marketplaceSettings,
+        aiFeatures: platformConfig.aiFeatures,
+      })
+      .from(platformConfig)
+      .where(eq(platformConfig.id, "default"))
+      .limit(1);
+    return row ?? null;
+  },
+  ["kaamkaro-platform-settings-v1"],
+  { revalidate: 60, tags: ["platform-settings"] },
+);
+
 export async function getPlatformSettings(): Promise<PlatformSettings> {
   try {
-    const [row] = await db.select({ siteContent: platformConfig.siteContent, marketplaceSettings: platformConfig.marketplaceSettings, aiFeatures: platformConfig.aiFeatures })
-      .from(platformConfig).where(eq(platformConfig.id, "default")).limit(1);
+    const row = await readStoredPlatformSettings();
     return {
       siteContent: mergeValid(siteContentSchema, { ...SITE_CONTENT_DEFAULTS }, row?.siteContent),
       marketplace: mergeValid(marketplaceSettingsSchema, { ...MARKETPLACE_DEFAULTS, enabledCategories: [...MARKETPLACE_DEFAULTS.enabledCategories] }, row?.marketplaceSettings),
