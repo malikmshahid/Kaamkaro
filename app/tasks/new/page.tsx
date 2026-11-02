@@ -5,11 +5,12 @@ import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { CURRENCIES } from "@/lib/currency";
 import PriceFairness from "@/components/PriceFairness";
+import { usePublicPlatformSettings } from "@/lib/usePublicPlatformSettings";
 
 // Default the date picker to 7 days out — the poster can change it to
 // anything from 1 hour up to 90 days from now (enforced again server-side).
-function defaultExpiryLocal() {
-  const d = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+function defaultExpiryLocal(days = 7) {
+  const d = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
   d.setSeconds(0, 0);
   // toISOString gives UTC; datetime-local inputs want local wall-clock time.
   const tzOffsetMs = d.getTimezoneOffset() * 60 * 1000;
@@ -25,6 +26,7 @@ function quickPick(hoursFromNow: number) {
 
 export default function NewTaskPage() {
   const router = useRouter();
+  const platformSettings = usePublicPlatformSettings();
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -34,6 +36,7 @@ export default function NewTaskPage() {
     city: "",
     expiresAt: defaultExpiryLocal(),
   });
+  const [currencyTouched, setCurrencyTouched] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -42,6 +45,10 @@ export default function NewTaskPage() {
   const [copilotError, setCopilotError] = useState("");
   const [copilotReasoning, setCopilotReasoning] = useState("");
   const [showManualForm, setShowManualForm] = useState(false);
+
+  const enabledCategories = platformSettings.marketplace.enabledCategories;
+  const selectedCategory = enabledCategories.includes(form.category) ? form.category : enabledCategories[0] || "other";
+  const selectedCurrency = currencyTouched ? form.currency : platformSettings.marketplace.defaultCurrency;
 
   async function handleCopilot(e: React.FormEvent) {
     e.preventDefault();
@@ -60,11 +67,12 @@ export default function NewTaskPage() {
         return;
       }
       const d = data.draft;
+      setCurrencyTouched(true);
       setForm((prev) => ({
         ...prev,
         title: d.title,
         description: d.description,
-        category: d.category,
+        category: enabledCategories.includes(d.category) ? d.category : selectedCategory,
         budget: String(d.suggestedBudgetPkr),
         currency: "PKR",
         city: prev.city || d.city || "",
@@ -90,6 +98,8 @@ export default function NewTaskPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
+          category: selectedCategory,
+          currency: selectedCurrency,
           budget: Number(form.budget),
           expiresAt: new Date(form.expiresAt).toISOString(),
         }),
@@ -209,18 +219,14 @@ export default function NewTaskPage() {
               <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-ink/50">Category</label>
               <select
                 className="w-full rounded-xl border border-line bg-card px-4 py-3 text-sm shadow-lux-sm transition-shadow placeholder:text-ink/30 focus:border-green-800/40 focus:outline-none focus:ring-2 focus:ring-green-700/40"
-                value={form.category}
+                value={selectedCategory}
                 onChange={(e) =>
                   setForm({ ...form, category: e.target.value })
                 }
               >
-                <option value="delivery">Delivery</option>
-                <option value="design">Design</option>
-                <option value="coding">Coding / IT</option>
-                <option value="writing">Writing</option>
-                <option value="home">Home Services</option>
-                <option value="verification">Verification / Photo</option>
-                <option value="other">Other</option>
+                {platformSettings.categories.map((category) => (
+                  <option key={category.value} value={category.value}>{category.label}</option>
+                ))}
               </select>
             </div>
             <div>
@@ -228,8 +234,8 @@ export default function NewTaskPage() {
               <div className="flex gap-2">
                 <select
                   className="border border-line rounded-lg px-2 py-2.5 bg-card text-sm focus:outline-none focus:ring-2 focus:ring-green-700"
-                  value={form.currency}
-                  onChange={(e) => setForm({ ...form, currency: e.target.value })}
+                  value={selectedCurrency}
+                  onChange={(e) => { setCurrencyTouched(true); setForm({ ...form, currency: e.target.value }); }}
                 >
                   {CURRENCIES.map((c) => (
                     <option key={c.code} value={c.code}>
@@ -239,7 +245,9 @@ export default function NewTaskPage() {
                 </select>
                 <input
                   type="number"
-                  min="1"
+                  min={platformSettings.marketplace.minTaskBudget}
+                  max={platformSettings.marketplace.maxTaskBudget}
+                  placeholder={`${platformSettings.marketplace.minTaskBudget}–${platformSettings.marketplace.maxTaskBudget.toLocaleString()}`}
                   className="w-full rounded-xl border border-line bg-card px-4 py-3 text-sm shadow-lux-sm transition-shadow placeholder:text-ink/30 focus:border-green-800/40 focus:outline-none focus:ring-2 focus:ring-green-700/40"
                   value={form.budget}
                   onChange={(e) => setForm({ ...form, budget: e.target.value })}
@@ -254,7 +262,7 @@ export default function NewTaskPage() {
                 amount={Number(form.budget) || null}
               />
               <p className="mt-1.5 text-[11px] text-ink/40">
-                Based on real budgets on KaamKaro — not a guess. You can still post any amount.
+                Based on real budgets on KaamKaro. Platform bounds: {platformSettings.marketplace.minTaskBudget.toLocaleString()}–{platformSettings.marketplace.maxTaskBudget.toLocaleString()} {form.currency}.
               </p>
             </div>
           </div>
@@ -279,7 +287,7 @@ export default function NewTaskPage() {
                 { label: "3 days", hours: 72 },
                 { label: "7 days", hours: 168 },
                 { label: "30 days", hours: 720 },
-              ].map((opt) => (
+              ].filter((opt) => opt.hours >= platformSettings.marketplace.minTaskLifetimeHours && opt.hours <= platformSettings.marketplace.maxTaskLifetimeDays * 24).map((opt) => (
                 <button
                   key={opt.label}
                   type="button"
@@ -296,8 +304,8 @@ export default function NewTaskPage() {
               type="datetime-local"
               className="w-full rounded-xl border border-line bg-card px-4 py-3 text-sm shadow-lux-sm transition-shadow placeholder:text-ink/30 focus:border-green-800/40 focus:outline-none focus:ring-2 focus:ring-green-700/40"
               value={form.expiresAt}
-              min={quickPick(1)}
-              max={quickPick(90 * 24)}
+              min={quickPick(platformSettings.marketplace.minTaskLifetimeHours / 24)}
+              max={quickPick(platformSettings.marketplace.maxTaskLifetimeDays * 24)}
               onChange={(e) => setForm({ ...form, expiresAt: e.target.value })}
               required
             />

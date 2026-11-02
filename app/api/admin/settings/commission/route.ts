@@ -1,6 +1,7 @@
+import { randomUUID } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { platformConfig } from "@/db/schema";
+import { adminConfigAudit, platformConfig } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { requireAdmin } from "@/lib/adminAuth";
 import { z } from "zod";
@@ -60,6 +61,14 @@ export async function POST(req: NextRequest) {
         updatedBy: admin.id,
       });
     }
+
+    await db.insert(adminConfigAudit).values({
+      id: randomUUID(),
+      actorId: admin.id,
+      section: "commission",
+      beforeValue: { commissionRatePercent: existing[0]?.commissionRatePercent ?? 10 },
+      afterValue: { commissionRatePercent: parsed.data.commissionRatePercent },
+    });
 
     return NextResponse.json({ success: true });
   } catch (err) {

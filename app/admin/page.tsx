@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import { useUser } from "@/lib/useUser";
 import { formatMoney } from "@/lib/currency";
 import Tabs, { type TabItem } from "@/components/Tabs";
+import PlatformSettingsPanel from "@/components/PlatformSettingsPanel";
 
 type Stats = {
   userCount: number;
@@ -66,7 +67,7 @@ type Revenue = {
 
 export default function AdminPage() {
   const { user, loading: userLoading } = useUser();
-  const [tab, setTab] = useState<"overview" | "disputes" | "users" | "tasks" | "revenue">("overview");
+  const [tab, setTab] = useState<"overview" | "disputes" | "users" | "tasks" | "revenue" | "settings">("overview");
   const [stats, setStats] = useState<Stats | null>(null);
   const [disputes, setDisputes] = useState<AdminTask[]>([]);
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -260,6 +261,7 @@ export default function AdminPage() {
     { id: "revenue", label: "Revenue", icon: <Dot /> },
     { id: "users", label: "Users", count: users.length || undefined, icon: <Dot /> },
     { id: "tasks", label: "All tasks", count: allTasks.length || undefined, icon: <Dot /> },
+    { id: "settings", label: "Settings", icon: <Dot /> },
   ];
 
   return (
@@ -682,6 +684,8 @@ export default function AdminPage() {
               </div>
             </div>
           )}
+
+          {!loading && tab === "settings" && <PlatformSettingsPanel />}
 
           {/* ------------------------------- TASKS ----------------------------- */}
           {!loading && tab === "tasks" && (

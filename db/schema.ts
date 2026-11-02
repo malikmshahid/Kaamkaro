@@ -314,8 +314,21 @@ export const walletCredits = pgTable("wallet_credits", {
 export const platformConfig = pgTable("platform_config", {
   id: text("id").primaryKey().default("default"),
   commissionRatePercent: real("commission_rate_percent").notNull().default(10),
+  siteContent: jsonb("site_content").$type<Record<string, unknown>>().notNull().default(sql`'{}'::jsonb`),
+  marketplaceSettings: jsonb("marketplace_settings").$type<Record<string, unknown>>().notNull().default(sql`'{}'::jsonb`),
   updatedAt: timestamp("updated_at").notNull().default(sql`now()`),
   updatedBy: text("updated_by"),
+});
+
+// Append-only record of admin configuration edits. Settings snapshots exclude
+// credentials, payment ledgers, and user identity documents.
+export const adminConfigAudit = pgTable("admin_config_audit", {
+  id: text("id").primaryKey(),
+  actorId: text("actor_id").notNull(),
+  section: text("section").notNull(),
+  beforeValue: jsonb("before_value").$type<Record<string, unknown>>().notNull(),
+  afterValue: jsonb("after_value").$type<Record<string, unknown>>().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
 });
 
 export const reviews = pgTable("reviews", {

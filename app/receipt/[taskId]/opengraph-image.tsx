@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 import { getReceipt } from "@/lib/receipt";
 import { formatMoney } from "@/lib/currency";
+import { getPlatformSettings } from "@/lib/platformSettings";
 
 /**
  * Share card for a work receipt.
@@ -63,6 +64,8 @@ export default async function Image({ params }: { params: Promise<{ taskId: stri
   }
 
   const r = result.receipt;
+  const settings = await getPlatformSettings();
+  const categoryLabel = settings.marketplace.categoryLabels.find((item) => item.value === r.task.category)?.label || r.task.category.replace(/_/g, " ");
   const score = r.provider?.kaamScore;
   const verified = r.proof.verification === "pass";
 
@@ -159,7 +162,7 @@ export default async function Image({ params }: { params: Promise<{ taskId: stri
           </div>
 
           <div style={{ display: "flex", flexWrap: "wrap", marginTop: 20, gap: 10, fontSize: 19, color: "#6b6152" }}>
-            <span>{r.task.category.replace(/_/g, " ")}</span>
+            <span>{categoryLabel}</span>
             <span>·</span>
             <span>{r.task.city || "Remote"}</span>
             <span>·</span>

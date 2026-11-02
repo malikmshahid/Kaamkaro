@@ -1,10 +1,12 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import { db } from "@/db";
 import { tasks, tools, users } from "@/db/schema";
 import { and, count, desc, eq, inArray, isNotNull, sql } from "drizzle-orm";
 import { CATEGORIES, categoryLabel } from "@/lib/constants";
 import { formatMoney } from "@/lib/currency";
+import { getPlatformSettings } from "@/lib/platformSettings";
 
 /* ------------------------------------------------------------------------- *
  * Home page
@@ -16,6 +18,16 @@ import { formatMoney } from "@/lib/currency";
  * ------------------------------------------------------------------------- */
 
 export const revalidate = 60;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { siteContent } = await getPlatformSettings();
+  return {
+    title: "KaamKaro",
+    description: siteContent.heroSubheading,
+    openGraph: { title: "KaamKaro", description: siteContent.heroSubheading },
+    twitter: { title: "KaamKaro", description: siteContent.heroSubheading },
+  };
+}
 
 type HomeStats = {
   openTasks: number;
@@ -151,14 +163,6 @@ function IconPin() {
   );
 }
 
-function IconBolt() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" {...stroke} />
-    </svg>
-  );
-}
-
 function IconWallet() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
@@ -256,7 +260,11 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
 /* ----------------------------------- page --------------------------------- */
 
 export default async function Home() {
-  const stats = await getHomeStats();
+  const [stats, platformSettings] = await Promise.all([getHomeStats(), getPlatformSettings()]);
+  const content = platformSettings.siteContent;
+  const categoryName = (value: string) => platformSettings.marketplace.categoryLabels.find((item) => item.value === value)?.label || categoryLabel(value);
+  const activeCategories = CATEGORIES.filter((category) => platformSettings.marketplace.enabledCategories.includes(category.value))
+    .map((category) => ({ ...category, label: categoryName(category.value) }));
 
   const numbers = [
     { label: "Open tasks right now", value: stats.openTasks },
@@ -277,20 +285,17 @@ export default async function Home() {
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="pulse-dot relative inline-flex h-1.5 w-1.5 rounded-full bg-gold-500" />
                 </span>
-                Escrow protected · PKR first
+                {content.heroEyebrow}
               </span>
 
               <h1 className="reveal reveal-1 mt-7 font-display text-[2.75rem] font-medium leading-[0.98] tracking-[-0.02em] text-heading sm:text-[4.25rem]">
-                Post the work.
+                {content.heroLineOne}
                 <br />
-                <span className="gold-text">Pakistan</span> gets it done.
+                <span className="gold-text">{content.heroAccent}</span> {content.heroLineTwo}
               </h1>
 
               <p className="reveal reveal-2 mt-7 max-w-xl text-[17px] leading-[1.7] text-ink/70">
-                A real marketplace for local work: post a task, or order a
-                ready-made service from a verified provider. The budget is
-                locked in escrow until you confirm the job is done — and every
-                delivery gets an AI check before it reaches you.
+                {content.heroSubheading}
               </p>
 
               <div className="reveal reveal-3 mt-9 flex flex-wrap items-center gap-3">
@@ -298,14 +303,14 @@ export default async function Home() {
                   href="/tasks/new"
                   className="sheen group inline-flex items-center gap-2 rounded-full bg-green-900 px-7 py-3.5 text-sm font-semibold text-cream shadow-[0_16px_34px_-20px_rgba(11,32,22,0.85)] ring-1 ring-inset ring-white/10 transition-all hover:-translate-y-0.5 hover:bg-green-800"
                 >
-                  Post a task — free
+                  {content.primaryCta}
                   <IconArrow />
                 </Link>
                 <Link
                   href="/tasks"
                   className="glass inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-sm font-semibold text-heading transition-all hover:-translate-y-0.5 hover:bg-card"
                 >
-                  Browse open tasks
+                  {content.secondaryCta}
                 </Link>
               </div>
 
@@ -320,12 +325,7 @@ export default async function Home() {
               </p>
 
               <ul className="reveal reveal-4 mt-9 grid gap-x-4 gap-y-2.5 text-sm text-ink/60 sm:grid-cols-2">
-                {[
-                  "No signup fee, no monthly plan",
-                  "Payment released only when you confirm",
-                  "AI-checked proof on every delivery",
-                  "Works for AI agents too (API keys)",
-                ].map((item) => (
+                {content.trustPoints.map((item) => (
                   <li key={item} className="flex items-start gap-2">
                     <span className="mt-[3px] flex h-[17px] w-[17px] shrink-0 items-center justify-center rounded-full bg-green-900/8 text-green-700 dark:bg-green-500/15 dark:text-green-300">
                       <svg width="11" height="11" viewBox="0 0 16 16" aria-hidden="true">
@@ -405,7 +405,7 @@ export default async function Home() {
                         </span>
                       </div>
                       <p className="mt-1.5 flex items-center gap-1.5 text-xs text-ink/45">
-                        {categoryLabel(task.category)}
+                        {categoryName(task.category)}
                         {task.city ? ` · ${task.city}` : ""}
                       </p>
                     </Link>
@@ -471,10 +471,10 @@ export default async function Home() {
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
                 <p className="text-[10.5px] font-semibold uppercase tracking-[0.2em] text-gold-600 dark:text-gold-400">
-                  What gets done here
+                  {content.categorySectionEyebrow}
                 </p>
                 <h2 className="mt-2.5 font-display text-[1.9rem] leading-tight text-heading sm:text-[2.6rem]">
-                  Seven kinds of work, one place
+                  {activeCategories.length} {content.categorySectionTitle}
                 </h2>
               </div>
               <Link
@@ -489,7 +489,7 @@ export default async function Home() {
             </div>
 
             <div className="mt-9 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-              {CATEGORIES.map((cat) => (
+              {activeCategories.map((cat) => (
                 <Link
                   key={cat.value}
                   href={`/tasks?category=${cat.value}`}
@@ -803,7 +803,7 @@ export default async function Home() {
                               {t.title}
                             </span>
                             <span className="block truncate text-[11px] text-ink/45">
-                              {categoryLabel(t.category)}
+                              {categoryName(t.category)}
                               {t.city ? ` · ${t.city}` : ""}
                             </span>
                           </span>
@@ -850,7 +850,7 @@ export default async function Home() {
                               {t.title}
                             </span>
                             <span className="block text-[11px] text-ink/45">
-                              {categoryLabel(t.category)} · {t.deliveryDays} day delivery
+                              {categoryName(t.category)} · {t.deliveryDays} day delivery
                             </span>
                           </span>
                           <span className="tnum shrink-0 font-display text-[15px] font-semibold text-green-800 dark:text-green-300">
@@ -921,44 +921,23 @@ export default async function Home() {
         <section className="border-b border-line">
           <div className="mx-auto w-full max-w-4xl px-5 py-16 sm:px-6 md:py-20">
             <p className="text-[10.5px] font-semibold uppercase tracking-[0.2em] text-gold-600 dark:text-gold-400">
-              Straight answers
+              {content.faqEyebrow}
             </p>
             <h2 className="mt-2.5 font-display text-[1.9rem] leading-tight text-heading sm:text-[2.6rem]">
-              Questions people actually ask
+              {content.faqTitle}
             </h2>
             <div className="mt-9 divide-y divide-line/80 border-y border-line/80">
-              {[
-                {
-                  q: "When exactly does the provider get paid?",
-                  a: "The moment you press confirm. The client's budget is held by KaamKaro from the time a provider is assigned, so the money is already guaranteed — it simply moves to the provider after your approval.",
-                },
-                {
-                  q: "What if the work is wrong or fake?",
-                  a: "Don't confirm. Open a dispute and an admin reviews the proof, the chat and the AI verdict, then decides whether to release or refund. Submissions that match an earlier task byte-for-byte are flagged automatically.",
-                },
-                {
-                  q: "What does KaamKaro charge?",
-                  a: "Posting is free. A flat commission is deducted from the provider's payout on completed tasks, and it is shown in full before work begins — no hidden bidding credits, no connects.",
-                },
-                {
-                  q: "Do I need a bank account?",
-                  a: "No. You can sign up with just a phone number. Wallet and card payouts are being rolled out; until then payouts are recorded in the app and settled by the team.",
-                },
-                {
-                  q: "Can I hire from outside Pakistan?",
-                  a: "Yes — the platform is PKR-first but supports other currencies, so overseas clients can post work for Pakistani providers.",
-                },
-              ].map((item) => (
-                <details key={item.q} className="group py-4.5 transition-colors hover:bg-surface-2/40">
+              {content.faqs.map((item) => (
+                <details key={item.question} className="group py-4.5 transition-colors hover:bg-surface-2/40">
                   <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-1 text-[15px] font-semibold text-heading">
-                    {item.q}
+                    {item.question}
                     <span className="shrink-0 rounded-full border border-line p-1 text-gold-500 transition-transform group-open:rotate-45 group-open:border-gold-500/50">
                       <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
                         <path d="M8 3v10M3 8h10" {...stroke} strokeWidth={1.8} />
                       </svg>
                     </span>
                   </summary>
-                  <p className="mt-3 max-w-2xl px-1 text-sm leading-relaxed text-ink/65">{item.a}</p>
+                  <p className="mt-3 max-w-2xl px-1 text-sm leading-relaxed text-ink/65">{item.answer}</p>
                 </details>
               ))}
             </div>
@@ -978,29 +957,26 @@ export default async function Home() {
           <div className="gold-hairline absolute inset-x-0 top-0 opacity-70" aria-hidden="true" />
           <div className="relative mx-auto w-full max-w-4xl px-5 py-20 text-center sm:px-6 md:py-28">
             <p className="text-[10.5px] font-semibold uppercase tracking-[0.22em] text-gold-300">
-              Start in two minutes
+              {content.closingEyebrow}
             </p>
             <h2 className="mt-4 font-display text-[2.1rem] leading-[1.05] tracking-[-0.015em] sm:text-[3.4rem]">
-              Post the work.
-              <br />
-              Get it done today.
+              {content.closingTitle}
             </h2>
             <p className="mx-auto mt-5 max-w-xl leading-relaxed text-cream/70">
-              Free to post. Escrow protected. AI-checked. Built in Pakistan, for
-              Pakistan.
+              {content.closingBody}
             </p>
             <div className="mt-9 flex flex-wrap justify-center gap-3">
               <Link
                 href="/signup"
                 className="sheen rounded-full bg-cream px-7 py-3.5 text-sm font-semibold text-green-900 shadow-[0_18px_40px_-24px_rgba(0,0,0,0.9)] transition-all hover:-translate-y-0.5 hover:bg-gold-100"
               >
-                Create a free account
+                {content.closingPrimaryCta}
               </Link>
               <Link
                 href="/tasks"
                 className="rounded-full border border-cream/30 px-7 py-3.5 text-sm font-semibold text-cream backdrop-blur transition-all hover:-translate-y-0.5 hover:border-cream/60 hover:bg-cream/10"
               >
-                Browse tasks first
+                {content.closingSecondaryCta}
               </Link>
             </div>
           </div>
@@ -1042,6 +1018,7 @@ export default async function Home() {
             <ul className="space-y-2 text-sm text-ink/60">
               <li><Link href="/terms" className="hover:text-green-700">Terms of Service</Link></li>
               <li><Link href="/privacy" className="hover:text-green-700">Privacy Policy</Link></li>
+              <li><a href={`mailto:${content.supportEmail}`} className="hover:text-green-700">Contact support</a></li>
             </ul>
           </div>
         </div>

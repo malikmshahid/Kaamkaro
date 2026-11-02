@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import { useUser } from "@/lib/useUser";
 import { formatMoney } from "@/lib/currency";
 import { categoryLabel } from "@/lib/constants";
+import { usePublicPlatformSettings } from "@/lib/usePublicPlatformSettings";
 import type { KaamScoreResult } from "@/lib/kaamScore";
 
 type Tool = {
@@ -72,6 +73,8 @@ function MiniTool({ t }: { t: Tool }) {
 export default function ToolDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
+  const platformSettings = usePublicPlatformSettings();
+  const categoryName = (value: string) => platformSettings.categoryLabels[value] || categoryLabel(value);
   const { user, loading: userLoading } = useUser();
   const [tool, setTool] = useState<Tool | null>(null);
   const [loading, setLoading] = useState(true);
@@ -170,7 +173,7 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
             </Link>
             <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.12em]">
               <span className="rounded-full bg-green-950/5 px-2.5 py-1 font-semibold text-green-800 dark:bg-green-500/15 dark:text-green-300">
-                {categoryLabel(tool.category)}
+                {categoryName(tool.category)}
               </span>
               <span className="text-ink/45">{tool.city || "Remote"}</span>
               <span className="rounded-full bg-gold-100 px-2.5 py-1 font-semibold text-gold-500 dark:bg-gold-500/15">
@@ -409,7 +412,7 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
                 <div className={fromProvider.length > 0 ? "mt-7" : ""}>
                   <div className="mb-3 flex items-center justify-between gap-3">
                     <h2 className="font-display text-lg text-heading">
-                      Similar in {categoryLabel(tool.category)}
+                      Similar in {categoryName(tool.category)}
                     </h2>
                     <Link
                       href={`/tools?category=${tool.category}`}

@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import { useUser } from "@/lib/useUser";
 import { formatMoney } from "@/lib/currency";
 import { categoryLabel } from "@/lib/constants";
+import { usePublicPlatformSettings } from "@/lib/usePublicPlatformSettings";
 import PriceFairness from "@/components/PriceFairness";
 
 type Task = {
@@ -55,6 +56,8 @@ export default function ApplyPage({
   const { id } = use(params);
   const router = useRouter();
   const { user, loading: userLoading } = useUser();
+  const platformSettings = usePublicPlatformSettings();
+  const categoryName = (value: string) => platformSettings.categoryLabels[value] || categoryLabel(value);
 
   const [task, setTask] = useState<Task | null>(null);
   const [feed, setFeed] = useState<FeedTask | null>(null);
@@ -321,7 +324,7 @@ export default function ApplyPage({
           <div className="overflow-hidden rounded-2xl border border-line bg-card">
             <div className="bg-gradient-to-br from-green-950 to-green-800 px-5 py-6 text-cream sm:px-7">
               <p className="text-[11px] uppercase tracking-[0.14em] text-cream/60">
-                Apply · {categoryLabel(task.category)} · {task.city || "Remote"}
+                Apply · {categoryName(task.category)} · {task.city || "Remote"}
               </p>
               <h1 className="mt-2 break-words font-display text-2xl leading-tight [overflow-wrap:anywhere] sm:text-3xl">
                 {task.title}
@@ -485,7 +488,7 @@ export default function ApplyPage({
                 Applying
               </span>
               <span className="text-ink/45">
-                {categoryLabel(task.category)}
+                {categoryName(task.category)}
               </span>
               <span className="text-ink/30">·</span>
               <span className="text-ink/45">{task.city || "Remote"}</span>
@@ -884,7 +887,7 @@ export default function ApplyPage({
                 <p className="flex justify-between gap-2">
                   <span>Category</span>
                   <span className="text-cream">
-                    {categoryLabel(task.category)}
+                    {categoryName(task.category)}
                   </span>
                 </p>
                 <p className="flex justify-between gap-2">

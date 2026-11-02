@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import { getReceipt } from "@/lib/receipt";
 import { categoryLabel } from "@/lib/constants";
 import { formatMoney } from "@/lib/currency";
+import { getPlatformSettings } from "@/lib/platformSettings";
 
 /**
  * Public, shareable proof that a job was done and paid.
@@ -57,7 +58,7 @@ const VERDICT: Record<string, { label: string; tone: string }> = {
 
 export default async function ReceiptPage({ params }: Props) {
   const { taskId } = await params;
-  const result = await getReceipt(taskId);
+  const [result, platformSettings] = await Promise.all([getReceipt(taskId), getPlatformSettings()]);
 
   if (!result.ok) {
     return (
@@ -101,7 +102,7 @@ export default async function ReceiptPage({ params }: Props) {
               {r.task.title}
             </h1>
             <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink/55">
-              <span>{categoryLabel(r.task.category)}</span>
+              <span>{platformSettings.marketplace.categoryLabels.find((item) => item.value === r.task.category)?.label || categoryLabel(r.task.category)}</span>
               {r.task.city ? (
                 <>
                   <span>·</span>

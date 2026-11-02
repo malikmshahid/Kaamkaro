@@ -6,10 +6,9 @@ import { getSessionUser } from "@/lib/auth";
 import { z } from "zod";
 import { randomUUID } from "crypto";
 import { CATEGORY_VALUES, LIMITS } from "@/lib/constants";
-import { throttle, clientIp, tooManyRequests } from "@/lib/rateLimit";
-
-const MIN_LIFETIME_HOURS = 1;
-const MAX_LIFETIME_DAYS = 90;
+import { throttle, tooManyRequests } from "@/lib/rateLimit";
+import { getPlatformSettings } from "@/lib/platformSettings";
+import { CURRENCIES } from "@/lib/currency";
 
 const createTaskSchema = z.object({
   title: z
@@ -119,21 +118,32 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const settings = await getPlatformSettings();
     const { title, description, category, budget, currency, city, expiresAt } = parsed.data;
+    const policy = settings.marketplace;
+    if (!policy.enabledCategories.includes(category)) {
+      return NextResponse.json({ error: "This category is currently unavailable. Pick another category." }, { status: 400 });
+    }
+    if (budget < policy.minTaskBudget || budget > policy.maxTaskBudget) {
+      return NextResponse.json({ error: `Budget must be between ${policy.minTaskBudget.toLocaleString()} and ${policy.maxTaskBudget.toLocaleString()}.` }, { status: 400 });
+    }
+    if (currency && !CURRENCIES.some((item) => item.code === currency)) {
+      return NextResponse.json({ error: "Choose a supported currency." }, { status: 400 });
+    }
 
     const expiresAtDate = new Date(expiresAt);
     const now = Date.now();
-    const minAllowed = now + MIN_LIFETIME_HOURS * 60 * 60 * 1000;
-    const maxAllowed = now + MAX_LIFETIME_DAYS * 24 * 60 * 60 * 1000;
+    const minAllowed = now + policy.minTaskLifetimeHours * 60 * 60 * 1000;
+    const maxAllowed = now + policy.maxTaskLifetimeDays * 24 * 60 * 60 * 1000;
     if (expiresAtDate.getTime() < minAllowed) {
       return NextResponse.json(
-        { error: `Active-until must be at least ${MIN_LIFETIME_HOURS} hour(s) from now` },
+        { error: `Active-until must be at least ${policy.minTaskLifetimeHours} hour(s) from now` },
         { status: 400 }
       );
     }
     if (expiresAtDate.getTime() > maxAllowed) {
       return NextResponse.json(
-        { error: `Active-until can't be more than ${MAX_LIFETIME_DAYS} days from now` },
+        { error: `Active-until can't be more than ${policy.maxTaskLifetimeDays} days from now` },
         { status: 400 }
       );
     }
@@ -148,7 +158,7 @@ export async function POST(req: NextRequest) {
       description,
       category,
       budget,
-      currency: currency || "PKR",
+      currency: currency || policy.defaultCurrency,
       city: city || null,
       status: "open",
       expiresAt: expiresAtDate,

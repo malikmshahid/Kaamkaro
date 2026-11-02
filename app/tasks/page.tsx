@@ -5,7 +5,8 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import SaveButton from "@/components/SaveButton";
 import { formatMoney } from "@/lib/currency";
-import { CATEGORIES, categoryLabel } from "@/lib/constants";
+import { categoryLabel } from "@/lib/constants";
+import { usePublicPlatformSettings } from "@/lib/usePublicPlatformSettings";
 import { useUser } from "@/lib/useUser";
 
 type WorkTask = {
@@ -92,6 +93,7 @@ function MatchRing({ score }: { score: number }) {
 
 export default function FindWorkPage() {
   const { user, loading: userLoading } = useUser();
+  const platformSettings = usePublicPlatformSettings();
   const [data, setData] = useState<Payload | null>(null);
   const [loading, setLoading] = useState(true);
   // Filters re-query constantly. Only the very first load gets a skeleton —
@@ -143,7 +145,8 @@ export default function FindWorkPage() {
     [tasks, sort]
   );
   const rest = top ? tasks.slice(1) : tasks;
-  const categories = CATEGORIES.filter(
+  const categoryName = (value: string) => platformSettings.categoryLabels[value] || categoryLabel(value);
+  const categories = platformSettings.categories.filter(
     (c) => (data?.facets.categories[c.value] || 0) > 0 || category === c.value
   );
 
@@ -399,7 +402,7 @@ export default function FindWorkPage() {
                 <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0 sm:flex-1">
                     <div className="mb-2 flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-wide text-cream/60">
-                      <span className="rounded-full bg-cream/15 px-2 py-0.5">{categoryLabel(top.category)}</span>
+                      <span className="rounded-full bg-cream/15 px-2 py-0.5">{categoryName(top.category)}</span>
                       <span>{top.city || "Remote"}</span>
                       <span>·</span>
                       <span>{ago(top.createdAt)}</span>
@@ -463,7 +466,7 @@ export default function FindWorkPage() {
                     <div className="mb-3 flex items-start justify-between gap-3">
                       <div className="flex min-w-0 flex-wrap items-center gap-1.5 text-[11px] uppercase tracking-wide">
                         <span className="rounded-full bg-green-950/5 px-2 py-0.5 font-semibold text-green-800 dark:bg-green-500/15 dark:text-green-300">
-                          {categoryLabel(t.category)}
+                          {categoryName(t.category)}
                         </span>
                         {fresh && (
                           <span className="flex items-center gap-1 rounded-full bg-gold-100 px-2 py-0.5 font-semibold text-gold-500 dark:bg-gold-500/15">

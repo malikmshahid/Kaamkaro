@@ -7,6 +7,8 @@ import { z } from "zod";
 import { randomUUID } from "crypto";
 import { CATEGORY_VALUES, LIMITS } from "@/lib/constants";
 import { throttle, tooManyRequests } from "@/lib/rateLimit";
+import { getPlatformSettings } from "@/lib/platformSettings";
+import { CURRENCIES } from "@/lib/currency";
 
 const createToolSchema = z.object({
   title: z
@@ -101,7 +103,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const settings = await getPlatformSettings();
     const { title, description, category, price, currency, deliveryDays, city } = parsed.data;
+    if (!settings.marketplace.enabledCategories.includes(category)) {
+      return NextResponse.json({ error: "This category is currently unavailable. Pick another category." }, { status: 400 });
+    }
+    if (currency && !CURRENCIES.some((item) => item.code === currency)) {
+      return NextResponse.json({ error: "Choose a supported currency." }, { status: 400 });
+    }
     const id = randomUUID();
 
     await db.insert(tools).values({
@@ -111,7 +120,7 @@ export async function POST(req: NextRequest) {
       description,
       category,
       price,
-      currency: currency || "PKR",
+      currency: currency || settings.marketplace.defaultCurrency,
       deliveryDays,
       city: city || null,
       status: "active",

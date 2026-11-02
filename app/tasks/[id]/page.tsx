@@ -8,6 +8,7 @@ import PriceFairness from "@/components/PriceFairness";
 import { useUser } from "@/lib/useUser";
 import { formatMoney } from "@/lib/currency";
 import { categoryLabel } from "@/lib/constants";
+import { usePublicPlatformSettings } from "@/lib/usePublicPlatformSettings";
 import { proofDisplayUrl, isImageRef } from "@/lib/proof";
 
 type Task = {
@@ -83,6 +84,8 @@ export default function TaskDetailPage({
 }) {
   const { id } = use(params);
   const { user } = useUser();
+  const platformSettings = usePublicPlatformSettings();
+  const categoryName = (value: string) => platformSettings.categoryLabels[value] || categoryLabel(value);
   const [task, setTask] = useState<Task | null>(null);
   const [applications, setApplications] = useState<Application[]>([]);
   const [myApplication, setMyApplication] = useState<Application | null>(null);
@@ -359,7 +362,7 @@ export default function TaskDetailPage({
 
             <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.12em]">
               <span className="rounded-full bg-green-950/5 px-2.5 py-1 font-semibold text-green-800 dark:bg-green-500/15 dark:text-green-300">
-                {categoryLabel(task.category)}
+                {categoryName(task.category)}
               </span>
               <span className="text-ink/45">{task.city || "Remote"}</span>
               {task.postedByType === "ai_agent" && (
@@ -1110,7 +1113,7 @@ export default function TaskDetailPage({
                 <p className="flex items-center justify-between gap-2">
                   <span className="text-ink/50">Category</span>
                   <span className="truncate text-ink/75">
-                    {categoryLabel(task.category)}
+                    {categoryName(task.category)}
                   </span>
                 </p>
                 <p className="flex items-center justify-between gap-2">

@@ -5,16 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { CURRENCIES, formatMoney } from "@/lib/currency";
-
-const CATEGORIES = [
-  { value: "delivery", label: "Delivery" },
-  { value: "design", label: "Design" },
-  { value: "coding", label: "Coding / IT" },
-  { value: "writing", label: "Writing" },
-  { value: "home", label: "Home services" },
-  { value: "verification", label: "Verification / Photo" },
-  { value: "other", label: "Other" },
-] as const;
+import { usePublicPlatformSettings } from "@/lib/usePublicPlatformSettings";
 
 const field =
   "w-full rounded-xl border border-line bg-card px-4 py-3 text-sm shadow-lux-sm outline-none transition placeholder:text-ink/30 focus:border-gold-500/60 focus:ring-2 focus:ring-gold-500/20";
@@ -23,6 +14,7 @@ const labelStyle =
 
 export default function NewToolPage() {
   const router = useRouter();
+  const platformSettings = usePublicPlatformSettings();
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -32,8 +24,13 @@ export default function NewToolPage() {
     deliveryDays: "1",
     city: "",
   });
+  const [currencyTouched, setCurrencyTouched] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const enabledCategories = platformSettings.marketplace.enabledCategories;
+  const selectedCategory = enabledCategories.includes(form.category) ? form.category : enabledCategories[0] || "other";
+  const selectedCurrency = currencyTouched ? form.currency : platformSettings.marketplace.defaultCurrency;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -45,6 +42,8 @@ export default function NewToolPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
+          category: selectedCategory,
+          currency: selectedCurrency,
           price: Number(form.price),
           deliveryDays: Number(form.deliveryDays),
         }),
@@ -129,10 +128,10 @@ export default function NewToolPage() {
                   <select
                     id="category"
                     className={field}
-                    value={form.category}
+                    value={selectedCategory}
                     onChange={(e) => setForm({ ...form, category: e.target.value })}
                   >
-                    {CATEGORIES.map((c) => (
+                    {platformSettings.categories.map((c) => (
                       <option key={c.value} value={c.value}>
                         {c.label}
                       </option>
@@ -147,8 +146,8 @@ export default function NewToolPage() {
                     <select
                       aria-label="Currency"
                       className="rounded-xl border border-line bg-card px-2.5 py-3 text-sm shadow-lux-sm outline-none focus:border-gold-500/60"
-                      value={form.currency}
-                      onChange={(e) => setForm({ ...form, currency: e.target.value })}
+                      value={selectedCurrency}
+                      onChange={(e) => { setCurrencyTouched(true); setForm({ ...form, currency: e.target.value }); }}
                     >
                       {CURRENCIES.map((c) => (
                         <option key={c.code} value={c.code}>
@@ -232,7 +231,7 @@ export default function NewToolPage() {
               {showEarnings ? (
                 <>
                   <p className="tnum mt-1 font-display text-[1.9rem] leading-none text-heading">
-                    {formatMoney(priceNumber * 0.9, form.currency)}
+                    {formatMoney(priceNumber * 0.9, selectedCurrency)}
                   </p>
                   <p className="mt-2 text-[12px] text-ink/50">
                     After the 10% platform fee. Buyers pay the listed price; nothing is hidden from

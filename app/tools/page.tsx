@@ -5,7 +5,8 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import SaveButton from "@/components/SaveButton";
 import { formatMoney } from "@/lib/currency";
-import { CATEGORIES, categoryLabel } from "@/lib/constants";
+import { categoryLabel } from "@/lib/constants";
+import { usePublicPlatformSettings } from "@/lib/usePublicPlatformSettings";
 import { useUser } from "@/lib/useUser";
 
 type Tool = {
@@ -83,6 +84,7 @@ function deliveryLabel(days: number) {
 
 export default function ToolboxPage() {
   const { user } = useUser();
+  const platformSettings = usePublicPlatformSettings();
   const [data, setData] = useState<Payload | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -151,7 +153,8 @@ export default function ToolboxPage() {
 
   const tools = data?.tools || [];
   const stats = data?.stats;
-  const categories = CATEGORIES.filter(
+  const categoryName = (value: string) => platformSettings.categoryLabels[value] || categoryLabel(value);
+  const categories = platformSettings.categories.filter(
     (c) => (data?.facets.categories[c.value] || 0) > 0 || category === c.value
   );
   const filtersOn = Boolean(q || category || maxPrice || maxDays);
@@ -425,7 +428,7 @@ export default function ToolboxPage() {
                 <div className="relative min-w-0">
                   <div className="mb-2 flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-wide text-cream/60">
                     <span className="rounded-full bg-cream/15 px-2 py-0.5">
-                      {categoryLabel(spotlight.category)}
+                      {categoryName(spotlight.category)}
                     </span>
                     <span>{spotlight.city || "Remote"}</span>
                     <span className="rounded-full bg-gold-500/25 px-2 py-0.5 text-gold-100">
@@ -481,7 +484,7 @@ export default function ToolboxPage() {
                     <div className="mb-3 flex items-start justify-between gap-2">
                       <div className="flex min-w-0 flex-wrap items-center gap-1.5 text-[11px] uppercase tracking-wide">
                         <span className="rounded-full bg-green-950/5 px-2 py-0.5 font-semibold text-green-800 dark:bg-green-500/15 dark:text-green-300">
-                          {categoryLabel(t.category)}
+                          {categoryName(t.category)}
                         </span>
                         {fresh && (
                           <span className="rounded-full bg-gold-100 px-2 py-0.5 font-semibold text-gold-500 dark:bg-gold-500/15">

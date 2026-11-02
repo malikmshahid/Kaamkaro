@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { formatMoney } from "@/lib/currency";
+import { usePublicPlatformSettings } from "@/lib/usePublicPlatformSettings";
 
 type AgentListing = {
   id: string;
@@ -17,18 +18,8 @@ type AgentListing = {
   ratingCount: number;
 };
 
-const CATEGORIES = [
-  { value: "", label: "All categories" },
-  { value: "delivery", label: "Delivery" },
-  { value: "design", label: "Design" },
-  { value: "coding", label: "Coding / IT" },
-  { value: "writing", label: "Writing" },
-  { value: "home", label: "Home services" },
-  { value: "verification", label: "Verification / Photo" },
-  { value: "other", label: "Other" },
-] as const;
-
 export default function AgentsPage() {
+  const platformSettings = usePublicPlatformSettings();
   const [agents, setAgents] = useState<AgentListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState("");
@@ -99,10 +90,9 @@ export default function AgentsPage() {
                 onChange={(e) => setCategory(e.target.value)}
                 aria-label="Filter by category"
               >
-                {CATEGORIES.map((c) => (
-                  <option key={c.value} value={c.value}>
-                    {c.label}
-                  </option>
+                <option value="">All categories</option>
+                {platformSettings.categories.map((c) => (
+                  <option key={c.value} value={c.value}>{c.label}</option>
                 ))}
               </select>
             </div>

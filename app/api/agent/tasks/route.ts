@@ -6,12 +6,15 @@ import { authenticateAgent } from "@/lib/agentAuth";
 import { throttleAgent, tooManyRequests, guardRequest } from "@/lib/rateLimit";
 import { z } from "zod";
 import { randomUUID } from "crypto";
+import { getPlatformSettings } from "@/lib/platformSettings";
+import { CURRENCIES } from "@/lib/currency";
 
 const createTaskSchema = z.object({
   title: z.string().min(3),
   description: z.string().min(10),
   category: z.string().min(2),
   budget: z.number().positive(),
+  currency: z.string().max(8).optional(),
   city: z.string().optional(),
 });
 
@@ -75,7 +78,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { title, description, category, budget, city } = parsed.data;
+    const settings = await getPlatformSettings();
+    const { title, description, category, budget, currency, city } = parsed.data;
+    const policy = settings.marketplace;
+    if (!policy.enabledCategories.includes(category)) {
+      return NextResponse.json({ error: "This category is currently unavailable." }, { status: 400 });
+    }
+    if (budget < policy.minTaskBudget || budget > policy.maxTaskBudget) {
+      return NextResponse.json({ error: `Budget must be between ${policy.minTaskBudget.toLocaleString()} and ${policy.maxTaskBudget.toLocaleString()}.` }, { status: 400 });
+    }
+    if (currency && !CURRENCIES.some((item) => item.code === currency)) {
+      return NextResponse.json({ error: "Choose a supported currency." }, { status: 400 });
+    }
+    const defaultDurationDays = Math.min(Math.max(7, Math.ceil(policy.minTaskLifetimeHours / 24)), policy.maxTaskLifetimeDays);
+    const expiresAt = new Date(Date.now() + defaultDurationDays * 24 * 60 * 60 * 1000);
     const id = randomUUID();
 
     await db.insert(tasks).values({
@@ -86,8 +102,10 @@ export async function POST(req: NextRequest) {
       description,
       category,
       budget,
+      currency: currency || policy.defaultCurrency,
       city: city || null,
       status: "open",
+      expiresAt,
     });
 
     return NextResponse.json({ success: true, taskId: id });
