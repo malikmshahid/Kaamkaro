@@ -79,6 +79,8 @@ export const tasks = pgTable("tasks", {
     .default("human"),
   title: text("title").notNull(),
   description: text("description").notNull(),
+  // Optional, client-defined deliverables make the expected outcome easier to review.
+  deliverables: text("deliverables").array().notNull().default(sql`'{}'::text[]`),
   category: text("category").notNull(),
   budget: real("budget").notNull(),
   currency: text("currency").notNull().default("PKR"),

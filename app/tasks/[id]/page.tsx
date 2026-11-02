@@ -15,6 +15,7 @@ type Task = {
   id: string;
   title: string;
   description: string;
+  deliverables?: string[] | null;
   category: string;
   budget: number;
   currency: string;
@@ -420,6 +421,28 @@ export default function TaskDetailPage({
               </p>
             </div>
 
+            {task.deliverables?.some((item) => item.trim()) && (
+              <section className="card-lux relative overflow-hidden p-5 sm:p-6" aria-labelledby="task-deliverables-heading">
+                <div className="gold-hairline absolute inset-x-6 top-0 opacity-70" aria-hidden="true" />
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-green-800/70 dark:text-green-300/70">Deliverables checklist</p>
+                    <h2 id="task-deliverables-heading" className="mt-1 font-display text-xl text-heading">What needs to be delivered</h2>
+                  </div>
+                  <span className="rounded-full border border-line bg-card px-2.5 py-1 text-xs text-ink/55">{task.deliverables.filter((item) => item.trim()).length} items</span>
+                </div>
+                <ol className="mt-4 space-y-2.5">
+                  {task.deliverables.filter((item) => item.trim()).map((item, index) => (
+                    <li key={`${index}-${item}`} className="flex items-start gap-3 rounded-xl border border-line/70 bg-card/60 px-3.5 py-3 text-sm leading-relaxed text-ink/75">
+                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-green-900/10 text-[11px] font-semibold text-green-800 dark:bg-green-400/10 dark:text-green-300">{index + 1}</span>
+                      <span className="min-w-0 break-words">{item}</span>
+                    </li>
+                  ))}
+                </ol>
+                <p className="mt-3 text-xs leading-relaxed text-ink/45">These are the outcomes requested in the task. Confirm any changes together in messages before proceeding.</p>
+              </section>
+            )}
+
             {notice && (
               <p className="text-sm bg-gold-100 text-gold-500 rounded-lg px-4 py-2 mb-6">
                 {notice}
@@ -717,6 +740,11 @@ export default function TaskDetailPage({
                   className="mb-10 border border-line rounded-xl p-6 bg-card space-y-3"
                 >
                   <p className="font-semibold text-heading">Submit Your Work</p>
+                  {task.deliverables?.some((item) => item.trim()) && (
+                    <p className="rounded-xl border border-line bg-paper px-3.5 py-2.5 text-xs leading-relaxed text-ink/60">
+                      Refer to the requested outcomes above and explain in your note where each item is included in the submission.
+                    </p>
+                  )}
                   {payment.commissionAmount > 0 && (
                     <p className="text-xs text-ink/50 bg-paper rounded-lg px-3 py-2">
                       Escrow held:{" "}

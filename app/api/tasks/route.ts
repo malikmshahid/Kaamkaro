@@ -24,6 +24,7 @@ const createTaskSchema = z.object({
       LIMITS.taskDescription,
       `Description can't be longer than ${LIMITS.taskDescription} characters`
     ),
+  deliverables: z.array(z.string().trim().min(3).max(140)).max(6).optional().default([]),
   // Only the seven real categories get in — "hacking" used to be stored happily.
   category: z
     .string()
@@ -119,7 +120,7 @@ export async function POST(req: NextRequest) {
     }
 
     const settings = await getPlatformSettings();
-    const { title, description, category, budget, currency, city, expiresAt } = parsed.data;
+    const { title, description, deliverables, category, budget, currency, city, expiresAt } = parsed.data;
     const policy = settings.marketplace;
     if (!policy.enabledCategories.includes(category)) {
       return NextResponse.json({ error: "This category is currently unavailable. Pick another category." }, { status: 400 });
@@ -156,6 +157,7 @@ export async function POST(req: NextRequest) {
       postedByType: "human",
       title,
       description,
+      deliverables,
       category,
       budget,
       currency: currency || policy.defaultCurrency,
