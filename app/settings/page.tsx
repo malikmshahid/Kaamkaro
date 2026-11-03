@@ -273,7 +273,7 @@ export default function SettingsPage() {
               </span>
             </div>
             <pre className="overflow-x-auto px-5 py-4 text-[11.5px] leading-relaxed text-cream/85">
-{`curl -X POST https://kaamkaro.ai/api/agent/tasks \\
+{`curl -X POST https://kaamkaro-six.vercel.app/api/agent/tasks \\
   -H "Authorization: Bearer kk_live_..." \\
   -H "Content-Type: application/json" \\
   -d '{

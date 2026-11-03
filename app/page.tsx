@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import { db } from "@/db";
 import { tasks, tools, users } from "@/db/schema";
-import { and, count, desc, eq, inArray, isNotNull, sql } from "drizzle-orm";
+import { and, count, desc, eq, gt, inArray, isNotNull, isNull, or, sql } from "drizzle-orm";
 import { CATEGORIES, categoryLabel } from "@/lib/constants";
 import { formatMoney } from "@/lib/currency";
 import { getPlatformSettings } from "@/lib/platformSettings";
@@ -21,11 +21,14 @@ export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   const { siteContent } = await getPlatformSettings();
+  const title = "Task & Service Marketplace in Pakistan | KaamKaro";
+  const description = siteContent.heroSubheading.replace(/\s+/g, " ").trim().slice(0, 160);
   return {
-    title: "KaamKaro",
-    description: siteContent.heroSubheading,
-    openGraph: { title: "KaamKaro", description: siteContent.heroSubheading },
-    twitter: { title: "KaamKaro", description: siteContent.heroSubheading },
+    title: { absolute: title },
+    description,
+    alternates: { canonical: "/" },
+    openGraph: { title, description, url: "/" },
+    twitter: { title, description },
   };
 }
 
@@ -65,8 +68,9 @@ const EMPTY: HomeStats = {
 
 async function getHomeStats(): Promise<HomeStats> {
   try {
+    const activeExpiry = or(isNull(tasks.expiresAt), gt(tasks.expiresAt, new Date()))!;
     const [openRes, providerRes, cityRes, toolRes, recent, featured, byCategory] = await Promise.all([
-      db.select({ value: count() }).from(tasks).where(eq(tasks.status, "open")),
+      db.select({ value: count() }).from(tasks).where(and(eq(tasks.status, "open"), activeExpiry)),
       db
         .select({ value: count() })
         .from(users)
@@ -74,7 +78,7 @@ async function getHomeStats(): Promise<HomeStats> {
       db
         .select({ value: sql<number>`count(distinct ${tasks.city})` })
         .from(tasks)
-        .where(and(eq(tasks.status, "open"), isNotNull(tasks.city))),
+        .where(and(eq(tasks.status, "open"), activeExpiry, isNotNull(tasks.city))),
       db.select({ value: count() }).from(tools).where(eq(tools.status, "active")),
       db
         .select({
@@ -86,7 +90,7 @@ async function getHomeStats(): Promise<HomeStats> {
           city: tasks.city,
         })
         .from(tasks)
-        .where(eq(tasks.status, "open"))
+        .where(and(eq(tasks.status, "open"), activeExpiry))
         .orderBy(desc(tasks.createdAt))
         .limit(3),
       db
@@ -105,7 +109,7 @@ async function getHomeStats(): Promise<HomeStats> {
       db
         .select({ category: tasks.category, value: count() })
         .from(tasks)
-        .where(eq(tasks.status, "open"))
+        .where(and(eq(tasks.status, "open"), activeExpiry))
         .groupBy(tasks.category),
     ]);
 
@@ -272,10 +276,23 @@ export default async function Home() {
     { label: "Cities covered", value: stats.cities },
     { label: "Ready-to-order services", value: stats.toolbox },
   ];
+  const faqStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: content.faqs.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: { "@type": "Answer", text: item.answer },
+    })),
+  };
 
   return (
     <>
       <Navbar />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqStructuredData).replace(/</g, "\\u003c") }}
+      />
       <main className="flex-1">
         {/* ------------------------------- HERO ------------------------------- */}
         <section className="aurora grain relative isolate overflow-hidden border-b border-line">
@@ -862,7 +879,7 @@ export default async function Home() {
                 </span>
               </div>
               <pre className="relative overflow-x-auto text-[12.5px] leading-relaxed text-cream/85">
-{`curl -X POST https://kaamkaro.ai/api/agent/tasks \\
+{`curl -X POST https://kaamkaro-six.vercel.app/api/agent/tasks \\
   -H "Authorization: Bearer $KAAMKARO_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -959,9 +976,11 @@ export default async function Home() {
           <div>
             <p className="mb-3 text-sm font-medium text-heading">Platform</p>
             <ul className="space-y-2 text-sm text-ink/60">
-              <li><Link href="/why-kaamkaro" className="hover:text-green-700">Why KaamKaro</Link></li>
-              <li><Link href="/demo" className="hover:text-green-700">Try the interactive demo</Link></li>
-              <li><Link href="/tasks" className="hover:text-green-700">Find work</Link></li>
+              <li><Link href="/why-kaamkaro" className="hover:text-green-700">How KaamKaro works</Link></li>
+              <li><Link href="/for-clients" className="hover:text-green-700">Hire with KaamKaro</Link></li>
+              <li><Link href="/for-providers" className="hover:text-green-700">Find work in Pakistan</Link></li>
+              <li><Link href="/demo" className="hover:text-green-700">Watch the product demo</Link></li>
+              <li><Link href="/tasks" className="hover:text-green-700">Browse open tasks</Link></li>
               <li><Link href="/tools" className="hover:text-green-700">The Toolbox</Link></li>
               <li><Link href="/tasks/new" className="hover:text-green-700">Post a task</Link></li>
               <li><Link href="/agents" className="hover:text-green-700">AI agents</Link></li>

@@ -18,7 +18,7 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://kaamkaro.ai";
+const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://kaamkaro-six.vercel.app").replace(/\/$/, "");
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -33,28 +33,33 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "KaamKaro",
+    default: "Task & Service Marketplace in Pakistan | KaamKaro",
     template: "%s | KaamKaro",
   },
   description:
-    "Insaan aur AI dono ke liye — Pakistan ka pehla hybrid task marketplace. Post a task or order a ready-made gig in PKR, with escrow-held payment.",
+    "Post a local or digital task in Pakistan, compare provider proposals, or browse ready-made services. PKR-first, with optional AI assistance and human-led review.",
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
+    locale: "en_PK",
     siteName: "KaamKaro",
     url: siteUrl,
-    title: "KaamKaro — Post the work. Pakistan gets it done.",
+    title: "KaamKaro — Pakistan Task & Service Marketplace",
     description:
-      "Post a task or order a ready-to-go gig from a Pakistani provider. Escrow-held, PKR-first, and open to AI agents.",
-    images: [{ url: "/og.png", width: 1200, height: 630, alt: "KaamKaro — Pakistan ka apna marketplace" }],
+      "Post a task, compare provider proposals or browse ready-made services in Pakistan. Clear deliverables, optional AI assistance and human review.",
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "KaamKaro — task and service marketplace in Pakistan" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "KaamKaro — Post the work. Pakistan gets it done.",
-    description: "Escrow-held tasks and instant gigs from Pakistani providers. Open to AI agents too.",
+    title: "KaamKaro — Pakistan Task & Service Marketplace",
+    description: "Post a task, compare proposals or browse ready-made services in Pakistan.",
     images: ["/og.png"],
   },
-  robots: { index: true, follow: true },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-video-preview": -1, "max-snippet": -1 },
+  },
   manifest: "/manifest.webmanifest",
   applicationName: "KaamKaro",
   appleWebApp: { capable: true, title: "KaamKaro", statusBarStyle: "default" },
@@ -68,11 +73,7 @@ export const metadata: Metadata = {
   formatDetection: { telephone: false },
 };
 
-/**
- * Structured data. Google reads this to build the sitelinks search box and to
- * understand that KaamKaro is a local-services marketplace operating in PKR —
- * not another global freelance board.
- */
+/** Accurate organization and website entity metadata shared across public pages. */
 const structuredData = {
   "@context": "https://schema.org",
   "@graph": [
@@ -83,36 +84,16 @@ const structuredData = {
       url: siteUrl,
       logo: `${siteUrl}/icon-512.png`,
       description:
-        "Pakistan ka pehla hybrid task marketplace — post a task for a human or an AI agent, with payment held in escrow until the work is verified.",
-      founded: "2026",
+        "A Pakistan-focused online marketplace where clients can post local or digital tasks, compare provider proposals, and browse ready-made services.",
       areaServed: { "@type": "Country", name: "Pakistan" },
-      sameAs: [] as string[],
     },
     {
       "@type": "WebSite",
       "@id": `${siteUrl}/#website`,
       url: siteUrl,
       name: "KaamKaro",
-      inLanguage: "en-PK",
+      inLanguage: ["en-PK", "ur-PK"],
       publisher: { "@id": `${siteUrl}/#organization` },
-      potentialAction: {
-        "@type": "SearchAction",
-        target: { "@type": "EntryPoint", urlTemplate: `${siteUrl}/tasks?q={search_term_string}` },
-        "query-input": "required name=search_term_string",
-      },
-    },
-    {
-      "@type": "Service",
-      name: "KaamKaro escrow task marketplace",
-      serviceType: "Local task marketplace with escrow and AI agents",
-      provider: { "@id": `${siteUrl}/#organization` },
-      areaServed: { "@type": "Country", name: "Pakistan" },
-      offers: {
-        "@type": "Offer",
-        priceCurrency: "PKR",
-        description:
-          "Post a task with a fixed budget in PKR. Funds are held in escrow and released only when the work is verified.",
-      },
     },
   ],
 };
@@ -136,7 +117,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="en-PK"
       className={`${fraunces.variable} ${inter.variable} h-full antialiased`}
       suppressHydrationWarning
     >

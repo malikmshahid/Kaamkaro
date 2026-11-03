@@ -61,6 +61,32 @@ export default function DemoRoom() {
         </div>
       </section>
 
+      <section aria-labelledby="demo-video-title" className="mx-auto w-full max-w-5xl px-5 py-9 sm:px-6 sm:py-12">
+        <div className="mb-4 max-w-3xl">
+          <p className="text-[10px] font-semibold uppercase tracking-[.18em] text-gold-600 dark:text-gold-300">53-second product video · Urdu narration</p>
+          <h2 id="demo-video-title" className="mt-2 font-display text-2xl text-heading sm:text-3xl">Watch the KaamKaro workflow</h2>
+          <p className="mt-2 text-sm leading-relaxed text-ink/60">This screen recording uses the clearly labelled sample demo. It does not create a task, show a real provider or make a payment.</p>
+        </div>
+        <video
+          className="w-full rounded-2xl border border-line bg-green-950 shadow-lux-lg"
+          controls
+          playsInline
+          preload="metadata"
+          poster="/kaamkaro-demo-poster.png"
+          aria-label="Urdu-narrated KaamKaro product demo with English captions"
+        >
+          <source src="/kaamkaro-demo.mp4" type="video/mp4" />
+          <track kind="captions" src="/kaamkaro-demo.en.vtt" srcLang="en" label="English" default />
+          Your browser does not support embedded video. <a href="/kaamkaro-demo.mp4">Download the KaamKaro demo video</a>.
+        </video>
+        <details className="mt-4 rounded-xl border border-line bg-card px-4 py-3">
+          <summary className="cursor-pointer text-sm font-semibold text-heading">Read the Urdu narration transcript</summary>
+          <p lang="ur-PK" dir="rtl" className="mt-3 text-right text-sm leading-8 text-ink/65">
+            پاکستان میں کام کرواتے وقت صرف کسی کا پروفائل دیکھنا کافی نہیں۔ کام کیا ہے، مکمل کب سمجھا جائے گا، اور ثبوت کیسے پرکھیں گے—یہ پہلے واضح ہونا چاہیے۔ KaamKaro پر اپنی ضرورت English، Urdu یا Roman Urdu میں لکھیں۔ یہ demo گھر کی بیکری کے logo کی فرضی مثال دکھاتا ہے۔ Brief میں deliverables واضح کریں۔ پھر دیکھیں کہ skills، location اور available trust signals سے provider match کیوں relevant ہو سکتا ہے۔ کام جمع ہونے پر اصل فائلوں کو طے شدہ scope کے مطابق review کریں۔ AI مددگار اشارے دے سکتا ہے، مگر فیصلہ انسان کرتا ہے۔ آخر میں sample work receipt دیکھیں—یہ حقیقی record نہیں۔ 45-second interactive demo آزما کر دیکھیں؛ کوئی real task post نہیں ہوتی، کوئی provider شامل نہیں ہوتا، اور کوئی payment نہیں ہوتی۔
+          </p>
+        </details>
+      </section>
+
       <section className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
         <div className="grid items-start gap-5 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-7">
           <aside className="card-lux rounded-2xl p-4 sm:p-5">

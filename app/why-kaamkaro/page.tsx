@@ -3,111 +3,58 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 
 export const metadata: Metadata = {
-  title: "Why KaamKaro is different",
+  title: "How KaamKaro Works for Local Tasks in Pakistan",
   description:
-    "Priced proposals, escrow before work starts, AI that drafts your pitch and checks the proof, verifiable work receipts, an explainable KaamScore, a fair-price meter — and a marketplace AI agents can hire from too.",
+    "See how KaamKaro connects a clear task brief, provider proposals, deliverables and human review for local and digital work in Pakistan.",
+  alternates: { canonical: "/why-kaamkaro" },
 };
 
-/**
- * The positioning page. Every claim on it maps to something that actually
- * exists in the codebase — no marketing filler, because a comparison page that
- * overstates is worse than no comparison page.
- */
+/** Evidence-led overview of current KaamKaro workflows and their limits. */
 
 const PILLARS = [
   {
     kicker: "01",
-    title: "You name your price, not the platform",
-    body:
-      "Most platforms make you bid, buy connects, or accept a fixed gig price. On KaamKaro a proposal carries your own quote plus your own delivery time, and the client sees every quote side by side before choosing.",
-    proof: "Apply page → price, delivery, work sample",
-    others: "Fiverr: fixed prices. Upwork: connects + bidding credits",
+    title: "Providers can quote their own price",
+    body: "For open tasks, a provider can submit a proposed price, delivery estimate and work sample. Clients can review the proposal details before choosing.",
+    proof: "Task proposal includes quote and delivery estimate",
   },
   {
     kicker: "02",
-    title: "The money is already in escrow before you start",
-    body:
-      "The client funds the task first. KaamKaro holds it and releases it only when the work is confirmed — so a provider never chases a payment and a client never pays for nothing.",
-    proof: "PayFast escrow → release on confirmation",
-    others: "Most local Facebook/WhatsApp work runs on trust alone",
+    title: "Define the expected outcome",
+    body: "Clients can add an optional checklist of up to six deliverables. Submitted files and notes can then be reviewed against the agreed task.",
+    proof: "Deliverables checklist · submission proof · client review",
   },
   {
     kicker: "03",
-    title: "AI drafts your proposal from your real track record",
-    body:
-      "One tap writes a first draft using the task brief and your own profile — skills, city, completed jobs. It never invents experience you don't have, and you edit every word before sending.",
-    proof: "✨ Draft with AI inside the apply flow",
-    others: "Generic AI writers with no idea what work you've actually done",
+    title: "AI assistance stays optional",
+    body: "AI can help draft a task or proposal and surface proof-review signals. Suggestions are editable; people make the choices and completion decisions.",
+    proof: "Optional drafting and advisory proof assistance",
   },
   {
     kicker: "04",
-    title: "Proof gets checked before the client pays",
-    body:
-      "Providers upload photos or PDFs; KaamKaro's verifier looks at the evidence and flags it as pass, review-needed or fail. Duplicate submissions are detected by file hash.",
-    proof: "AI proof check on every submission",
-    others: "Client-only judging, or nothing at all",
+    title: "Understand why work may match",
+    body: "Provider and task information can include relevant skills, location and visible trust signals. These are decision aids, not guarantees of fit or quality.",
+    proof: "Match reasons and visible profile signals",
   },
   {
     kicker: "05",
-    title: "A finished job comes with a receipt anyone can check",
-    body:
-      "Every completed task issues a public work receipt: the amount, the escrow release and a hash of the delivered file. No client name, no address, no contact details — just proof. Anyone can verify it as JSON.",
-    proof: "Public /receipt/<id> → /api/receipt/<id>",
-    others: "Screenshots and a promise in a chat",
+    title: "Local work, with clear payment terms",
+    body: "The platform is PKR-first and supports multiple currencies. Available payment methods and status depend on the options enabled for a particular task.",
+    proof: "Review the task's actual terms before committing",
   },
   {
     kicker: "06",
-    title: "AI agents can hire, and be hired",
-    body:
-      "A real API: post a task, read proposals, accept, and release escrow — with hashed keys, per-key rate limits and revoke. Escrow is only ever funded by a real payment, never by an API call.",
-    proof: "API keys → /api/agent/* endpoints",
-    others: "Human-only marketplaces",
+    title: "Two ways to find a service",
+    body: "Clients can post an open task and compare proposals, or browse fixed-scope services in the Toolbox.",
+    proof: "Open tasks · ready-made provider services",
   },
   {
     kicker: "07",
-    title: "Match scores, KaamScore and a fair-price meter",
-    body:
-      "Open tasks are scored against your skills, city and rate with the reason on the card. Providers carry an explainable KaamScore, and when you post a task you see what that work actually pays — taken from real budgets here, not a guess.",
-    proof: "Find Work match ring · KaamScore · market-rate meter",
-    others: "Chronological lists, opaque star ratings, blind budgeting",
+    title: "An API surface for AI agents",
+    body: "Developers can create API keys and let an agent post or track tasks. An API call does not itself fund payment; the enabled payment flow still applies.",
+    proof: "Agent task API · key management · payment controls",
   },
 ];
-
-const COMPARE = [
-  ["Priced proposal with your own quote", "yes", "no", "no"],
-  ["Escrow held before work starts (PKR)", "yes", "partial", "yes"],
-  ["AI drafts the pitch from your history", "yes", "no", "no"],
-  ["Automated proof verification", "yes", "no", "no"],
-  ["AI agents can hire humans via API", "yes", "no", "no"],
-  ["Match score with reasons", "yes", "no", "no"],
-  ["Public, verifiable work receipts", "yes", "no", "no"],
-  ["Explainable trust score + fair-price meter", "yes", "no", "no"],
-  ["JazzCash / Easypaisa checkout", "yes", "no", "no"],
-  ["No connects or paid bidding", "yes", "no", "yes"],
-];
-
-function Cell({ value }: { value: string }) {
-  const v = value.toLowerCase();
-  if (v === "yes")
-    return (
-      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-green-900 text-[11px] text-cream">
-        ✓
-      </span>
-    );
-  if (v === "partial")
-    return (
-      <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-gold-100 px-1.5 text-[10px] font-semibold text-gold-500 dark:bg-gold-500/20">
-        ~
-      </span>
-    );
-  if (v === "no")
-    return (
-      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-line text-[11px] text-ink/30">
-        —
-      </span>
-    );
-  return <span className="text-xs font-semibold text-heading">{value}</span>;
-}
 
 export default function WhyKaamKaroPage() {
   return (
@@ -121,13 +68,10 @@ export default function WhyKaamKaroPage() {
               Why KaamKaro
             </p>
             <h1 className="reveal reveal-1 mt-5 max-w-3xl font-display text-[2.1rem] font-medium leading-[1.04] tracking-[-0.02em] text-heading sm:text-[3.4rem]">
-              Seven things you can do here
-              <br className="hidden sm:block" /> that you <span className="gold-text">can&apos;t do</span>{" "}
-              anywhere else in Pakistan.
+              How KaamKaro works for local and digital tasks in Pakistan.
             </h1>
             <p className="reveal reveal-2 mt-5 max-w-2xl leading-relaxed text-ink/65">
-              Every line below is a feature that already works on this site — not a roadmap. Open
-              any of them and check for yourself.
+              Explore the workflow, current product capabilities and payment caveats. Features can depend on the task and enabled settings; try the clearly labelled sample demo before creating an account.
             </p>
             <div className="reveal reveal-3 mt-8 flex flex-wrap gap-3">
               <Link
@@ -179,51 +123,8 @@ export default function WhyKaamKaroPage() {
                 <p className="mt-4 rounded-xl border border-green-900/15 bg-green-950/[0.04] px-3 py-2 text-[11px] text-ink/55 dark:border-green-500/20 dark:bg-green-500/10">
                   On KaamKaro: <span className="font-semibold text-ink/75">{p.proof}</span>
                 </p>
-                <p className="mt-2 text-[11px] text-ink/40">Elsewhere: {p.others}</p>
               </article>
             ))}
-          </div>
-        </section>
-
-        <section className="border-y border-line bg-surface-2/40">
-          <div className="mx-auto w-full max-w-6xl px-5 py-14 sm:px-6 sm:py-16">
-            <h2 className="font-display text-[1.7rem] leading-tight text-heading sm:text-[2.2rem]">
-              Straight comparison
-            </h2>
-            <p className="mt-2 max-w-2xl text-sm text-ink/60">
-              Competitor columns describe their standard product as of late 2026. We would rather
-              show the gaps than pretend they don&apos;t exist — but these are the ones that matter
-              for work in Pakistan.
-            </p>
-            <div className="no-bar fade-x card-lux -mx-5 mt-6 overflow-x-auto px-5 py-2 sm:mx-0 sm:px-4 sm:[mask-image:none] sm:[-webkit-mask-image:none]">
-              <table className="w-full min-w-[560px] border-collapse text-left">
-                <thead>
-                  <tr className="border-b border-line text-[11px] uppercase tracking-[0.12em] text-ink/45">
-                    <th className="py-3 pr-3 font-medium">Capability</th>
-                    <th className="px-2 py-3 text-center font-semibold text-green-800 dark:text-green-300">
-                      KaamKaro
-                    </th>
-                    <th className="px-2 py-3 text-center font-medium">Upwork</th>
-                    <th className="px-2 py-3 text-center font-medium">Fiverr</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {COMPARE.map(([label, ...cells]) => (
-                    <tr key={label} className="border-b border-line/60">
-                      <td className="py-3 pr-3 text-sm text-ink/70">{label}</td>
-                      {cells.map((c, i) => (
-                        <td key={i} className="px-2 py-3 text-center">
-                          <Cell value={c} />
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <p className="mt-3 text-[11px] text-ink/40">
-              ✓ available · ~ partly / with conditions · — not part of the standard product
-            </p>
           </div>
         </section>
 
@@ -231,20 +132,20 @@ export default function WhyKaamKaroPage() {
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {[
               {
-                t: "Receipts you can prove",
-                d: "Every completed job issues a public, tamper-evident receipt — amount, escrow release and a proof hash — verifiable as JSON by anyone, with no private data.",
+                t: "Receipts with a verification path",
+                d: "Eligible completed tasks can issue a public record of the amount, release status and proof hash. The public receipt is designed not to expose client names or addresses.",
               },
               {
-                t: "Built for PKR, not translated for it",
-                d: "Pakistan-first checkout through PayFast (JazzCash / Easypaisa / card), prices in rupees, cities in local terms.",
+                t: "Local context, clear terms",
+                d: "PKR-first settings and multiple currency options. The exact payment methods and status are shown in each applicable task flow.",
               },
               {
                 t: "Two kinds of worker",
                 d: "Humans and AI agents sit side by side: order a fixed-price gig, post an open task, or let an agent do it through the API.",
               },
               {
-                t: "Disputes with a paper trail",
-                d: "Every payment step is logged: initiated, funded, released. Proof files are access-controlled, so evidence can't leak.",
+                t: "Review before you confirm",
+                d: "Clients can compare submitted work with the agreed brief and use the available task review and dispute steps.",
               },
             ].map((x) => (
               <div key={x.t} className="card-lux p-5">
@@ -261,23 +162,23 @@ export default function WhyKaamKaroPage() {
             />
             <span className="gold-hairline absolute inset-x-0 top-0 opacity-70" aria-hidden="true" />
             <div className="relative">
-              <p className="font-display text-[1.5rem]">Try it with a real task</p>
+              <p className="font-display text-[1.5rem]">See the workflow first</p>
               <p className="mt-1 text-sm text-cream/70">
-                Post a task in a minute, or send a priced proposal today. No fees to apply.
+                Explore the sample demo without signing up. No real task, provider or payment is involved.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
               <Link
-                href="/tasks"
+                href="/demo"
                 className="rounded-full bg-cream px-5 py-2.5 text-sm font-semibold text-green-900"
               >
-                Find work
+                Try the interactive demo
               </Link>
               <Link
-                href="/tasks/new"
+                href="/for-clients"
                 className="rounded-full border border-cream/40 px-5 py-2.5 text-sm font-semibold text-cream"
               >
-                Post a task
+                Client guide
               </Link>
             </div>
           </div>

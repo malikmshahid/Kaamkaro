@@ -128,7 +128,7 @@ export default async function PayPage({
     currency: payment.currency,
   });
 
-  const origin = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "https://kaamkaro.ai";
+  const origin = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "https://kaamkaro-six.vercel.app";
   const form = token.ok
     ? buildCheckoutForm(cfg, {
         token: token.token,

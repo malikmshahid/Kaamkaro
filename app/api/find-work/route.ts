@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { tasks, users, applications } from "@/db/schema";
-import { eq, and, or, ilike, sql, gte, desc } from "drizzle-orm";
+import { eq, and, or, ilike, sql, gte, gt, isNull, desc } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
 import { kaamScore } from "@/lib/kaamScore";
 
@@ -126,7 +126,9 @@ export async function GET(req: NextRequest) {
       myApplications = mine.length;
     }
 
-    const where = [eq(tasks.status, "open")];
+    const now = new Date();
+    const activeExpiry = or(isNull(tasks.expiresAt), gt(tasks.expiresAt, now))!;
+    const where = [eq(tasks.status, "open"), activeExpiry];
     if (category) where.push(eq(tasks.category, category));
     if (city) where.push(eq(tasks.city, city));
     if (minBudget > 0) where.push(gte(tasks.budget, minBudget));
@@ -231,7 +233,7 @@ export async function GET(req: NextRequest) {
     const facetRows = await db
       .select({ category: tasks.category, count: sql<number>`count(*)::int` })
       .from(tasks)
-      .where(eq(tasks.status, "open"))
+      .where(and(eq(tasks.status, "open"), activeExpiry))
       .groupBy(tasks.category);
 
     const [statsRow] = await db
@@ -242,7 +244,7 @@ export async function GET(req: NextRequest) {
         newToday: sql<number>`count(*) filter (where ${tasks.createdAt} > now() - interval '24 hours')::int`,
       })
       .from(tasks)
-      .where(eq(tasks.status, "open"));
+      .where(and(eq(tasks.status, "open"), activeExpiry));
 
     return NextResponse.json({
       tasks: sorted,

@@ -243,7 +243,7 @@ export default async function Image({ params }: { params: Promise<{ taskId: stri
               }}
             >
               Verify independently at
-              <div style={{ display: "flex", color: JADE_SOFT, fontWeight: 600 }}>kaamkaro.ai/receipt/{clip(taskId, 8)}…</div>
+              <div style={{ display: "flex", color: JADE_SOFT, fontWeight: 600 }}>kaamkaro-six.vercel.app/receipt/{clip(taskId, 8)}…</div>
             </div>
           </div>
         </div>

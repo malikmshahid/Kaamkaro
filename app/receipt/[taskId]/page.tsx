@@ -9,10 +9,9 @@ import { getPlatformSettings } from "@/lib/platformSettings";
 /**
  * Public, shareable proof that a job was done and paid.
  *
- * This is the thing no other Pakistani platform hands you: a link you can send
- * to a future client (or paste in a portfolio) that shows the work, the amount,
- * the escrow release and a content hash of the delivered file — all verifiable
- * against /api/receipt/<id>.
+ * A shareable link to an eligible completed task's work, amount, escrow release
+ * and proof hash, verifiable against /api/receipt/<id>. Public fields are limited
+ * to the receipt data and masked provider identity; client identity is omitted.
  */
 
 export const dynamic = "force-dynamic";
