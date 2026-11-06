@@ -2,7 +2,7 @@ import Navbar from "@/components/Navbar";
 import MessagesInterface from "@/components/MessagesInterface";
 
 export const metadata = {
-  title: "Messages · KaamKaro",
+  title: "Messages · SafarWorks",
   description: "Every task chat, update and decision in one thread — with escrow context beside it.",
 };
 

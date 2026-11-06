@@ -1,4 +1,4 @@
-/* KaamKaro service worker — deliberately small.
+/* SafarWorks service worker — deliberately small.
  *
  * Goal: the app installs and survives a flaky connection, without ever
  * serving a stale escrow screen. So:
@@ -7,7 +7,7 @@
  *   - navigations are network-first with an offline page as the fallback
  *   - static assets are stale-while-revalidate
  */
-const VERSION = "kaamkaro-v1";
+const VERSION = "safarworks-v1";
 const STATIC_CACHE = `${VERSION}-static`;
 const OFFLINE_URL = "/offline.html";
 

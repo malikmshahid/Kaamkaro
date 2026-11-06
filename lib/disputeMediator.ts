@@ -101,7 +101,7 @@ export async function mediateDispute(taskId: string): Promise<MediatorSuggestion
     })
     .join("\n");
 
-  const prompt = `You are a neutral dispute mediator for KaamKaro, a Pakistani task marketplace that holds payment in escrow.
+  const prompt = `You are a neutral dispute mediator for SafarWorks, a Pakistani task marketplace that holds payment in escrow.
 
 JOB
 Title: ${task.title}

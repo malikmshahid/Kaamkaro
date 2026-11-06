@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: `${result.receipt.task.title} — ${formatMoney(
       result.receipt.task.amount,
       result.receipt.task.currency
-    )}, delivered and released through KaamKaro escrow.`,
+    )}, delivered and released through SafarWorks escrow.`,
     twitter: {
       card: "summary_large_image",
       title: `Work receipt ${result.receipt.receiptId}`,
@@ -70,7 +70,7 @@ export default async function ReceiptPage({ params }: Props) {
           <p className="mt-2 text-sm leading-relaxed text-ink/60">
             {result.reason === "not_completed"
               ? "A receipt is issued only after the work is confirmed and escrow is released. Come back once the client taps confirm."
-              : "This link does not match any job on KaamKaro. Receipt links are permanent — check for a typo."}
+              : "This link does not match any job on SafarWorks. Receipt links are permanent — check for a typo."}
           </p>
           <Link
             href="/tools"
@@ -137,7 +137,7 @@ export default async function ReceiptPage({ params }: Props) {
             <div className="mt-6 grid gap-3 sm:grid-cols-3">
               {[
                 ["Provider", r.provider?.displayName || "Provider", r.provider?.verified ? "ID verified" : "ID not verified"],
-                ["Escrow status", r.escrow.status.replace(/_/g, " "), `via ${r.escrow.gateway || "KaamKaro"}`],
+                ["Escrow status", r.escrow.status.replace(/_/g, " "), `via ${r.escrow.gateway || "SafarWorks"}`],
                 ["Proof check", verdict.label, r.proof.verifiedAt ? fmtDate(r.proof.verifiedAt) : "no file check"],
               ].map(([label, value, detail]) => (
                 <div key={label} className="rounded-xl bg-surface-2/60 px-3.5 py-3">
@@ -158,7 +158,7 @@ export default async function ReceiptPage({ params }: Props) {
                   ["Work posted", "The client described the job and set the budget", null],
                   [
                     "Escrow funded",
-                    "Money left the client and was held by KaamKaro — not by the provider",
+                    "Money left the client and was held by SafarWorks — not by the provider",
                     r.escrow.fundedAt,
                   ],
                   [
@@ -237,14 +237,14 @@ export default async function ReceiptPage({ params }: Props) {
 
           <div className="mt-6 rounded-2xl border border-dashed border-line bg-card/50 px-5 py-6 text-center">
             <p className="text-sm text-ink/60">
-              KaamKaro receipts are permanent portfolio proof. Providers can paste this link anywhere
+              SafarWorks receipts are permanent portfolio proof. Providers can paste this link anywhere
               — no client name, no address, no contact details are exposed.
             </p>
             <Link
               href="/tasks"
               className="mt-4 inline-block rounded-full bg-green-900 px-5 py-2.5 text-sm font-semibold text-cream hover:bg-green-800"
             >
-              Find work on KaamKaro
+              Find work on SafarWorks
             </Link>
           </div>
         </div>

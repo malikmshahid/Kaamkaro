@@ -310,7 +310,7 @@ export default function NewTaskPage() {
                 amount={Number(form.budget) || null}
               />
               <p className="mt-1.5 text-[11px] text-ink/40">
-                Based on real budgets on KaamKaro. Platform bounds: {platformSettings.marketplace.minTaskBudget.toLocaleString()}–{platformSettings.marketplace.maxTaskBudget.toLocaleString()} {form.currency}.
+                Based on real budgets on SafarWorks. Platform bounds: {platformSettings.marketplace.minTaskBudget.toLocaleString()}–{platformSettings.marketplace.maxTaskBudget.toLocaleString()} {form.currency}.
               </p>
             </div>
           </div>

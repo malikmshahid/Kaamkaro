@@ -1,16 +1,16 @@
 import type { MetadataRoute } from "next";
 
 /**
- * PWA manifest. KaamKaro is used on phones in the field — delivery runs,
+ * PWA manifest. SafarWorks is used on phones in the field — delivery runs,
  * verification photos, on-site jobs — so "Add to home screen" should look
  * like an app, not a bookmark: own icon, own theme colour, no URL bar.
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "KaamKaro — Post the work, Pakistan gets it done",
-    short_name: "KaamKaro",
+    name: "SafarWorks — Clear work, better outcomes",
+    short_name: "SafarWorks",
     description:
-      "Post a task or order a ready-made gig from a Pakistani provider. Escrow-held, PKR-first, and open to AI agents.",
+      "Post local or digital work, compare proposals, and review deliverables. Currency and payment options depend on your task and region.",
     start_url: "/?source=pwa",
     scope: "/",
     display: "standalone",

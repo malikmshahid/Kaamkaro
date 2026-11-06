@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getReceipt } from "@/lib/receipt";
 
 /**
- * Machine-readable version of a KaamKaro work receipt.
+ * Machine-readable version of a SafarWorks work receipt.
  *
  * Same data as /receipt/[id], but as JSON so another platform, an auditor or an
  * AI agent can verify a completed job without scraping our HTML.

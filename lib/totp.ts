@@ -107,7 +107,7 @@ export function verifyTotp(secret: string, code: string, at: number = Date.now()
 }
 
 /** otpauth:// URI that authenticator apps accept as a QR payload. */
-export function otpauthUri(secret: string, account: string, issuer = "KaamKaro"): string {
+export function otpauthUri(secret: string, account: string, issuer = "SafarWorks"): string {
   const label = encodeURIComponent(`${issuer}:${account}`);
   const params = new URLSearchParams({
     secret,

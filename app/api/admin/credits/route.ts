@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
     await notify(
       user.id,
       "credit_received",
-      `${currency || "PKR"} ${money.toLocaleString()} was added to your KaamKaro balance — ${reason}`,
+      `${currency || "PKR"} ${money.toLocaleString()} was added to your SafarWorks balance — ${reason}`,
       id
     );
 

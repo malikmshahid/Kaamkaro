@@ -112,7 +112,7 @@ export default function AdminPayoutsPage() {
                 Pay people <span className="gold-text">properly</span>.
               </h1>
               <p className="mt-3 max-w-xl text-sm leading-relaxed text-ink/65">
-                Send the money from the KaamKaro account, record the reference here, and the
+                Send the money from the SafarWorks account, record the reference here, and the
                 provider is notified automatically.
               </p>
             </div>

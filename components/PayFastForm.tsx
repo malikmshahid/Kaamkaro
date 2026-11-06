@@ -38,7 +38,7 @@ export default function PayFastForm({
       </button>
       <p className="text-xs text-ink/40">
         JazzCash · Easypaisa · Raast · Debit/Credit card — all handled by PayFast.
-        KaamKaro never sees your card or wallet PIN.
+        SafarWorks never sees your card or wallet PIN.
       </p>
     </form>
   );

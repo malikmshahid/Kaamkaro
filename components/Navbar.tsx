@@ -111,7 +111,7 @@ export default function Navbar() {
           <Link href="/" className="flex shrink-0 items-center gap-2.5" onClick={closeMenus}>
             <img src="/logo-mark.svg" alt="" width={34} height={34} className="rounded-lg" />
             <span className="whitespace-nowrap font-display text-xl font-semibold tracking-tight text-heading sm:text-2xl">
-              KaamKaro
+              SafarWorks
             </span>
           </Link>
 

@@ -1,7 +1,5 @@
-<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="SafarWorks mark">
   <rect width="64" height="64" rx="16" fill="#123a26"/>
-  <path d="M22 15 L22 49" stroke="#f7f4ec" stroke-width="7" stroke-linecap="round"/>
-  <path d="M25 31 L43 15" stroke="#f7f4ec" stroke-width="7" stroke-linecap="round"/>
-  <path d="M25 33 L43 49" stroke="#f7f4ec" stroke-width="7" stroke-linecap="round"/>
-  <circle cx="45" cy="14" r="5.5" fill="#c8963e"/>
+  <path d="M43 18c-4-5-14-6-20-2-8 5-6 14 2 17l14 5c8 3 9 12 2 17-7 5-18 3-22-3" fill="none" stroke="#f7f4ec" stroke-width="5.5" stroke-linecap="round"/>
+  <circle cx="46" cy="15" r="5" fill="#c8963e"/>
 </svg>

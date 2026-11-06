@@ -56,7 +56,7 @@ export function getPayFastConfig(): PayFastConfig | null {
 
   return {
     merchantId,
-    merchantName: process.env.PAYFAST_MERCHANT_NAME?.trim() || "KaamKaro",
+    merchantName: process.env.PAYFAST_MERCHANT_NAME?.trim() || "SafarWorks",
     securedKey,
     mode,
     apiBase,

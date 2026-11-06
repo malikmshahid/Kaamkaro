@@ -7,12 +7,12 @@ import { unstable_cache } from "next/cache";
 import { z } from "zod";
 
 export const SITE_CONTENT_DEFAULTS = {
-  heroEyebrow: "Clear scope · PKR first",
-  heroLineOne: "Post the work.",
-  heroAccent: "Pakistan",
-  heroLineTwo: "gets it done.",
+  heroEyebrow: "Clear scope · work worldwide",
+  heroLineOne: "Work starts here.",
+  heroAccent: "Anywhere",
+  heroLineTwo: "with clarity.",
   heroSubheading:
-    "A marketplace for local work: share what you need, compare real provider proposals and review the work against a clear brief. Optional AI assistance helps reduce the guesswork; people stay in control.",
+    "A marketplace for local and digital work. Share what you need, compare proposals and review deliverables against a clear brief. Optional AI assists; people stay in control.",
   howItWorksEyebrow: "Three steps, no guesswork",
   howItWorksTitle: "Clear scope to reviewed work, with less chasing",
   howItWorksSteps: [
@@ -31,7 +31,7 @@ export const SITE_CONTENT_DEFAULTS = {
     { title: "Proof linked to the work", body: "Submitted files and notes sit alongside the agreed deliverables for review." },
     { title: "Identity signals you can inspect", body: "Verification badges are visible signals, not a guarantee of outcome." },
   ],
-  footerDescription: "A marketplace for real work in Pakistan—clear briefs, useful AI assistance and people in control from start to finish.",
+  footerDescription: "A marketplace for local and digital work—clear briefs, useful AI assistance and people in control from start to finish.",
   primaryCta: "Post a task — free",
   secondaryCta: "Browse open tasks",
   supportEmail: "support@kaamkaro.ai",
@@ -46,16 +46,16 @@ export const SITE_CONTENT_DEFAULTS = {
   faqEyebrow: "Straight answers",
   faqTitle: "Questions people actually ask",
   closingEyebrow: "Start in two minutes",
-  closingTitle: "Post the work. Get it done today.",
-  closingBody: "Free to post. Clear expectations, optional AI assistance and human review. Built in Pakistan, for Pakistan.",
+  closingTitle: "Start good work, anywhere.",
+  closingBody: "Free to post. Clear expectations, optional AI assistance and human review. Rooted in Pakistan, open to the world.",
   closingPrimaryCta: "Create a free account",
   closingSecondaryCta: "Browse tasks first",
   faqs: [
     { question: "When is a task marked complete?", answer: "After you review the submitted work and explicitly confirm completion. Payment and payout availability depend on the methods enabled for that task; check the terms shown in the product before starting." },
     { question: "What if the work is wrong or fake?", answer: "Do not confirm completion. Open a dispute so the available proof and conversation can be reviewed under the platform's dispute process. AI signals are advisory; a human makes the review decision." },
-    { question: "What does KaamKaro charge?", answer: "Posting is free. Any applicable platform fee is shown in the task flow before you commit; there are no bidding credits or connects." },
+    { question: "What does SafarWorks charge?", answer: "Posting is free. Any applicable platform fee is shown in the task flow before you commit; there are no bidding credits or connects." },
     { question: "Do I need a bank account to browse?", answer: "No account is needed to browse public listings. Account and payment requirements, when relevant, are shown in the actual task flow." },
-    { question: "Can I hire from outside Pakistan?", answer: "Yes — the platform is PKR-first but supports other currencies, so overseas clients can post work for Pakistani providers." },
+    { question: "Can people use SafarWorks from outside Pakistan?", answer: "SafarWorks is designed for clients and providers in multiple markets. Available currencies, task categories and payment options can vary by region and task; check the terms shown before committing." },
   ],
 };
 
@@ -167,11 +167,41 @@ const readStoredPlatformSettings = unstable_cache(
   { revalidate: 60, tags: ["platform-settings"] },
 );
 
+function migrateLegacySiteCopy(siteContent: SiteContent): SiteContent {
+  const legacyText: Record<string, string> = {
+    "Clear scope · PKR first": "Clear scope · work worldwide",
+    "Post the work.": "Work starts here.",
+    Pakistan: "Anywhere",
+    "gets it done.": "with clarity.",
+    "A marketplace for local work: share what you need, compare real provider proposals and review the work against a clear brief. Optional AI assistance helps reduce the guesswork; people stay in control.":
+      "A marketplace for local and digital work. Share what you need, compare proposals and review deliverables against a clear brief. Optional AI assists; people stay in control.",
+    "A marketplace for real work in Pakistan—clear briefs, useful AI assistance and people in control from start to finish.":
+      "A marketplace for local and digital work—clear briefs, useful AI assistance and people in control from start to finish.",
+    "Post the work. Get it done today.": "Start good work, anywhere.",
+    "Free to post. Clear expectations, optional AI assistance and human review. Built in Pakistan, for Pakistan.":
+      "Free to post. Clear expectations, optional AI assistance and human review. Rooted in Pakistan, open to the world.",
+  };
+  const migrated = { ...siteContent };
+  for (const key of ["heroEyebrow", "heroLineOne", "heroAccent", "heroLineTwo", "heroSubheading", "footerDescription", "closingTitle", "closingBody"] as const) {
+    const value = migrated[key];
+    if (value in legacyText) migrated[key] = legacyText[value];
+  }
+  migrated.faqs = migrated.faqs.map((faq) =>
+    faq.question === "Can I hire from outside Pakistan?" && faq.answer === "Yes — the platform is PKR-first but supports other currencies, so overseas clients can post work for Pakistani providers."
+      ? {
+          question: "Can people use SafarWorks from outside Pakistan?",
+          answer: "SafarWorks is designed for clients and providers in multiple markets. Available currencies, task categories and payment options can vary by region and task; check the terms shown before committing.",
+        }
+      : faq,
+  );
+  return migrated;
+}
+
 export async function getPlatformSettings(): Promise<PlatformSettings> {
   try {
     const row = await readStoredPlatformSettings();
     return {
-      siteContent: mergeValid(siteContentSchema, { ...SITE_CONTENT_DEFAULTS }, row?.siteContent),
+      siteContent: migrateLegacySiteCopy(mergeValid(siteContentSchema, { ...SITE_CONTENT_DEFAULTS }, row?.siteContent)),
       marketplace: mergeValid(marketplaceSettingsSchema, { ...MARKETPLACE_DEFAULTS, enabledCategories: [...MARKETPLACE_DEFAULTS.enabledCategories] }, row?.marketplaceSettings),
       aiFeatures: mergeValid(aiFeaturesSchema, { ...AI_FEATURE_DEFAULTS }, row?.aiFeatures),
     };

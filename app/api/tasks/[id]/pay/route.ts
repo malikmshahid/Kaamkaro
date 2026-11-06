@@ -154,7 +154,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       basketId,
       amount: task.budget,
       currency: task.currency,
-      description: `KaamKaro escrow — ${task.title}`,
+      description: `SafarWorks escrow — ${task.title}`,
       customerMobile: payer?.phone || null,
       customerEmail: payer?.email || null,
       successUrl: `${origin}/pay/return?basket=${encodeURIComponent(basketId)}`,

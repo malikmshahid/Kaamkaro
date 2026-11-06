@@ -16,7 +16,7 @@ import { z } from "zod";
 /**
  * Provider withdrawals.
  *
- * Escrow release moves money to the provider's KaamKaro balance; this is how
+ * Escrow release moves money to the provider's SafarWorks balance; this is how
  * it leaves the platform into a JazzCash / Easypaisa / bank account. Requests
  * are queued and settled by an admin, because PayFast's payout (disbursement)
  * product needs a separate approval we don't have yet — the ledger, the

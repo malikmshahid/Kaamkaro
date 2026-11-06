@@ -42,7 +42,7 @@ export const PK_CITIES = [
   "Bahawalpur",
 ];
 
-const SYSTEM_PROMPT = `You are the task-drafting copilot for KaamKaro, a Pakistani freelance/task marketplace (like a mix of Fiverr and Upwork, localized for Pakistan).
+const SYSTEM_PROMPT = `You are the task-drafting copilot for SafarWorks, a Pakistani freelance/task marketplace (like a mix of Fiverr and Upwork, localized for Pakistan).
 
 A client will give you a short, rough, possibly Roman Urdu or mixed-language description of something they need done. Your job:
 1. Write a clear, professional task TITLE (under 12 words).
@@ -191,7 +191,7 @@ export async function draftProposal(input: {
 
   const { provider, taskTitle, taskDescription, budget, currency, city } = input;
 
-  const system = `You write short, winning proposals for KaamKaro, a Pakistani task marketplace.
+  const system = `You write short, winning proposals for SafarWorks, a Pakistani task marketplace.
 
 Rules:
 - 70-110 words, plain English (a light Roman Urdu touch is fine if the task is written that way).
@@ -214,7 +214,7 @@ Name: ${provider.name}
 Skills: ${provider.skills || "not listed"}
 City: ${provider.city || "not listed"}
 Rating: ${provider.ratingAvg ? provider.ratingAvg.toFixed(1) : "new"} (${provider.ratingCount} reviews)
-Jobs completed on KaamKaro: ${provider.completedJobs}`;
+Jobs completed on SafarWorks: ${provider.completedJobs}`;
 
   const candidates = [process.env.GROQ_MODEL, "openai/gpt-oss-120b", "openai/gpt-oss-20b"].filter(
     (m): m is string => Boolean(m)

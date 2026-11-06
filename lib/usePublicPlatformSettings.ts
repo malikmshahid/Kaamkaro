@@ -36,11 +36,11 @@ export type PublicPlatformSettings = {
 
 const FALLBACK: PublicPlatformSettings = {
   siteContent: {
-    heroEyebrow: "Clear scope · PKR first",
-    heroLineOne: "Post the work.",
-    heroAccent: "Pakistan",
-    heroLineTwo: "gets it done.",
-    heroSubheading: "A marketplace for local work: share what you need, compare real provider proposals and review the work against a clear brief. Optional AI assistance helps reduce the guesswork; people stay in control.",
+    heroEyebrow: "Clear scope · work worldwide",
+    heroLineOne: "Work starts here.",
+    heroAccent: "Anywhere",
+    heroLineTwo: "with clarity.",
+    heroSubheading: "A marketplace for local and digital work. Share what you need, compare proposals and review deliverables against a clear brief. Optional AI assists; people stay in control.",
     primaryCta: "Post a task — free",
     secondaryCta: "Browse open tasks",
     supportEmail: "support@kaamkaro.ai",

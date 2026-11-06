@@ -3,13 +3,13 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 
 export const metadata: Metadata = {
-  title: "How KaamKaro Works for Local Tasks in Pakistan",
+  title: "How SafarWorks Works for Local and Digital Tasks",
   description:
-    "See how KaamKaro connects a clear task brief, provider proposals, deliverables and human review for local and digital work in Pakistan.",
+    "See how SafarWorks connects clear task briefs, provider proposals, deliverables and human review for local and digital work.",
   alternates: { canonical: "/why-kaamkaro" },
 };
 
-/** Evidence-led overview of current KaamKaro workflows and their limits. */
+/** Evidence-led overview of current SafarWorks workflows and their limits. */
 
 const PILLARS = [
   {
@@ -38,8 +38,8 @@ const PILLARS = [
   },
   {
     kicker: "05",
-    title: "Local work, with clear payment terms",
-    body: "The platform is PKR-first and supports multiple currencies. Available payment methods and status depend on the options enabled for a particular task.",
+    title: "Work across markets, with clear payment terms",
+    body: "Task currencies and payment options can vary by region and task. Review the exact terms and payment status shown before committing.",
     proof: "Review the task's actual terms before committing",
   },
   {
@@ -56,7 +56,7 @@ const PILLARS = [
   },
 ];
 
-export default function WhyKaamKaroPage() {
+export default function WhySafarWorksPage() {
   return (
     <>
       <Navbar />
@@ -65,10 +65,10 @@ export default function WhyKaamKaroPage() {
           <div className="relative mx-auto w-full max-w-6xl px-5 py-14 sm:px-6 sm:py-20">
             <p className="reveal inline-flex items-center gap-2.5 rounded-full border border-gold-500/35 bg-card/70 px-3.5 py-1.5 text-[10.5px] font-semibold uppercase tracking-[0.18em] text-gold-600 shadow-lux-sm backdrop-blur dark:text-gold-300">
               <span className="pulse-dot inline-block h-1.5 w-1.5 rounded-full bg-gold-500" />
-              Why KaamKaro
+              Why SafarWorks
             </p>
             <h1 className="reveal reveal-1 mt-5 max-w-3xl font-display text-[2.1rem] font-medium leading-[1.04] tracking-[-0.02em] text-heading sm:text-[3.4rem]">
-              How KaamKaro works for local and digital tasks in Pakistan.
+              How SafarWorks works for local and digital tasks.
             </h1>
             <p className="reveal reveal-2 mt-5 max-w-2xl leading-relaxed text-ink/65">
               Explore the workflow, current product capabilities and payment caveats. Features can depend on the task and enabled settings; try the clearly labelled sample demo before creating an account.
@@ -121,7 +121,7 @@ export default function WhyKaamKaroPage() {
                 </h2>
                 <p className="mt-2 flex-1 text-sm leading-relaxed text-ink/65">{p.body}</p>
                 <p className="mt-4 rounded-xl border border-green-900/15 bg-green-950/[0.04] px-3 py-2 text-[11px] text-ink/55 dark:border-green-500/20 dark:bg-green-500/10">
-                  On KaamKaro: <span className="font-semibold text-ink/75">{p.proof}</span>
+                  On SafarWorks: <span className="font-semibold text-ink/75">{p.proof}</span>
                 </p>
               </article>
             ))}
@@ -136,8 +136,8 @@ export default function WhyKaamKaroPage() {
                 d: "Eligible completed tasks can issue a public record of the amount, release status and proof hash. The public receipt is designed not to expose client names or addresses.",
               },
               {
-                t: "Local context, clear terms",
-                d: "PKR-first settings and multiple currency options. The exact payment methods and status are shown in each applicable task flow.",
+                t: "Regional options, clear terms",
+                d: "Currency and payment options vary. The exact methods and status are shown in each applicable task flow.",
               },
               {
                 t: "Two kinds of worker",

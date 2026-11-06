@@ -33,26 +33,26 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Task & Service Marketplace in Pakistan | KaamKaro",
-    template: "%s | KaamKaro",
+    default: "Local and Digital Work Marketplace | SafarWorks",
+    template: "%s | SafarWorks",
   },
   description:
-    "Post a local or digital task in Pakistan, compare provider proposals, or browse ready-made services. PKR-first, with optional AI assistance and human-led review.",
+    "Post local or digital work, compare provider proposals, and browse ready-made services. Currency and payment options vary by task and region.",
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
-    locale: "en_PK",
-    siteName: "KaamKaro",
+    locale: "en_US",
+    siteName: "SafarWorks",
     url: siteUrl,
-    title: "KaamKaro — Pakistan Task & Service Marketplace",
+    title: "SafarWorks — Local and Digital Work",
     description:
-      "Post a task, compare provider proposals or browse ready-made services in Pakistan. Clear deliverables, optional AI assistance and human review.",
-    images: [{ url: "/og.png", width: 1200, height: 630, alt: "KaamKaro — task and service marketplace in Pakistan" }],
+      "Connect with providers, post local or digital tasks, and browse ready-made services. Clear deliverables, optional AI assistance and human review.",
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "SafarWorks — marketplace for local and digital work" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "KaamKaro — Pakistan Task & Service Marketplace",
-    description: "Post a task, compare proposals or browse ready-made services in Pakistan.",
+    title: "SafarWorks — Local and Digital Work",
+    description: "Post work, compare proposals, or browse ready-made services. Payment options vary by task and region.",
     images: ["/og.png"],
   },
   robots: {
@@ -61,8 +61,8 @@ export const metadata: Metadata = {
     googleBot: { index: true, follow: true, "max-image-preview": "large", "max-video-preview": -1, "max-snippet": -1 },
   },
   manifest: "/manifest.webmanifest",
-  applicationName: "KaamKaro",
-  appleWebApp: { capable: true, title: "KaamKaro", statusBarStyle: "default" },
+  applicationName: "SafarWorks",
+  appleWebApp: { capable: true, title: "SafarWorks", statusBarStyle: "default" },
   icons: {
     icon: [
       { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
@@ -80,19 +80,18 @@ const structuredData = {
     {
       "@type": "Organization",
       "@id": `${siteUrl}/#organization`,
-      name: "KaamKaro",
+      name: "SafarWorks",
       url: siteUrl,
       logo: `${siteUrl}/icon-512.png`,
       description:
-        "A Pakistan-focused online marketplace where clients can post local or digital tasks, compare provider proposals, and browse ready-made services.",
-      areaServed: { "@type": "Country", name: "Pakistan" },
+        "A marketplace connecting clients and providers for local and digital work, with optional AI assistance and human-led review.",
     },
     {
       "@type": "WebSite",
       "@id": `${siteUrl}/#website`,
       url: siteUrl,
-      name: "KaamKaro",
-      inLanguage: ["en-PK", "ur-PK"],
+      name: "SafarWorks",
+      inLanguage: ["en", "ur"],
       publisher: { "@id": `${siteUrl}/#organization` },
     },
   ],
@@ -117,7 +116,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en-PK"
+      lang="en"
       className={`${fraunces.variable} ${inter.variable} h-full antialiased`}
       suppressHydrationWarning
     >

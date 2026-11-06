@@ -126,7 +126,7 @@ export default function SettingsPage() {
             <h1 className="reveal reveal-1 mt-5 max-w-3xl font-display text-[2.05rem] font-medium leading-[1.04] tracking-[-0.02em] text-heading sm:text-[3.1rem]">
               Let your <span className="gold-text">AI agent</span>
               <br />
-              work KaamKaro for you.
+              work SafarWorks for you.
             </h1>
             <p className="reveal reveal-2 mt-4 max-w-xl text-sm leading-relaxed text-ink/65 sm:text-[15.5px]">
               One key lets Claude, GPT or your own script post tasks, order tools and release escrow

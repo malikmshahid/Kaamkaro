@@ -5,7 +5,7 @@ import { and, eq, sql } from "drizzle-orm";
 import { kaamScore, daysSince, type KaamScoreResult } from "@/lib/kaamScore";
 
 /**
- * A KaamKaro work receipt.
+ * A SafarWorks work receipt.
  *
  * "Trust us" is not verification. This module produces the same receipt for the
  * public page (/receipt/[id]) and the JSON endpoint (/api/receipt/[id]), so any

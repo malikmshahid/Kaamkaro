@@ -3,23 +3,23 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 
 export const metadata: Metadata = {
-  title: "Find Freelance and Local Task Work in Pakistan",
+  title: "Find Freelance and Local Task Work | SafarWorks",
   description:
-    "Browse local and digital work in Pakistan, send a proposal with your own quote and delivery estimate, and submit work against clear deliverables.",
+    "Browse local and digital work, send a proposal with your own quote and delivery estimate, and submit work against clear deliverables.",
   alternates: { canonical: "/for-providers" },
   openGraph: {
-    title: "Find Work in Pakistan | KaamKaro Provider Guide",
+    title: "Find Work | SafarWorks Provider Guide",
     description:
-      "A practical guide to browsing tasks, writing proposals and setting clear delivery terms on KaamKaro.",
+      "A practical guide to browsing tasks, writing proposals and setting clear delivery terms on SafarWorks.",
     url: "/for-providers",
   },
 };
 
 const faqs = [
   {
-    question: "What is KaamKaro for providers?",
+    question: "What is SafarWorks for providers?",
     answer:
-      "KaamKaro is a Pakistan-focused marketplace where providers can browse local and digital tasks, send proposals, or list ready-made services for clients to order.",
+      "SafarWorks is a marketplace where providers can browse local and digital tasks, send proposals, or list ready-made services. Availability and payment options may vary by region.",
   },
   {
     question: "Can I set my own price and delivery time?",
@@ -29,7 +29,7 @@ const faqs = [
   {
     question: "Do I have to pay to apply?",
     answer:
-      "KaamKaro's public product information says there are no paid connects and no fee to apply. Check the current terms shown in your account and task flow.",
+      "SafarWorks's public product information says there are no paid connects and no fee to apply. Check the current terms shown in your account and task flow.",
   },
   {
     question: "Can AI write my proposal?",
@@ -67,9 +67,9 @@ export default function ForProvidersPage() {
             <nav aria-label="Breadcrumb" className="text-xs text-ink/50">
               <Link href="/" className="hover:text-green-800">Home</Link> <span aria-hidden="true">/</span> For providers
             </nav>
-            <p className="mt-7 text-[10px] font-semibold uppercase tracking-[.2em] text-gold-600">For providers · Pakistan</p>
+            <p className="mt-7 text-[10px] font-semibold uppercase tracking-[.2em] text-gold-600">For providers · local + digital</p>
             <h1 className="mt-3 max-w-3xl font-display text-4xl leading-tight text-heading sm:text-6xl">
-              Find freelance and local task work in Pakistan.
+              Find freelance and local task work.
             </h1>
             <p className="mt-5 max-w-2xl text-base leading-relaxed text-ink/65 sm:text-lg">
               Browse open tasks, decide which work fits your skills, and send a proposal with your own price and delivery estimate. You can also list a fixed-scope service for clients to discover.
@@ -83,7 +83,7 @@ export default function ForProvidersPage() {
         </section>
 
         <section className="mx-auto max-w-5xl px-5 py-12 sm:px-6 sm:py-16">
-          <h2 className="font-display text-3xl text-heading">How to use KaamKaro as a provider</h2>
+          <h2 className="font-display text-3xl text-heading">How to use SafarWorks as a provider</h2>
           <ol className="mt-8 grid gap-4 md:grid-cols-2">
             {[
               ["1", "Build an honest profile", "Describe the work you can do, your skills and relevant examples. Keep claims specific and verifiable."],
@@ -101,7 +101,7 @@ export default function ForProvidersPage() {
           </ol>
           <div className="mt-8 rounded-2xl border border-gold-500/25 bg-gold-500/5 p-5">
             <h2 className="font-display text-xl text-heading">Payment and safety reminder</h2>
-            <p className="mt-2 text-sm leading-relaxed text-ink/60">Payment and payout options can vary by task. Read the exact terms in KaamKaro, do not rely on a screenshot or off-platform promise, and do not begin until any required payment status is confirmed in the task.</p>
+            <p className="mt-2 text-sm leading-relaxed text-ink/60">Payment and payout options can vary by task. Read the exact terms in SafarWorks, do not rely on a screenshot or off-platform promise, and do not begin until any required payment status is confirmed in the task.</p>
           </div>
         </section>
 

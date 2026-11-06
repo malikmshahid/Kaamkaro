@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
     if (user.email) {
       const result = await sendEmail(
         user.email,
-        "Reset your KaamKaro password",
+        "Reset your SafarWorks password",
         passwordResetEmailHtml(resetLink)
       );
       emailDelivered = result.sent;

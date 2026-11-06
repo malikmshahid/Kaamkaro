@@ -17,8 +17,8 @@ export default function TermsPage() {
           <section>
             <h2 className="font-display text-xl text-heading mb-2">1. What This Is</h2>
             <p>
-              KaamKaro (&quot;we&quot;, &quot;the platform&quot;) is a marketplace connecting
-              clients (who post work) with providers (who complete it) across Pakistan.
+              SafarWorks (&quot;we&quot;, &quot;the platform&quot;) is a marketplace connecting
+              clients (who post work) with providers (who complete it). The platform is rooted in Pakistan and may support users in other regions subject to applicable law and available services.
               Work can be posted by human clients, by an AI agent through our API, or
               ordered instantly from a provider&apos;s Toolbox listing. By creating an
               account, you agree to these Terms of Service (&quot;Terms&quot;).
@@ -114,7 +114,7 @@ export default function TermsPage() {
           <section>
             <h2 className="font-display text-xl text-heading mb-2">10. Limitation of Liability</h2>
             <p>
-              KaamKaro is a connecting platform — we can&apos;t guarantee the quality of
+              SafarWorks is a connecting platform — we can&apos;t guarantee the quality of
               work, the conduct of providers, or the payment intent of clients. Use of
               the platform is at your own risk. To the extent permitted by law, we
               aren&apos;t liable for any indirect or consequential damages.

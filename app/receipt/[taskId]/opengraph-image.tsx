@@ -15,7 +15,7 @@ import { getPlatformSettings } from "@/lib/platformSettings";
  * the public receipt does. No names, no emails, no file URLs.
  */
 
-export const alt = "KaamKaro verified work receipt";
+export const alt = "SafarWorks verified work receipt";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const dynamic = "force-dynamic";
@@ -51,7 +51,7 @@ export default async function Image({ params }: { params: Promise<{ taskId: stri
             fontFamily: "sans-serif",
           }}
         >
-          <div style={{ display: "flex", fontSize: 64, fontWeight: 700, letterSpacing: -1 }}>KaamKaro</div>
+          <div style={{ display: "flex", fontSize: 64, fontWeight: 700, letterSpacing: -1 }}>SafarWorks</div>
           <div style={{ display: "flex", fontSize: 30, color: GOLD, marginTop: 16 }}>
             {result.reason === "not_completed"
               ? "No receipt yet — this job is still open"
@@ -113,7 +113,7 @@ export default async function Image({ params }: { params: Promise<{ taskId: stri
               </div>
               <div style={{ display: "flex", flexDirection: "column" }}>
                 <div style={{ display: "flex", fontSize: 27, fontWeight: 700, color: INK, letterSpacing: -0.5 }}>
-                  KaamKaro
+                  SafarWorks
                 </div>
                 <div style={{ display: "flex", fontSize: 14, color: "#6b6152", letterSpacing: 3 }}>
                   VERIFIED WORK RECEIPT
@@ -243,7 +243,7 @@ export default async function Image({ params }: { params: Promise<{ taskId: stri
               }}
             >
               Verify independently at
-              <div style={{ display: "flex", color: JADE_SOFT, fontWeight: 600 }}>kaamkaro-six.vercel.app/receipt/{clip(taskId, 8)}…</div>
+              <div style={{ display: "flex", color: JADE_SOFT, fontWeight: 600 }}>SafarWorks · public receipt {clip(taskId, 8)}…</div>
             </div>
           </div>
         </div>

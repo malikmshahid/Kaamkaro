@@ -134,7 +134,7 @@ export function kaamScore(input: KaamScoreInput): KaamScoreResult {
         label: "Account age",
         points: tenure,
         max: 10,
-        detail: days < 30 ? `${days} day${days === 1 ? "" : "s"} on KaamKaro` : `${Math.floor(days / 30)} months on KaamKaro`,
+        detail: days < 30 ? `${days} day${days === 1 ? "" : "s"} on SafarWorks` : `${Math.floor(days / 30)} months on SafarWorks`,
       },
     ],
   };

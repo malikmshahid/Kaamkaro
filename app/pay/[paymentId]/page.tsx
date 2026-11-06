@@ -89,7 +89,7 @@ export default async function PayPage({
               {payment.currency} {payment.amount.toLocaleString()}
             </p>
             <p className="mt-1 text-sm text-ink/60">
-              Held by KaamKaro until you confirm the work — never paid out on the provider&apos;s word.
+              Held by SafarWorks until you confirm the work — never paid out on the provider&apos;s word.
             </p>
           </div>
         </section>
@@ -135,7 +135,7 @@ export default async function PayPage({
         basketId: payment.basketId || payment.id,
         amount: payment.amount,
         currency: payment.currency,
-        description: `KaamKaro escrow — ${task?.title || "task"}`,
+        description: `SafarWorks escrow — ${task?.title || "task"}`,
         successUrl: `${origin}/pay/return?basket=${encodeURIComponent(payment.basketId || "")}`,
         failureUrl: `${origin}/pay/return?basket=${encodeURIComponent(payment.basketId || "")}&failed=1`,
         callbackUrl: `${origin}/api/payments/payfast/callback`,
@@ -158,7 +158,7 @@ export default async function PayPage({
             </h1>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-ink/65">
               {task?.title ? `For “${task.title}”. ` : ""}
-              KaamKaro holds the money and releases it only when you confirm the work is done.
+              SafarWorks holds the money and releases it only when you confirm the work is done.
             </p>
           </div>
         </section>

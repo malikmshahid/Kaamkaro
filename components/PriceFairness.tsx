@@ -187,7 +187,7 @@ export default function PriceFairness({
         {formatMoney(low, currency)} – {formatMoney(high, currency)}
       </p>
       <p className="mt-1 text-[11.5px] text-ink/50">
-        median {formatMoney(median, currency)} · real tasks and listings on KaamKaro
+        median {formatMoney(median, currency)} · real tasks and listings on SafarWorks
       </p>
 
       {pos !== null && (

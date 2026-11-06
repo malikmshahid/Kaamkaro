@@ -222,7 +222,7 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
               <ol className="space-y-3">
                 {[
                   "You order — the provider is notified immediately and the task is created for you.",
-                  "You fund the escrow. The money is held by KaamKaro, not by the provider.",
+                  "You fund the escrow. The money is held by SafarWorks, not by the provider.",
                   "The provider delivers, and uploads proof of the work.",
                   "You confirm, and the payment is released. Disagree and you can open a dispute.",
                 ].map((step, i) => (

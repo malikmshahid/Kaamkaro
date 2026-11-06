@@ -301,7 +301,7 @@ export default function DashboardPage() {
             <p className="text-sm text-ink/60 mb-4">
               Share your referral link — you&apos;ve brought{" "}
               <strong>{referredCount}</strong> {referredCount === 1 ? "person" : "people"} to
-              KaamKaro so far.
+              SafarWorks so far.
             </p>
             <div className="flex flex-wrap items-center gap-3">
               <code className="bg-card border border-line rounded-lg px-4 py-2 text-sm">

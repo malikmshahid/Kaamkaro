@@ -3,26 +3,26 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 
 export const metadata: Metadata = {
-  title: "Hire Local Service Providers in Pakistan",
+  title: "Hire Local and Digital Service Providers | SafarWorks",
   description:
-    "Post a local or digital task in Pakistan, compare provider proposals, or browse ready-made services. Set clear deliverables and review work yourself.",
+    "Post a local or digital task, compare provider proposals, or browse ready-made services. Set clear deliverables and review work yourself.",
   alternates: { canonical: "/for-clients" },
   openGraph: {
-    title: "Hire Local Service Providers in Pakistan | KaamKaro",
+    title: "Hire Local and Digital Service Providers | SafarWorks",
     description:
-      "A practical way to scope local work, compare provider proposals and review deliverables on KaamKaro.",
+      "A practical way to scope local work, compare provider proposals and review deliverables on SafarWorks.",
     url: "/for-clients",
   },
 };
 
 const faqs = [
   {
-    question: "What is KaamKaro?",
+    question: "What is SafarWorks?",
     answer:
-      "KaamKaro is a Pakistan-focused online marketplace where clients can post local or digital tasks, compare provider proposals, and browse ready-made services.",
+      "SafarWorks is a marketplace where clients can post local or digital tasks, compare provider proposals, and browse ready-made services. Availability and payment options may vary by region.",
   },
   {
-    question: "How do I hire a provider in Pakistan?",
+    question: "How do I hire a provider?",
     answer:
       "Describe the outcome, list deliverables and timing, set a budget, then review proposals or browse a ready-made service. Agree the terms before work starts and review the submitted work yourself.",
   },
@@ -67,12 +67,12 @@ export default function ForClientsPage() {
             <nav aria-label="Breadcrumb" className="text-xs text-ink/50">
               <Link href="/" className="hover:text-green-800">Home</Link> <span aria-hidden="true">/</span> For clients
             </nav>
-            <p className="mt-7 text-[10px] font-semibold uppercase tracking-[.2em] text-gold-600">For clients · Pakistan</p>
+            <p className="mt-7 text-[10px] font-semibold uppercase tracking-[.2em] text-gold-600">For clients · local + digital</p>
             <h1 className="mt-3 max-w-3xl font-display text-4xl leading-tight text-heading sm:text-6xl">
-              Hire local providers in Pakistan—with a clear brief.
+              Hire local and digital providers—with a clear brief.
             </h1>
             <p className="mt-5 max-w-2xl text-base leading-relaxed text-ink/65 sm:text-lg">
-              KaamKaro is a task and service marketplace for local and digital work. Describe the outcome, compare provider proposals or browse a ready-made service, then review the agreed deliverables yourself.
+              SafarWorks is a task and service marketplace for local and digital work. Describe the outcome, compare provider proposals or browse a ready-made service, then review the agreed deliverables yourself.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/tasks/new" className="rounded-full bg-green-900 px-6 py-3 text-sm font-semibold text-cream hover:bg-green-800">Post a task — free</Link>
@@ -83,12 +83,12 @@ export default function ForClientsPage() {
         </section>
 
         <section className="mx-auto max-w-5xl px-5 py-12 sm:px-6 sm:py-16">
-          <h2 className="font-display text-3xl text-heading">How to hire through KaamKaro</h2>
+          <h2 className="font-display text-3xl text-heading">How to hire through SafarWorks</h2>
           <p className="mt-3 max-w-3xl text-sm leading-relaxed text-ink/60">A good marketplace brief gives both sides the same definition of finished work. Use these steps for a local service, a remote digital task or a one-off business job.</p>
           <ol className="mt-8 grid gap-4 md:grid-cols-2">
             {[
               ["1", "Describe the result", "Write what you need done, where it needs to happen, and who or what the work is for. A task title should name the outcome, not only the activity."],
-              ["2", "List deliverables", "Name the files, actions, photos, edits or other evidence you expect. KaamKaro tasks can include an optional checklist of up to six deliverables."],
+              ["2", "List deliverables", "Name the files, actions, photos, edits or other evidence you expect. SafarWorks tasks can include an optional checklist of up to six deliverables."],
               ["3", "Set budget and timing", "Choose a budget and deadline that fit the work. Review the displayed currency, task duration and payment terms before publishing or accepting a proposal."],
               ["4", "Compare proposals or services", "Review provider experience, quoted price, delivery estimate and the scope each person is offering. Ask for clarification before you accept."],
               ["5", "Review the submitted work", "Compare the actual files or evidence with the agreed brief. Optional AI signals can assist, but you decide whether to confirm, request a revision or use the available dispute process."],
@@ -117,7 +117,7 @@ export default function ForClientsPage() {
                 </details>
               ))}
             </div>
-            <p className="mt-7 text-xs text-ink/45">KaamKaro is a marketplace; providers perform the work. Payment availability and terms are shown in each applicable task flow.</p>
+            <p className="mt-7 text-xs text-ink/45">SafarWorks is a marketplace; providers perform the work. Payment availability and terms are shown in each applicable task flow.</p>
           </div>
         </section>
       </main>

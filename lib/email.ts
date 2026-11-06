@@ -19,7 +19,7 @@ export async function sendEmail(to: string, subject: string, html: string): Prom
   try {
     const { Resend } = await import("resend");
     const resend = new Resend(apiKey);
-    const from = process.env.RESEND_FROM_EMAIL || "KaamKaro <onboarding@resend.dev>";
+    const from = process.env.RESEND_FROM_EMAIL || "SafarWorks <onboarding@resend.dev>";
 
     const { error } = await resend.emails.send({ from, to, subject, html });
     if (error) {
@@ -34,7 +34,7 @@ export async function sendEmail(to: string, subject: string, html: string): Prom
 export function passwordResetEmailHtml(resetLink: string) {
   return `
     <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-      <h2 style="color: #123a26;">Reset your KaamKaro password</h2>
+      <h2 style="color: #123a26;">Reset your SafarWorks password</h2>
       <p>Click the button below to set a new password. This link expires in 30 minutes.</p>
       <a href="${resetLink}" style="display: inline-block; background: #123a26; color: #f7f4ec; padding: 12px 24px; border-radius: 999px; text-decoration: none; margin: 16px 0;">
         Reset Password
@@ -60,21 +60,21 @@ function otpEmailHtml(heading: string, intro: string, otp: string) {
 // Step 1 of changing an account's email — code is sent to the NEW address.
 export async function sendEmailChangeOtp(to: string, otp: string): Promise<boolean> {
   const html = otpEmailHtml(
-    "Confirm your new KaamKaro email",
+    "Confirm your new SafarWorks email",
     "Enter this code to confirm this is your new email address:",
     otp
   );
-  const result = await sendEmail(to, "Confirm your new KaamKaro email", html);
+  const result = await sendEmail(to, "Confirm your new SafarWorks email", html);
   return result.sent;
 }
 
 // Final step of signup when an email was provided.
 export async function sendSignupVerificationOtp(to: string, otp: string): Promise<boolean> {
   const html = otpEmailHtml(
-    "Verify your KaamKaro email",
+    "Verify your SafarWorks email",
     "Enter this code to verify your email and finish creating your account:",
     otp
   );
-  const result = await sendEmail(to, "Verify your KaamKaro email", html);
+  const result = await sendEmail(to, "Verify your SafarWorks email", html);
   return result.sent;
 }

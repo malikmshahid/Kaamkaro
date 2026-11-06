@@ -15,7 +15,7 @@ export default function PrivacyPage() {
         <div className="prose-like space-y-8 text-ink/80 leading-relaxed">
           <section>
             <p>
-              This Privacy Policy explains how KaamKaro (&quot;we&quot;) collects,
+              This Privacy Policy explains how SafarWorks (&quot;we&quot;) collects,
               uses, and protects your information when you use the platform.
             </p>
           </section>

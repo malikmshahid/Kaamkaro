@@ -21,7 +21,7 @@ export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   const { siteContent } = await getPlatformSettings();
-  const title = "Task & Service Marketplace in Pakistan | KaamKaro";
+  const title = "Local and Digital Work Marketplace | SafarWorks";
   const description = siteContent.heroSubheading.replace(/\s+/g, " ").trim().slice(0, 160);
   return {
     title: { absolute: title },
@@ -475,7 +475,7 @@ export default async function Home() {
               : [
                   { icon: <IconShield />, label: "Clear scope before work" },
                   { icon: <IconCamera />, label: "AI proof assistance when enabled" },
-                  { icon: <IconWallet />, label: "PKR-first marketplace" },
+                  { icon: <IconWallet />, label: "Multi-currency task options" },
                   { icon: <IconAgent />, label: "Open to AI agents" },
                 ].map((item) => (
                   <div key={item.label} className="flex items-center gap-3 px-1 py-2 md:px-6 md:py-0">
@@ -968,7 +968,7 @@ export default async function Home() {
         <div className="gold-hairline opacity-50" aria-hidden="true" />
         <div className="mx-auto grid w-full max-w-6xl gap-8 px-5 py-14 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
           <div>
-            <p className="font-display text-xl text-heading">KaamKaro</p>
+            <p className="font-display text-xl text-heading">SafarWorks</p>
             <p className="mt-3 max-w-xs text-sm leading-relaxed text-ink/60">
               {content.footerDescription}
             </p>
@@ -976,9 +976,9 @@ export default async function Home() {
           <div>
             <p className="mb-3 text-sm font-medium text-heading">Platform</p>
             <ul className="space-y-2 text-sm text-ink/60">
-              <li><Link href="/why-kaamkaro" className="hover:text-green-700">How KaamKaro works</Link></li>
-              <li><Link href="/for-clients" className="hover:text-green-700">Hire with KaamKaro</Link></li>
-              <li><Link href="/for-providers" className="hover:text-green-700">Find work in Pakistan</Link></li>
+              <li><Link href="/why-kaamkaro" className="hover:text-green-700">How SafarWorks works</Link></li>
+              <li><Link href="/for-clients" className="hover:text-green-700">Hire with SafarWorks</Link></li>
+              <li><Link href="/for-providers" className="hover:text-green-700">Find work anywhere</Link></li>
               <li><Link href="/demo" className="hover:text-green-700">Watch the product demo</Link></li>
               <li><Link href="/tasks" className="hover:text-green-700">Browse open tasks</Link></li>
               <li><Link href="/tools" className="hover:text-green-700">The Toolbox</Link></li>
@@ -1005,7 +1005,7 @@ export default async function Home() {
           </div>
         </div>
         <div className="border-t border-line py-4 text-center text-xs text-ink/40">
-          &copy; {new Date().getFullYear()} KaamKaro. All rights reserved. Made in Pakistan.
+          &copy; {new Date().getFullYear()} SafarWorks. All rights reserved. Rooted in Pakistan · open to the world.
         </div>
       </footer>
     </>
