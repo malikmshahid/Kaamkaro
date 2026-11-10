@@ -24,6 +24,49 @@ function quickPick(hoursFromNow: number) {
   return new Date(d.getTime() - tzOffsetMs).toISOString().slice(0, 16);
 }
 
+const BRIEF_STARTERS = [
+  {
+    id: "website",
+    label: "Website or web app",
+    note: "Pages, audience, and the main user action",
+    title: "Build a responsive website or web app",
+    category: "coding",
+    idea: "I need a responsive website or web app for [business/product]. The main goal is [goal]. It should serve [audience] and include [pages or key flow]. I have [content, design references, or assets]. Please confirm the deliverables, mobile behavior, handover, and any assumptions before starting.",
+    description: "Project goal: [what the website should help people do].\nAudience: [who will use it].\nPages or key flow: [list the required pages/actions].\nContent, design references, and assets: [links or notes].\nThe site must work well on mobile. Please list the included deliverables, what is out of scope, the handover format, and any assumptions before work begins.",
+    deliverables: ["Build the agreed pages or user flow", "Test the main flow on mobile and desktop", "Provide the agreed source and handover notes"],
+  },
+  {
+    id: "design",
+    label: "Brand or design work",
+    note: "Describe the audience, style, and files you need",
+    title: "Create design assets for my brand",
+    category: "design",
+    idea: "I need [logo/brand asset/design] for [business]. The audience is [audience], and the style should feel [style]. I can share [references, colors, and existing files]. Please confirm the number of concepts, final file formats, and revision scope before starting.",
+    description: "Design needed: [logo, brand asset, or other].\nBusiness and audience: [details].\nPreferred style, colors, and references: [links or notes].\nFinal files required: [editable/source and export formats].\nPlease confirm the number of concepts, revision scope, and included deliverables before starting.",
+    deliverables: ["Create the agreed design assets", "Deliver the agreed editable and export files", "Include the agreed revision pass"],
+  },
+  {
+    id: "automation",
+    label: "Data or automation",
+    note: "Specify inputs, output format, and how often it runs",
+    title: "Build a data automation or API workflow",
+    category: "coding",
+    idea: "I need to automate [repetitive process]. Inputs come from [source], and the output should be [CSV/Excel/API/other]. It should run [once/on a schedule/when triggered]. Access method: [public source/API/credentials supplied securely]. Please flag access limits and confirm the sample output and error handling before starting.",
+    description: "Process to automate: [current steps and desired result].\nInput source and access method: [details; share secrets only through an agreed secure channel].\nOutput format: [CSV, Excel, API, or other].\nRun frequency or trigger: [details].\nPlease confirm a sample output, error handling, and any source access limits before implementation.",
+    deliverables: ["Implement the agreed workflow", "Validate output against the agreed sample", "Provide run instructions and handover notes"],
+  },
+  {
+    id: "local",
+    label: "Local service or repair",
+    note: "Add the place, access details, and expected result",
+    title: "Arrange a local service or repair",
+    category: "home",
+    idea: "I need [service or repair] at [area/city]. The issue or expected outcome is [details]. Access is available [days/times]. Please confirm what is included, any materials or equipment needed, the expected visit length, and what proof or completion check will be provided.",
+    description: "Service or repair: [what needs doing].\nLocation: [area/city; share the exact address only in the task after choosing a provider if appropriate].\nAccess and timing: [days/times].\nExpected result: [how we will know the job is complete].\nPlease confirm what is included, any materials needed, and the completion check before starting.",
+    deliverables: ["Complete the agreed service at the stated location", "Explain any materials or extra work before proceeding", "Confirm completion with the agreed proof or check"],
+  },
+];
+
 export default function NewTaskPage() {
   const router = useRouter();
   const platformSettings = usePublicPlatformSettings();
@@ -50,6 +93,20 @@ export default function NewTaskPage() {
   const enabledCategories = platformSettings.marketplace.enabledCategories;
   const selectedCategory = enabledCategories.includes(form.category) ? form.category : enabledCategories[0] || "other";
   const selectedCurrency = currencyTouched ? form.currency : platformSettings.marketplace.defaultCurrency;
+
+  function applyBriefStarter(starter: (typeof BRIEF_STARTERS)[number]) {
+    setIdea(starter.idea);
+    setForm((previous) => ({
+      ...previous,
+      title: starter.title,
+      description: starter.description,
+      category: enabledCategories.includes(starter.category) ? starter.category : selectedCategory,
+    }));
+    setDeliverables([...starter.deliverables]);
+    setCopilotError("");
+    setCopilotReasoning("Starter loaded. Edit every detail, budget, location, and deadline before posting.");
+    setShowManualForm(true);
+  }
 
   async function handleCopilot(e: React.FormEvent) {
     e.preventDefault();
@@ -145,12 +202,27 @@ export default function NewTaskPage() {
                 <path d="M18.5 15.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8.8-2Z" />
               </svg>
             </span>
-            <h2 className="font-display text-[1.15rem] text-heading">AI Copilot</h2>
+            <h2 className="font-display text-[1.15rem] text-heading">Brief Studio</h2>
+            <span className="ml-auto rounded-full border border-gold-500/25 bg-gold-500/5 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.14em] text-gold-700 dark:text-gold-300">SafarWorks QuickStart</span>
           </div>
-          <p className="mb-3 text-sm leading-relaxed text-ink/60">
-            Type your idea in a line or two — even in Roman Urdu. AI will write the
-            title, description, category, and a fair PKR budget for you.
+          <p className="mb-4 text-sm leading-relaxed text-ink/60">
+            Start from a task template or describe your idea in English, Urdu, or Roman Urdu. Everything stays editable; nothing is posted until you review and submit it.
           </p>
+          <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-ink/45">Choose a starting point</p>
+          <div className="mb-4 grid gap-2 sm:grid-cols-2">
+            {BRIEF_STARTERS.map((starter) => (
+              <button
+                key={starter.id}
+                type="button"
+                onClick={() => applyBriefStarter(starter)}
+                className="group rounded-xl border border-line bg-card/70 p-3 text-left transition hover:-translate-y-0.5 hover:border-green-800/35 hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700/40"
+              >
+                <span className="block text-sm font-semibold text-heading">{starter.label}</span>
+                <span className="mt-1 block text-xs leading-relaxed text-ink/55">{starter.note}</span>
+              </button>
+            ))}
+          </div>
+          <p className="mb-2 text-xs text-ink/50">Or write a rough idea and let AI draft it:</p>
           <form onSubmit={handleCopilot} className="space-y-3">
             <textarea
               className="min-h-20 w-full rounded-xl border border-line bg-card px-4 py-3 text-sm shadow-lux-sm transition-shadow placeholder:text-ink/30 focus:border-green-800/40 focus:outline-none focus:ring-2 focus:ring-green-700/40"
