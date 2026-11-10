@@ -94,6 +94,20 @@ export default function NewTaskPage() {
   const selectedCategory = enabledCategories.includes(form.category) ? form.category : enabledCategories[0] || "other";
   const selectedCurrency = currencyTouched ? form.currency : platformSettings.marketplace.defaultCurrency;
 
+  // Helpful, non-blocking guidance: the score updates as the task draft changes.
+  const hasDescriptionPlaceholders = form.description.includes("[") && form.description.includes("]");
+  const parsedDeadline = form.expiresAt ? new Date(form.expiresAt).getTime() : NaN;
+  const briefChecks = [
+    { label: "Specific task title", points: 15, done: form.title.trim().length >= 12, tip: "Use a few words that say exactly what needs doing." },
+    { label: "Description with enough detail", points: 30, done: form.description.trim().length >= 100 && !hasDescriptionPlaceholders, tip: "Explain the goal, scope, and any important requirements; replace template prompts." },
+    { label: "Budget added", points: 15, done: Number.isFinite(Number(form.budget)) && Number(form.budget) > 0, tip: "A budget helps providers decide whether the task is a fit." },
+    { label: "At least one deliverable", points: 20, done: deliverables.some((item) => item.trim().length >= 5), tip: "List the outcome or files you expect to receive." },
+    { label: "City or remote location", points: 10, done: form.city.trim().length > 0, tip: "Add a city for in-person work, or write ‘Remote’." },
+    { label: "Deadline selected", points: 10, done: Number.isFinite(parsedDeadline) && parsedDeadline > Date.now(), tip: "Choose a realistic deadline for receiving proposals." },
+  ];
+  const briefScore = briefChecks.reduce((total, check) => total + (check.done ? check.points : 0), 0);
+  const briefScoreLabel = briefScore >= 80 ? "Match ready" : briefScore >= 50 ? "Almost there" : "Needs a few details";
+
   function applyBriefStarter(starter: (typeof BRIEF_STARTERS)[number]) {
     setIdea(starter.idea);
     setForm((previous) => ({
@@ -266,6 +280,35 @@ export default function NewTaskPage() {
           onSubmit={handleSubmit}
           className={`space-y-4 ${showManualForm ? "" : "hidden"}`}
         >
+          <section className="rounded-2xl border border-gold-500/25 bg-card/80 p-4 shadow-lux-sm sm:p-5" aria-labelledby="match-ready-heading">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 id="match-ready-heading" className="text-sm font-semibold text-heading">Match Ready Score</h2>
+                <p className="mt-1 text-xs leading-relaxed text-ink/55">A quick, optional check to help providers understand your task and send relevant proposals.</p>
+              </div>
+              <div className="shrink-0 text-right">
+                <span className="block font-display text-2xl leading-none text-green-900 dark:text-green-300">{briefScore}<span className="text-sm text-ink/45">/100</span></span>
+                <span className="mt-1 block text-[10px] font-semibold uppercase tracking-[0.1em] text-gold-700 dark:text-gold-300">{briefScoreLabel}</span>
+              </div>
+            </div>
+            <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-line" role="progressbar" aria-label="Match Ready Score" aria-valuemin={0} aria-valuemax={100} aria-valuenow={briefScore}>
+              <div className="h-full rounded-full bg-green-800 transition-[width] duration-300" style={{ width: `${briefScore}%` }} />
+            </div>
+            <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+              {briefChecks.map((check) => (
+                <li key={check.label} className="flex items-start gap-2 text-xs leading-relaxed">
+                  <span aria-hidden="true" className={`mt-px flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[10px] ${check.done ? "bg-green-900/10 font-bold text-green-800 dark:bg-green-400/15 dark:text-green-300" : "bg-line text-ink/40"}`}>
+                    {check.done ? "✓" : "·"}
+                  </span>
+                  <span className={check.done ? "text-ink/65" : "text-ink/50"}>
+                    <span className="font-medium">{check.label}</span>
+                    {!check.done && <span className="block text-[11px] text-ink/45">{check.tip}</span>}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-3 text-[11px] text-ink/40">This score is guidance only. It does not affect approval or prevent you from posting.</p>
+          </section>
           <div>
             <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-ink/50">Task Title</label>
             <input
